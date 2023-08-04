@@ -26,7 +26,7 @@ jobs:
     - name: Build Rocky Live ${{ matrix.build_type }}
       run: |
         docker run --privileged \
-          -v $output_path:/kickstarts/out $image_name /bin/bash \
+          -v $output_path:/kickstarts/out rockylinux-base /bin/bash \
           -c "livecd-creator --verbose -c rocky-live-${{ matrix.build_type }}-base.ks -f rocky-live-base && mv rocky-live-${{ matrix.build_type }}-base.iso out"
 
 

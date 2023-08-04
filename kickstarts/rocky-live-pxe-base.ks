@@ -111,7 +111,13 @@ EOF
 
 systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
+%end
 
+%post
+# Install Cobbler PXE Server
+dnf install -y cobbler cobbler-web
+systemctl enable --force cobblerd.service
+systemctl start cobblerd.service
 %end
 
 %post
@@ -254,6 +260,4 @@ WantedBy=multi-user.target
 EOF
 
 systemctl enable --force synchronize.service
-
-
 %end

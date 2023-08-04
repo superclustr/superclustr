@@ -283,9 +283,9 @@ touch /etc/machine-id
 
 %post
 # Docker installation
-yum install -y yum-utils
-yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-yum install -y docker-ce docker-ce-cli containerd.io
+dnf install -y dnf-utils
+dnf-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+dnf install -y docker-ce docker-ce-cli containerd.io
 systemctl enable docker
 %end
 
@@ -296,7 +296,7 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # Install crictl and conntrack
-yum install -y epel-release conntrack
+dnf install -y epel-release conntrack
 
 local cri_tools_version="v1.27.1"
 wget https://github.com/kubernetes-sigs/cri-tools/releases/download/${cri_tools_version}/crictl-${cri_tools_version}-linux-amd64.tar.gz

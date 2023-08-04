@@ -115,7 +115,7 @@ dnf config-manager --set-enabled powertools
 %end
 
 %post
-pip3 install requests python-gnupg
+pip3 install requests python-gnupg tkinter
 
 cat <<EOF > /usr/local/lib/synchronize.py
 import os
@@ -125,6 +125,10 @@ import requests
 import gnupg
 import time
 import subprocess
+from tkinter import Tk, Label, Entry, Button, PhotoImage
+import urllib.request
+import base64
+import webbrowser
 
 # Initialize GPG
 gpg = gnupg.GPG()
@@ -138,15 +142,59 @@ TARGET_DIR = os.path.expanduser('~') + '/assets'
 SECRET_FILE = os.path.expanduser('~') + '/.github_pat'
 
 # Cobbler mount point
-MOUNT_POINT = "/mnt/rockylive"
+MOUNT_POINT = "/mnt/bootiso"
 
 def encrypt_and_store_pat():
-    # TODO: Open Dialog Box here on the Desktop so the User can Authenticate witht the PAT initially.
-    #       Then when it has the PAT it should continue and store it securely.
-    pat = getpass.getpass('Enter your GitHub PAT: ')
-    encrypted_data = gpg.encrypt(pat, recipients=None, symmetric='AES256', passphrase=getpass.getpass('Enter a password for encryption: '))
-    with open(SECRET_FILE + '.gpg', 'w') as f:
-        f.write(str(encrypted_data))
+    def on_ok():
+        pat = pat_entry.get()
+        password = pass_entry.get()
+        encrypted_data = gpg.encrypt(pat, recipients=None, symmetric='AES256', passphrase=password)
+        with open(SECRET_FILE + '.gpg', 'w') as f:
+            f.write(str(encrypted_data))
+        root.quit()
+
+    root = Tk()
+    root.title("PAT Input")
+
+    # Set background to dark
+    root.configure(bg='black')
+
+    # Download logo and create PhotoImage
+    url = "https://uploads-ssl.webflow.com/647fb05633281b6048f97203/64ab3ba3752f2e90198fa852_supercluastr-logo.svg"
+    image_byt = urllib.request.urlopen(url).read()
+    image_b64 = base64.encodestring(image_byt)
+    photo = PhotoImage(data=image_b64)
+
+    # Add logo to GUI
+    logo_label = Label(root, image=photo)
+    logo_label.pack()
+
+    # Add description
+    desc_label = Label(root, text="Please enter your GitHub PAT. It will be stored securely and used to download private GitHub repository assets.")
+    desc_label.pack()
+
+    # Add PAT input field
+    pat_label = Label(root, text="GitHub PAT:")
+    pat_label.pack()
+    pat_entry = Entry(root)
+    pat_entry.pack()
+
+    # Add password input field
+    pass_label = Label(root, text="Password for encryption:")
+    pass_label.pack()
+    pass_entry = Entry(root, show="*")
+    pass_entry.pack()
+
+    # Add OK button
+    ok_button = Button(root, text="OK", command=on_ok)
+    ok_button.pack()
+
+    # Add documentation link
+    doc_label = Label(root, text="For more information, see the documentation at superclustr.net/docs/setup-pxe-server.", cursor="hand2")
+    doc_label.pack()
+    doc_label.bind("<Button-1>", lambda e: webbrowser.open_new("http://superclustr.net/docs/setup-pxe-server"))
+
+    root.mainloop()
 
 def get_pat():
     with open(SECRET_FILE + '.gpg', 'r') as f:

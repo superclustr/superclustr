@@ -11,8 +11,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Create a new builder with a unique name
+builder_name=mybuilder_$(date +%s)
+
 # Create a new builder which gives access to the features of buildx
-docker buildx create --name mybuilder --use
+docker buildx create --name $builder_name --use
 
 # Build the Docker image for linux/amd64
 docker buildx build --platform linux/amd64 -t $image_name . --load

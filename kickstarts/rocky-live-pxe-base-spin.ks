@@ -14,7 +14,7 @@ zerombr
 clearpart --all
 part / --size 5120 --fstype ext4
 services --enabled=NetworkManager,ModemManager --disabled=sshd
-network --bootproto=dhcp --device=link --activate
+network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
 rootpw --lock --iscrypted locked
 shutdown
 
@@ -32,7 +32,7 @@ shutdown
 @hardware-support
 
 python3
-pip3
+python3-pip
 
 # explicit
 kernel

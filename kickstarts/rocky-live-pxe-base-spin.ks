@@ -1,4 +1,4 @@
-# rocky-live-base-spin.ks
+# rocky-live-pxe-base-spin.ks
 #
 # Base installation information for Rocky Linux images
 # Contains EPEL.

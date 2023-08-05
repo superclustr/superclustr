@@ -21,15 +21,12 @@ shutdown
 
 %packages
 @base-x
-@guest-desktop-agents
 @standard
 @core
-@fonts
 @input-methods
-@dial-up
-@multimedia
 @hardware-support
 
+git
 python3
 python3-pip
 
@@ -43,9 +40,6 @@ anaconda-install-env-deps
 anaconda-live
 @anaconda-tools
 
-# Required for SVG rnotes images
-aajohan-comfortaa-fonts
-
 # RHBZ#1242586 - Required for initramfs creation
 dracut-live
 syslinux
@@ -56,6 +50,42 @@ glibc-all-langpacks
 # This isn't in @core anymore, but livesys still needs it
 initscripts
 chkconfig
+
+# Excluding the Intel wireless drivers
+-iwl7260
+-iwl6050
+-iwl6000g2b
+-iwl6000g2a
+-iwl6000
+-iwl5150
+-iwl5000
+-iwl3160
+-iwl2030
+-iwl2000
+-iwl135
+-iwl105
+-iwl1000
+-iwl100
+
+# Excluding specific packages
+-httpd
+-mariadb-server
+-postfix
+-samba
+-squid
+-autofs
+-avahi-autoipd
+-avahi-daemon
+-bluez-cups
+-cups
+-dhcp
+-isdn4k-utils
+-radvd
+-rdisc
+-sendmail
+-wpa_supplicant
+-gtk2
+
 %end
 
 %post
@@ -282,63 +312,9 @@ touch /etc/machine-id
 %end
 
 %post
-# Docker installation
-dnf install -y dnf-utils
-dnf-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-dnf install -y docker-ce docker-ce-cli containerd.io
-systemctl enable docker
-%end
-
-%post
-# Kubernetes installation
-# Install kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-# Install crictl and conntrack
-dnf install -y epel-release conntrack
-
-local cri_tools_version="v1.27.1"
-wget https://github.com/kubernetes-sigs/cri-tools/releases/download/${cri_tools_version}/crictl-${cri_tools_version}-linux-amd64.tar.gz
-tar zxvf crictl-${cri_tools_version}-linux-amd64.tar.gz -C /usr/local/bin
-rm -f crictl-${cri_tools_version}-linux-amd64.tar.gz
-
-# Install Kubeadm
-curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubeadm
-chmod +x kubeadm
-mv kubeadm /usr/local/bin/
-
-# Initialize Kubernetes cluster
-kubeadm init --pod-network-cidr=10.244.0.0/16
-
-# Setup config for kubectl
-mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
-
-# Install Flannel
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-%end
-
-%post
-# Install Kubeflow using the Kubeflow kfctl tool
-# Download the kfctl tool
-wget https://github.com/kubeflow/kfctl/releases/download/v1.0.2/kfctl_v1.0.2-0-ga476281_linux.tar.gz
-
-# Extract the kfctl tool
-tar -xvf kfctl_v1.0.2-0-ga476281_linux.tar.gz
-
-# Define the environment variables needed by kfctl
-export PATH=$PATH:`pwd`
-export KF_NAME=kubeflow
-export BASE_DIR=`pwd`
-export KF_DIR=${BASE_DIR}/${KF_NAME}
-export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.0-branch/kfdef/kfctl_k8s_istio.v1.0.2.yaml"
-
-# Initialize and apply Kubeflow
-mkdir -p ${KF_DIR}
-cd ${KF_DIR}
-kfctl apply -V -f ${CONFIG_URI}
+# Nvidia DeepOps
+# TODO: DeepOps should install all ML/AI Software nesseary. How this going to be implemented is TBD.
+git clone -b tags/22.08 https://github.com/NVIDIA/deepops.git
 %end
 
 %post
@@ -378,8 +354,6 @@ import subprocess
 
 # Define a function to get the kubeflow token
 def get_kubeflow_token():
-    # Execute the shell command to get the kubeflow token and return the output
-    # Replace 'your-command' with the actual command to get the token
     token = subprocess.getoutput('kubectl -n kubeflow get secret $(kubectl -n kubeflow get sa kubeflow-controller -o jsonpath=\'{.secrets[0].name}\') -o jsonpath=\'{.data.token}\' | base64 --decode)')
     return token
 
@@ -427,5 +401,4 @@ WantedBy=multi-user.target
 EOF
 
 systemctl enable --force send_kubeflow_token.service
-
 %end

@@ -18,17 +18,10 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Build Docker image
-      run: docker build -t rockylinux-base .
+      uses: docker/setup-buildx-action@v2
     
-    - name: Build Rocky Live ${{ matrix.build_type }}
-      run: |
-        docker run --privileged \
-          -v $output_path:/kickstarts/out rockylinux-base /bin/bash \
-          -c "livecd-creator --verbose -c rocky-live-${{ matrix.build_type }}-base.ks -f rocky-live-base && mv rocky-live-${{ matrix.build_type }}-base.iso out"
-
+    - name: Build ${{ matrix.build_type }}
+      run: ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base -i superclustr-${{ matrix.build_type }}-live
 
 #  deploy:
 #    name: Update PXE Server

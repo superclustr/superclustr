@@ -3,9 +3,6 @@ FROM rockylinux/rockylinux:8
 
 USER root
 
-# Define working directory
-WORKDIR /kickstarts
-
 # Install necessary packages
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
     && dnf config-manager --set-enabled epel \
@@ -14,5 +11,6 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
     && dnf clean all \
     && rm -rf /var/cache/yum
 
-# Copy kickstart files into Docker image
-COPY kickstarts .
+# Kickstart files are expected to be mounted at runtime
+# Only uncomment this if you don't trust Docker Volumes for safety
+# COPY kickstarts .

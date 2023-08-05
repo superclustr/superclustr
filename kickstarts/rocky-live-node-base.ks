@@ -23,6 +23,7 @@ shutdown
 @base-x
 @standard
 @core
+@fonts
 @input-methods
 @hardware-support
 
@@ -31,6 +32,10 @@ kernel
 kernel-modules
 kernel-modules-extra
 memtest86+
+anaconda
+anaconda-install-env-deps
+anaconda-live
+@anaconda-tools
 python3
 python3-pip
 git
@@ -271,7 +276,7 @@ touch /etc/machine-id
 
 %end
 
-%post
+%post --erroronfail
 # Attempt to ping google.com 10 times, and exit if it's unsuccessful
 ATTEMPTS=10
 for i in $(seq 1 $ATTEMPTS); do
@@ -289,13 +294,13 @@ for i in $(seq 1 $ATTEMPTS); do
 done
 %end
 
-%post
+%post --erroronfail
 # Nvidia DeepOps
 # TODO: DeepOps should install all ML/AI Software nesseary. How this going to be implemented is TBD.
-git clone -b tags/22.08 https://github.com/NVIDIA/deepops.git
+git clone --branch 22.08 --depth 1  https://github.com/NVIDIA/deepops.git
 %end
 
-%post
+%post --erroronfail
 # Connect Netdata Monitoring
 curl https://my-netdata.io/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token rP5phC2xRoZkBNJkZsQSbmAJrG3qxI2ZOyL8sOHZKJ0x2Wr0BoZ-6FjFRCIucPyYCbzYlxmXNrfcIkaC5hDANUHHnUn2TvpwnJyEkq6AwUd1QmBzEpIap2rR7Pak_fyugBO-lI8 --claim-rooms 8b3683fd-c4bf-4070-a4de-df6a58856de4 --claim-url https://app.netdata.cloud
 %end
@@ -322,7 +327,7 @@ fi
 
 %end
 
-%post
+%post --erroronfail
 pip3 install pika
 
 cat <<EOF > /usr/local/lib/send_kubeflow_token.py

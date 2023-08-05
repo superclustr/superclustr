@@ -113,7 +113,7 @@ systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
 %end
 
-%post
+%post --erroronfail
 # Attempt to ping google.com 10 times, and exit if it's unsuccessful
 ATTEMPTS=10
 for i in $(seq 1 $ATTEMPTS); do
@@ -138,7 +138,7 @@ systemctl enable --force cobblerd.service
 systemctl start cobblerd.service
 %end
 
-%post
+%post --erroronfail
 pip3 install requests python-gnupg tkinter
 
 cat <<EOF > /usr/local/lib/synchronize.py

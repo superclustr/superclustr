@@ -31,18 +31,14 @@ shutdown
 @multimedia
 @hardware-support
 
-python3
-python3-pip
-
 # explicit
 kernel
 kernel-modules
 kernel-modules-extra
 memtest86+
-anaconda
-anaconda-install-env-deps
-anaconda-live
-@anaconda-tools
+python3
+python3-pip
+git
 
 # Required for SVG rnotes images
 aajohan-comfortaa-fonts

@@ -26,19 +26,14 @@ shutdown
 @input-methods
 @hardware-support
 
-git
-python3
-python3-pip
-
 # explicit
 kernel
 kernel-modules
 kernel-modules-extra
 memtest86+
-anaconda
-anaconda-install-env-deps
-anaconda-live
-@anaconda-tools
+python3
+python3-pip
+git
 
 # RHBZ#1242586 - Required for initramfs creation
 dracut-live
@@ -71,20 +66,10 @@ chkconfig
 -httpd
 -mariadb-server
 -postfix
--samba
--squid
--autofs
--avahi-autoipd
--avahi-daemon
 -bluez-cups
 -cups
--dhcp
--isdn4k-utils
--radvd
--rdisc
 -sendmail
 -wpa_supplicant
--gtk2
 
 %end
 

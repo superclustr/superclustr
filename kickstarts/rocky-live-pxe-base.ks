@@ -114,6 +114,24 @@ dnf config-manager --set-enabled powertools
 %end
 
 %post
+# Attempt to ping google.com 10 times, and exit if it's unsuccessful
+ATTEMPTS=10
+for i in $(seq 1 $ATTEMPTS); do
+    if ping -c1 google.com &>/dev/null; then
+        # Success, break the loop and move on
+        break
+    elif [ $i -eq $ATTEMPTS ]; then
+        # If this was the last attempt, exit with an error
+        echo "Network is not up, exiting"
+        exit 1
+    else
+        # Sleep for a second before the next attempt
+        sleep 1
+    fi
+done
+%end
+
+%post
 # Install Cobbler PXE Server
 dnf install -y cobbler cobbler-web
 systemctl enable --force cobblerd.service

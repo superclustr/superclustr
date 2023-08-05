@@ -83,10 +83,4 @@ docker run --privileged --platform linux/amd64 --rm \
     $image_name \
     /bin/bash -c "livecd-creator --verbose -c $kickstart_file -f $image_name && mv $image_name.iso /kickstarts/out"
 
-# Clean up
-if [ $(uname -m) != "x86_64" ]; then
-    echo "Cleaning up..."
-    docker buildx rm -f $builder_name
-fi
-
 echo "Done."

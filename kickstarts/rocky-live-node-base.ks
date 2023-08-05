@@ -46,31 +46,6 @@ glibc-all-langpacks
 initscripts
 chkconfig
 
-# Excluding the Intel wireless drivers
--iwl7260
--iwl6050
--iwl6000g2b
--iwl6000g2a
--iwl6000
--iwl5150
--iwl5000
--iwl3160
--iwl2030
--iwl2000
--iwl135
--iwl105
--iwl1000
--iwl100
-
-# Excluding specific packages
--httpd
--mariadb-server
--postfix
--bluez-cups
--cups
--sendmail
--wpa_supplicant
-
 %end
 
 %post
@@ -294,6 +269,24 @@ rm -f /boot/*-rescue*
 rm -f /etc/machine-id
 touch /etc/machine-id
 
+%end
+
+%post
+# Attempt to ping google.com 10 times, and exit if it's unsuccessful
+ATTEMPTS=10
+for i in $(seq 1 $ATTEMPTS); do
+    if ping -c1 google.com &>/dev/null; then
+        # Success, break the loop and move on
+        break
+    elif [ $i -eq $ATTEMPTS ]; then
+        # If this was the last attempt, exit with an error
+        echo "Network is not up, exiting"
+        exit 1
+    else
+        # Sleep for a second before the next attempt
+        sleep 1
+    fi
+done
 %end
 
 %post

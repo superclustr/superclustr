@@ -386,4 +386,8 @@ EOF
 systemctl enable --force send_kubeflow_token.service
 %end
 
+%post
+killall gpg-agent
+%end
+
 %include lazy-umount.ks

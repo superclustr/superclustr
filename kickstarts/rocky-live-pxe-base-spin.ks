@@ -358,4 +358,8 @@ if [ "$(uname -i)" = "i386" -o "$(uname -i)" = "x86_64" ]; then
     ' /usr/share/lorax/templates.d/99-generic/live/x86.tmpl
 fi
 
+%post
+killall gpg-agent
+%end
+
 %end

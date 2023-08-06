@@ -11,14 +11,21 @@ Base-System is a repository for building customized Rocky Linux OS images.
 
 ### Prerequisites
 
-You need the latest version of Docker on your machine.
+You need the latest version of Docker and the YUM Package Manager on your machine.
+
+For Linux with x86_64 architecture:
+- Yum package manager
+- EPEL repository enabled
+
+For non-Linux and/or non-x86_64:
+- Docker with Buildx plugin
 
 ### Building an Image
 
 Run the `make-image.sh` script with the Kickstart file and image name:
 
 ```bash
-./make-image.sh -k <your-kickstart-file> -i <your-image-name>
+./make-image.sh -k <your-kickstart-file> -i <your-image-name> [-n (force host build) | -d (force docker build)]
 ```
 
 The Linux image is stored in the `out` directory at the project's root.

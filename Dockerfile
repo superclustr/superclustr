@@ -9,7 +9,7 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
     && dnf -y update \
     && dnf install -y livecd-tools dracut-network \
     && dnf clean all \
-    && rm -rf /var/cache/yum
+    && rm -rf /var/cache/dnf
 
 # Kickstart files are expected to be mounted at runtime
 # Only uncomment this if you don't trust Docker Volumes for safety

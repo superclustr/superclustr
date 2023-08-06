@@ -6,6 +6,14 @@ on:
       - main
 
 jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete stale artifacts
+        uses: philips-labs/action-delete-artifacts@v1.0.0
+        with:
+          workflow: main.yml
+
   build:
     name: Build ${{ matrix.build_type }} Image
     runs-on: self-hosted

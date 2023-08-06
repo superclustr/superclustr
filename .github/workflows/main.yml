@@ -9,9 +9,6 @@ jobs:
   build:
     name: Build Images
     runs-on: self-hosted
-    strategy:
-      matrix:
-        build_type: ['node', 'pxe']
 
     steps:
     - name: Checkout repository
@@ -22,12 +19,26 @@ jobs:
 #    - name: Set up Docker Buildx
 #      uses: docker/setup-buildx-action@v2
     
-    - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
+    # Build node image
+    - name: Build node
+      run: sudo ./make-image.sh -k rocky-live-node-base.ks -i superclustr-node-live
 
-    - name: Upload artifact
+    # Build pxe image
+    - name: Build pxe
+      run: sudo ./make-image.sh -k rocky-live-pxe-base.ks -i superclustr-pxe-live
+
+    # Upload node artifact
+    - name: Upload node artifact
       uses: actions/upload-artifact@v2
       with:
-        name: superclustr-${{ matrix.build_type }}-live-iso
-        path: out/superclustr-${{ matrix.build_type }}-live.iso
+        name: superclustr-node-live-iso
+        path: out/superclustr-node-live.iso
+        retention-days: 1
+
+    # Upload pxe artifact
+    - name: Upload pxe artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: superclustr-pxe-live-iso
+        path: out/superclustr-pxe-live.iso
         retention-days: 1

@@ -280,4 +280,4 @@ EOF
 systemctl enable --force synchronize.service
 %end
 
-%include sleepy-unmount.ks
+%include lazy-umount.ks

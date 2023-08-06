@@ -119,7 +119,8 @@ elif [[ $force_no_docker_build -eq 0 ]]; then
     output_path=$(pwd)/out
     source_path=$(pwd)/kickstarts
 
-    echo "Building Image..."
+    # Note: This might fail if the host file system does not support the 'pquota' mount option.
+    # Please refer to https://stackoverflow.com/a/57248363/8413942 on how to enable 'pquota' if you encounter an error with this option.
     docker run --privileged --storage-opt size=7G \
         --platform linux/amd64 --rm \
         --workdir /kickstarts/source \

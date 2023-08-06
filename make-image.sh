@@ -56,12 +56,12 @@ if [[ $os == "Linux" ]] && [[ $arch == "x86_64" ]] && [[ $force_docker_build -eq
     echo "Running on Linux. Executing commands directly on the host system..."
 
     # Installing build dependencies
-    yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
-    && yum config-manager --set-enabled epel \
-    && yum -y update \
-    && yum install -y livecd-tools dracut-network \
-    && yum clean all \
-    && rm -rf /var/cache/yum
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
+    && dnf config-manager --set-enabled epel \
+    && dnf -y update \
+    && dnf install -y livecd-tools dracut-network \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
 
     # Define the output path on your host
     mkdir -p $(pwd)/out

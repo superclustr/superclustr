@@ -23,7 +23,7 @@ jobs:
 #      uses: docker/setup-buildx-action@v2
     
     - name: Build ${{ matrix.build_type }}
-      run: ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
+      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2

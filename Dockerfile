@@ -7,7 +7,7 @@ USER root
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
     && dnf config-manager --set-enabled epel \
     && dnf -y update \
-    && dnf install -y livecd-tools dracut-network \
+    && dnf install -y livecd-tools dracut-network lsof \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 

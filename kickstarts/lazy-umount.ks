@@ -10,6 +10,9 @@ while lsof | grep "$INSTALL_ROOT" && [ $RETRY_COUNT -lt $MAX_RETRIES ]
 do
     echo "Processes still using $INSTALL_ROOT:"
     lsof | grep "$INSTALL_ROOT"
+
+	# Fake mount
+	mount --bind $INSTALL_ROOT $INSTALL_ROOT
     
     # Kill processes
     lsof | grep "$INSTALL_ROOT" | awk '{print $2}' | uniq | xargs kill -9
@@ -25,6 +28,5 @@ if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     echo "Max retries reached. Unable to clear all processes using $INSTALL_ROOT."
 else
     echo "All processes stopped using $INSTALL_ROOT and its submounts successfully"
-    mount --bind $INSTALL_ROOT $INSTALL_ROOT
 fi
 %end

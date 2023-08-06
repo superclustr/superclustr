@@ -8,15 +8,12 @@ on:
 jobs:
   build:
     name: Build Images
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         build_type: ['node', 'pxe']
 
     steps:
-    - name: Maximize build disk space
-      uses: easimon/maximize-build-space@v7
-
     - name: Checkout repository
       uses: actions/checkout@v3
 
@@ -24,15 +21,9 @@ jobs:
 #    By default this action job is running 'ubuntu-latest', so it's not needed.
 #    - name: Set up Docker Buildx
 #      uses: docker/setup-buildx-action@v2
-
-    # Use a Docker container with a Rocky Linux 8 environment
-    - name: Setup Rocky Linux 8 environment
-      uses: docker://rockylinux:8
-      with:
-        options: --entrypoint /bin/bash
     
     - name: Build ${{ matrix.build_type }}
-      run: ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live -n
+      run: ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2

@@ -4,8 +4,8 @@
 echo "Unable to unmount $INSTALL_ROOT normally, using lazy unmount"
 while (/usr/bin/lsof /dev/loop* | grep -v "$0" | grep "$INSTALL_ROOT")
 do
-	echo "Sleeping 5 seconds, waiting for successful $INSTALL_ROOT umount..."
-	sleep 5s
+	echo "Sleeping 15 seconds, waiting for successful $INSTALL_ROOT umount..."
+	sleep 15s
 done
 echo "Lazy umount succeeded on $INSTALL_ROOT"
 %end

@@ -327,8 +327,4 @@ fi
 
 %end
 
-%post
-killall gpg-agent
-%end
-
 %include lazy-umount.ks

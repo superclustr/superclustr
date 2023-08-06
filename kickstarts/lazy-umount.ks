@@ -7,5 +7,5 @@ do
     echo "Sleeping 15 seconds, waiting for processes to stop using the filesystems under $INSTALL_ROOT...."
     sleep 15s
 done
-echo "All processes stopped using $INSTALL_ROOT and its submounts successfully"
+mount --bind $INSTALL_ROOT $INSTALL_ROOT
 %end

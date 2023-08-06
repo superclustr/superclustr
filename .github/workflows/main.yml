@@ -16,6 +16,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    
+    - name: Maximize build disk space
+      uses: easimon/maximize-build-space@v7
 
 #    Only if you run this Job on a non amd64 image where Buildx is required.
 #    By default this action job is running 'ubuntu-latest', so it's not needed.

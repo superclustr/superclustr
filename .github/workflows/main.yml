@@ -7,11 +7,13 @@ on:
 
 jobs:
   clean:
+    name: Cleanup
     runs-on: ubuntu-latest
     steps:
       - name: Delete stale artifacts
         uses: philips-labs/action-delete-artifacts@v1.0.0
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: main.yml
 
   build:

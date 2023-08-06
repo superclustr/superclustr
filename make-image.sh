@@ -75,7 +75,7 @@ if [[ $os == "Linux" ]] && [[ $arch == "x86_64" ]] && [[ $force_docker_build -eq
     mv $image_name.iso $output_path
 
     echo "Done."
-    
+
 elif [[ $force_no_docker_build -eq 0 ]]; then
     echo "Not running on Linux or Docker build forced. Executing commands in Docker..."
 
@@ -120,7 +120,8 @@ elif [[ $force_no_docker_build -eq 0 ]]; then
     source_path=$(pwd)/kickstarts
 
     echo "Building Image..."
-    docker run --privileged --platform linux/amd64 --rm \
+    docker run --privileged --storage-opt size=7G \
+        --platform linux/amd64 --rm \
         --workdir /kickstarts/source \
         --volume $output_path:/kickstarts/out \
         --volume $source_path:/kickstarts/source \

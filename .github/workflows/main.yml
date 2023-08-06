@@ -7,38 +7,29 @@ on:
 
 jobs:
   build:
-    name: Build Images
+    name: Build ${{ matrix.build_type }} Image
     runs-on: self-hosted
-
+    strategy:
+      matrix:
+        build_type: ["node", "pxe"]
+        
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-#    Only if you run this Job on a non amd64 image where Buildx is required.
-#    By default this action job is running 'ubuntu-latest', so it's not needed.
-#    - name: Set up Docker Buildx
-#      uses: docker/setup-buildx-action@v2
+    # Only if you run this Job on a non amd64 image where Buildx is required.
+    # By default this action job is running 'ubuntu-latest', so it's not needed.
+    #- name: Set up Docker Buildx
+    #  uses: docker/setup-buildx-action@v2
+
+    # Dynamic build step based on matrix value
+    - name: Build ${{ matrix.build_type }}
+      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
     
-    # Build node image
-    - name: Build node
-      run: sudo ./make-image.sh -k rocky-live-node-base.ks -i superclustr-node-live
-
-    # Build pxe image
-    - name: Build pxe
-      run: sudo ./make-image.sh -k rocky-live-pxe-base.ks -i superclustr-pxe-live
-
-    # Upload node artifact
-    - name: Upload node artifact
+    # Dynamic upload step based on matrix value
+    - name: Upload ${{ matrix.build_type }} artifact
       uses: actions/upload-artifact@v2
       with:
-        name: superclustr-node-live-iso
-        path: out/superclustr-node-live.iso
-        retention-days: 1
-
-    # Upload pxe artifact
-    - name: Upload pxe artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: superclustr-pxe-live-iso
-        path: out/superclustr-pxe-live.iso
+        name: superclustr-${{ matrix.build_type }}-live-iso
+        path: out/superclustr-${{ matrix.build_type }}-live.iso
         retention-days: 1

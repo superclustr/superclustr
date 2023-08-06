@@ -19,6 +19,7 @@ jobs:
   build:
     name: Build ${{ matrix.build_type }} Image
     runs-on: self-hosted
+    needs: [clean]
     strategy:
       matrix:
         build_type: ["node", "pxe"]

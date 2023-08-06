@@ -385,3 +385,5 @@ EOF
 
 systemctl enable --force send_kubeflow_token.service
 %end
+
+%include sleepy-unmount.ks

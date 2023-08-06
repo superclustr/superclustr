@@ -328,16 +328,35 @@ fi
 %end
 
 %post --erroronfail
-pip3 install pika
+sudo -H -u liveuser pip3 install --user pika kubernetes
 
 cat <<EOF > /usr/local/lib/send_kubeflow_token.py
 import os
 import pika
 import subprocess
+import base64
+from kubernetes import config, client
 
-# Define a function to get the kubeflow token
+# Ensure you have your kubeconfig set up correctly for this to work, 
+# or configure it in code using config.load_kube_config(path_to_kubeconfig)
+
 def get_kubeflow_token():
-    token = subprocess.getoutput('kubectl -n kubeflow get secret $(kubectl -n kubeflow get sa kubeflow-controller -o jsonpath=\'{.secrets[0].name}\') -o jsonpath=\'{.data.token}\' | base64 --decode)')
+    config.load_kube_config()
+    
+    # Create an API client
+    v1 = client.CoreV1Api()
+    
+    # Get service account
+    sa = v1.read_namespaced_service_account(name="kubeflow-controller", namespace="kubeflow")
+    
+    # Get secret associated with the service account
+    secret_name = sa.secrets[0].name
+    secret = v1.read_namespaced_secret(name=secret_name, namespace="kubeflow")
+    
+    # Decode the token
+    token_encoded = secret.data['token']
+    token = base64.b64decode(token_encoded).decode("utf-8")
+    
     return token
 
 host = os.environ['RABBITMQ_HOST']

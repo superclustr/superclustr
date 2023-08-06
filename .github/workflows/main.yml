@@ -24,7 +24,7 @@ jobs:
 
     # Dynamic build step based on matrix value
     - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live
+      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live -d
     
     # Dynamic upload step based on matrix value
     - name: Upload ${{ matrix.build_type }} artifact

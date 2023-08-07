@@ -86,6 +86,7 @@ docker run --privileged \
         mkdir -p /root/.ssh && \
         echo \"$private_key\" > /root/.ssh/id_rsa && \
         chmod 400 /root/.ssh/id_rsa && \
+        cat /root/.ssh/id_rsa && \
         livecd-creator --verbose -c $kickstart_file -f $image_name && \
         mv $image_name.iso /kickstarts/out"
 

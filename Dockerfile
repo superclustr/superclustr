@@ -1,7 +1,12 @@
 # Use the official Rocky Linux 8 image as base
 FROM rockylinux/rockylinux:8
 
+ARG PRIVATE_KEY
+
 USER root
+
+# Store private key
+RUN echo "$PRIVATE_KEY" > /root/.ssh/id_rsa && chmod 400 /root/.ssh/id_rsa
 
 # Install necessary packages
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 usage() {
-    echo "Usage: $0 -k <kickstart_file> -i <image_name> [-d | -n]"
+    echo "Usage: $0 -k <kickstart_file> -i <image_name> [-d | -n] -p <private_key>"
     echo "Example: $0 -k rocky-live-client-base.ks -i my-rocky-live-client -d"
     echo "Use -d to force Docker build. Use -n to force host build."
     exit 1
@@ -24,6 +24,9 @@ while getopts "k:i:dn" opt; do
         n)
             force_no_docker_build=1
             ;;
+        p)
+            private_key=$OPTARG
+            ;;
         \?)
             echo "Invalid option: $OPTARG" 1>&2
             usage
@@ -36,7 +39,7 @@ while getopts "k:i:dn" opt; do
 done
 shift $((OPTIND -1))
 
-if [[ -z "$kickstart_file" || -z "$image_name" ]]; then
+if [[ -z "$kickstart_file" || -z "$image_name" || -z "$private_key" ]]; then
     usage
 fi
 
@@ -124,6 +127,7 @@ elif [[ $force_no_docker_build -eq 0 ]]; then
         --workdir /kickstarts/source \
         --volume $output_path:/kickstarts/out \
         --volume $source_path:/kickstarts/source \
+        --env PRIVATE_KEY="$private_key" \
         $image_name \
         /bin/bash -c "livecd-creator --verbose -c $kickstart_file -f $image_name && mv $image_name.iso /kickstarts/out"
 

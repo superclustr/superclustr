@@ -40,4 +40,4 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on how to
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+Copyright (C) 2023 SUPERCLUSTR [legal@superclustr.net](mailto:legal@superclustr.net)

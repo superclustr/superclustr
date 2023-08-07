@@ -2,7 +2,7 @@
 
 usage() {
     echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key> [-d | -n] "
-    echo "Example: $0 -k rocky-live-client-base.ks -i my-rocky-live-client -d"
+    echo "Example: $0 -k rocky-live-client-base.ks -i my-rocky-live-client -p \"\$(cat ~/.ssh/id_rsa)\" -d"
     echo "Use -d to force Docker build. Use -n to force host build."
     exit 1
 }

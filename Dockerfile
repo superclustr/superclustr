@@ -1,7 +1,7 @@
 # Use the official Rocky Linux 8 image as base
 FROM rockylinux/rockylinux:8
 
-ARG PRIVATE_KEY
+ENV PRIVATE_KEY=not_set
 
 USER root
 

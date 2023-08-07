@@ -25,7 +25,7 @@ For non-Linux and/or non-x86_64:
 Run the `make-image.sh` script with the Kickstart file and image name:
 
 ```bash
-./make-image.sh -k <your-kickstart-file> -i <your-image-name> [-n (force host build) | -d (force docker build)]
+./make-image.sh -k <your-kickstart-file> -i <your-image-name> [-n (force host build) | -d (force docker build)] -p <private-key>
 ```
 
 The Linux image is stored in the `out` directory at the project's root.

@@ -19,6 +19,9 @@ RUN mkdir -p /root/.ssh
 RUN echo "$PRIVATE_KEY" > /root/.ssh/id_rsa
 RUN chmod 400 /root/.ssh/id_rsa
 
+# Test
+RUN git clone git@github.com:superclustr/pxe-sync-daemon.git
+
 # Kickstart files are expected to be mounted via docker volumes
 # Only use this if you don't trust docker volumes
 # COPY kickstarts .

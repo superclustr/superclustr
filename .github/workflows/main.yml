@@ -2,8 +2,10 @@ name: Main
 
 on: 
   push:
-    branches: 
+    branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -17,13 +19,28 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Extract version from git tag
-      run: echo "VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v//')" >> $GITHUB_ENV
+    - name: Determine if tag push
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+          echo "IS_TAG_PUSH=true" >> $GITHUB_ENV
+        else
+          echo "IS_TAG_PUSH=false" >> $GITHUB_ENV
+        fi
+
+    - name: Extract version from git tag or default to 'dev'
+      id: get_version
+      run: |
+        if [[ "${IS_TAG_PUSH}" == "true" ]]; then
+          echo "::set-output name=VERSION::${GITHUB_REF#refs/tags/v}"
+        else
+          echo "::set-output name=VERSION::dev"
+        fi
 
     - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i rocky-${{ matrix.build_type }}-live-${{ env.VERSION }}-x86_64 -d
+      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -d
 
     - name: Upload artifact
+      if: env.IS_TAG_PUSH == 'true'
       uses: sonatype-nexus-community/nexus-repo-github-action@master
       with:
         serverUrl: https://nexus.superclustr.net
@@ -31,6 +48,6 @@ jobs:
         password: ${{ secrets.NEXUS_PASS }}
         format: raw
         repository: superclustr-binaries
-        coordinates: groupId=net.superclustr artifactId=rocky-${{ matrix.build_type }}-live version=${{ env.VERSION }}
+        coordinates: groupId=net.superclustr artifactId=rocky-live-${{ matrix.build_type }}-x86_64 version=${{ steps.get_version.outputs.VERSION }}
         assets: extension=iso
-        filename: out/rocky-${{ matrix.build_type }}-live-${{ env.VERSION }}-x86_64.iso
+        filename: out/rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso

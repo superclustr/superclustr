@@ -17,14 +17,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live -d
+    - name: Extract version from git tag
+      run: echo "VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v//')" >> $GITHUB_ENV
 
-    # Upload to https://nexus.superclustr.net/repository/superclustr-binaries
-    - name: Upload artifact to Nexus
-      run: |
-        curl -v -u ${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }} \
-             --upload-file out/superclustr-${{ matrix.build_type }}-live.iso \
-             https://nexus.superclustr.net/repository/superclustr-binaries/superclustr-${{ matrix.build_type }}-live.iso && \
-             echo "Download at https://nexus.superclustr.net/repository/superclustr-binaries/superclustr-${{ matrix.build_type }}-live.iso"
-      continue-on-error: true # Consider if you want the workflow to fail if this step fails
+    - name: Build ${{ matrix.build_type }}
+      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i superclustr-${{ matrix.build_type }}-live-${{ env.VERSION }}-x86_64 -d
+
+    - name: Upload artifact
+      uses: sonatype-nexus-community/nexus-repo-github-action@master
+      with:
+        serverUrl: https://nexus.superclustr.net
+        username: ${{ secrets.NEXUS_USER }}
+        password: ${{ secrets.NEXUS_PASS }}
+        format: raw
+        repository: superclustr-binaries
+        coordinates: groupId=net.superclustr artifactId=superclustr-${{ matrix.build_type }}-live version=${{ env.VERSION }}
+        assets: extension=iso
+        filename: out/superclustr-${{ matrix.build_type }}-live-${{ env.VERSION }}-x86_64.iso

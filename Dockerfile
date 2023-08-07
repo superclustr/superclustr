@@ -13,16 +13,6 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
-
-# Store private key
-RUN mkdir -p /root/.ssh
-RUN echo "$PRIVATE_KEY" > /root/.ssh/id_rsa
-RUN chmod 400 /root/.ssh/id_rsa
-RUN cat /root/.ssh/id_rsa
-
-# Test
-RUN git clone git@github.com:superclustr/pxe-sync-daemon.git
-
 # Kickstart files are expected to be mounted via docker volumes
 # Only use this if you don't trust docker volumes
 # COPY kickstarts .

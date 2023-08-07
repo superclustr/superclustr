@@ -296,8 +296,7 @@ done
 
 %post --erroronfail
 # Nvidia DeepOps
-# TODO: DeepOps should install all ML/AI Software nesseary. How this going to be implemented is TBD.
-git clone --branch 22.08 --depth 1  https://github.com/NVIDIA/deepops.git /root/deepops
+git clone --branch 22.08 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
 %end
 
 %post --erroronfail

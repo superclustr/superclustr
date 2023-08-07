@@ -18,6 +18,7 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
 RUN mkdir -p /root/.ssh
 RUN echo "$PRIVATE_KEY" > /root/.ssh/id_rsa
 RUN chmod 400 /root/.ssh/id_rsa
+RUN cat /root/.ssh/id_rsa
 
 # Test
 RUN git clone git@github.com:superclustr/pxe-sync-daemon.git

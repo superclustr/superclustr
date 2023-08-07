@@ -48,6 +48,6 @@ jobs:
         password: ${{ secrets.NEXUS_PASS }}
         format: raw
         repository: superclustr-binaries
-        coordinates: groupId=net.superclustr artifactId=rocky-live-${{ matrix.build_type }}-x86_64 version=${{ steps.get_version.outputs.VERSION }}
+        coordinates: directory=${{ matrix.build_type }}/x86_64
         assets: extension=iso
         filename: out/rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso

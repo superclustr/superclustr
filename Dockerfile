@@ -12,7 +12,7 @@ RUN echo "$PRIVATE_KEY" > /root/.ssh/id_rsa && chmod 400 /root/.ssh/id_rsa
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
     && dnf config-manager --set-enabled epel \
     && dnf -y update \
-    && dnf install -y livecd-tools dracut-network lsof \
+    && dnf install -y livecd-tools dracut-network lsof git \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 

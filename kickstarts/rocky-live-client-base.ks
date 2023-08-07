@@ -1,4 +1,4 @@
-# rocky-live-node-base.ks
+# rocky-live-client-base.ks
 #
 # Base installation information for Rocky Linux images
 #

@@ -49,5 +49,5 @@ jobs:
         format: raw
         repository: superclustr-binaries
         coordinates: directory=${{ matrix.build_type }}/x86_64
-        assets: extension=iso
+        assets: filename=rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso
         filename: out/rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso

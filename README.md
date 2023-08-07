@@ -32,7 +32,8 @@ The Linux image is stored in the `out` directory at the project's root.
 
 ## Continuous Integration
 
-GitHub Actions automatically build images for each `-base.ks` Kickstart file in the `kickstarts` directory when you push to the `main` branch. Docker Buildx is used for multi-platform image builds.
+GitHub Actions automatically build images for each `-base.ks` Kickstart file in the `kickstarts` directory when you push to the `main` branch.
+Docker Buildx is used for multi-platform image builds.
 
 ## Contributing
 

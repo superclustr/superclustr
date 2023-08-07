@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 usage() {
-    echo "Usage: $0 -k <kickstart_file> -i <image_name> [-d | -n] -p <private_key>"
+    echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key> [-d | -n] "
     echo "Example: $0 -k rocky-live-client-base.ks -i my-rocky-live-client -d"
     echo "Use -d to force Docker build. Use -n to force host build."
     exit 1
@@ -10,7 +10,7 @@ usage() {
 force_docker_build=0
 force_no_docker_build=0
 
-while getopts "k:i:dn" opt; do
+while getopts "k:i:p:dn" opt; do
     case ${opt} in
         k)
             kickstart_file=$OPTARG
@@ -18,14 +18,14 @@ while getopts "k:i:dn" opt; do
         i)
             image_name=$OPTARG
             ;;
+        p)
+            private_key=$OPTARG
+            ;;
         d)
             force_docker_build=1
             ;;
         n)
             force_no_docker_build=1
-            ;;
-        p)
-            private_key=$OPTARG
             ;;
         \?)
             echo "Invalid option: $OPTARG" 1>&2

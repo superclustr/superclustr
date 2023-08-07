@@ -140,6 +140,10 @@ systemctl start cobblerd.service
 
 %post --nochroot
 # Install PXE Syc Daemon
+
+# Ensure GitHub's authenticity
+echo "github.com,140.82.121.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=" > /root/.ssh/known_hosts
+
 git clone git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/root/pxe-sync-daemon
 %end
 

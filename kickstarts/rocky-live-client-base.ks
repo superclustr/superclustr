@@ -36,8 +36,8 @@ anaconda
 anaconda-install-env-deps
 anaconda-live
 @anaconda-tools
-python3
-python3-pip
+python3.11
+python3.11-pip
 git
 
 # RHBZ#1242586 - Required for initramfs creation

@@ -6,7 +6,7 @@ Base-System is a repository for building customized Rocky Linux OS images.
 
 - **Client Image** (`rocky-live-client-base.ks`): For ML/AI cluster nodes.
 - **PXE Server Image** (`rocky-live-pxe-base.ks`): For network-based booting.
-- **Infrastructure** (`rocky-generic-infra-base.ks`): For Infrastructure services.
+- **Infrastructure** (`rocky-disk-infra-base.ks`): For Infrastructure services.
 
 ## Getting Started
 

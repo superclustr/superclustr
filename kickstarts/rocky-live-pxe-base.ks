@@ -161,10 +161,8 @@ git clone --branch v1.0.0 --depth 1 git@github.com:superclustr/pxe-sync-daemon.g
 # Set up virtual environment and install dependencies
 (
 cd /home/liveuser/pxe-sync-daemon
-ls -la
-pwd
-python3 -m venv venv
-source venv/bin/activate
+/usr/bin/python3 -m venv /home/liveuser/pxe-sync-daemon/venv
+source /home/liveuser/pxe-sync-daemon/venv/bin/activate
 pip install -r requirements.txt
 )
 

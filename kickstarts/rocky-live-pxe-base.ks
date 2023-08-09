@@ -131,6 +131,19 @@ for i in $(seq 1 $ATTEMPTS); do
 done
 %end
 
+%post --nochroot
+# Copying desired wallpaper image to the target system
+echo $PWD
+ls -la
+ls -la $INSTALL_ROOT
+cp ./assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/
+%end
+
+%post
+# Set the new wallpaper image for GNOME
+gsettings set org.gnome.desktop.background picture-uri file:///usr/share/backgrounds/wallpaper.png
+%end
+
 %post
 # Install Cobbler PXE Server
 dnf install -y cobbler cobbler-web
@@ -144,7 +157,33 @@ systemctl start cobblerd.service
 # Ensure GitHub's authenticity
 echo "github.com,140.82.121.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=" > /root/.ssh/known_hosts
 
-git clone --branch v1.0.0 --depth 1 git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/root/pxe-sync-daemon
+git clone --branch v1.0.0 --depth 1 git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+%end
+
+%post
+(
+cd $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+
+# Set up virtual environment and install dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+)
+
+mkdir -p /home/liveuser/download_directory
+mkdir -p /home/liveuser/.config/autostart/
+cat > /home/liveuser/.config/autostart/pxe-sync-daemon.desktop << EOF
+[Desktop Entry]
+Type=Application
+Exec=/home/liveuser/pxe-sync-daemon/venv/bin/python /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
+Hidden=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=PXE Sync Daemon
+Name=PXE Sync Daemon
+Comment[en_US]=Starts PXE Sync Daemon on login
+Comment=Starts PXE Sync Daemon on login
+EOF
+
 %end
 
 %post --erroronfail

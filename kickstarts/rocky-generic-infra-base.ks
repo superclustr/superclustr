@@ -408,7 +408,7 @@ syslinux
 
 %end
 
-%post
+%post --nochroot
 echo "What requires gpg-agent:"
 rpm -q --whatrequires gpg-agent
 %end

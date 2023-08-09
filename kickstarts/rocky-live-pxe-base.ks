@@ -172,7 +172,7 @@ mkdir -p /home/liveuser/.config/autostart/
 cat > /home/liveuser/.config/autostart/pxe-sync-daemon.desktop << EOF
 [Desktop Entry]
 Type=Application
-Exec=/home/liveuser/pxe-sync-daemon/venv/bin/python3 /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
+Exec=/home/liveuser/pxe-sync-daemon/venv/bin/python3.11 /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
 Hidden=false
 X-GNOME-Autostart-enabled=true
 Name[en_US]=PXE Sync Daemon

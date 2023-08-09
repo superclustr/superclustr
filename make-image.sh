@@ -73,6 +73,7 @@ fi
 # Define the output path on your host
 mkdir -p $(pwd)/out
 output_path=$(pwd)/out
+assets_path=$(pwd)/assets
 source_path=$(pwd)/kickstarts
 
 docker run --privileged \
@@ -80,6 +81,7 @@ docker run --privileged \
     --rm \
     --workdir /kickstarts/source \
     --volume $output_path:/kickstarts/out \
+    --volume $assets_path:/kickstarts/assets \
     --volume $source_path:/kickstarts/source \
     $image_name \
     /bin/bash -c "

@@ -133,10 +133,7 @@ done
 
 %post --nochroot
 # Copying desired wallpaper image to the target system
-echo $PWD
-ls -la
-ls -la $INSTALL_ROOT
-cp ./assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/
+cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/
 %end
 
 %post
@@ -161,10 +158,11 @@ git clone --branch v1.0.0 --depth 1 git@github.com:superclustr/pxe-sync-daemon.g
 %end
 
 %post
-(
-cd $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
-
 # Set up virtual environment and install dependencies
+(
+cd /home/liveuser/pxe-sync-daemon
+ls -la
+pwd
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

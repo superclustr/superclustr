@@ -11,7 +11,7 @@ lang en_US.UTF-8
 # Shutdown after installation
 shutdown
 # Network information
-network  --bootproto=dhcp --device=link --activate
+network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
 # Firewall configuration
 firewall --enabled --service=mdns
 # Use network installation

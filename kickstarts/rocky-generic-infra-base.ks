@@ -407,3 +407,5 @@ syslinux
 -xsane-gimp
 
 %end
+
+%include lazy-umount.ks

@@ -13,7 +13,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        build_type: ["client", "pxe"]
+        build_type: ["live-client", "live-pxe", "generic-infra"]
 
     steps:
     - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
         fi
 
     - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-live-${{ matrix.build_type }}-base.ks -i rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -p "${{ secrets.PRIVATE_KEY }}"
+      run: sudo ./make-image.sh -k rocky-${{ matrix.build_type }}-base.ks -i rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -p "${{ secrets.PRIVATE_KEY }}"
 
     - name: Upload artifact
       if: env.IS_TAG_PUSH == 'true'
@@ -49,5 +49,5 @@ jobs:
         format: raw
         repository: superclustr-binaries
         coordinates: directory=${{ matrix.build_type }}/x86_64
-        assets: filename=rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso
-        filename: out/rocky-live-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso
+        assets: filename=rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso
+        filename: out/rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }}.iso

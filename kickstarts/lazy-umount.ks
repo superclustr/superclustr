@@ -1,4 +1,5 @@
 %post --nochroot
+sleep 20s
 
 echo "Probing if all processes have stopped using $INSTALL_ROOT and its submounts"
 
@@ -8,7 +9,7 @@ mount | grep "$INSTALL_ROOT" | awk '{ print $3 }' | sort -r | while read mnt; do
     umount $mnt
 done
 
-MAX_RETRIES=5
+MAX_RETRIES=10
 RETRY_COUNT=0
 
 while lsof | grep "$INSTALL_ROOT" && [ $RETRY_COUNT -lt $MAX_RETRIES ]; do

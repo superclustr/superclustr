@@ -163,7 +163,7 @@ git clone --branch v1.0.0 --depth 1 git@github.com:superclustr/pxe-sync-daemon.g
 cd /home/liveuser/pxe-sync-daemon
 /usr/bin/python3 -m venv /home/liveuser/pxe-sync-daemon/venv
 source /home/liveuser/pxe-sync-daemon/venv/bin/activate
-pip install -r requirements.txt
+/home/liveuser/pxe-sync-daemon/venv/bin/pip install -r requirements.txt
 )
 
 mkdir -p /home/liveuser/download_directory
@@ -171,7 +171,7 @@ mkdir -p /home/liveuser/.config/autostart/
 cat > /home/liveuser/.config/autostart/pxe-sync-daemon.desktop << EOF
 [Desktop Entry]
 Type=Application
-Exec=/home/liveuser/pxe-sync-daemon/venv/bin/python /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
+Exec=/home/liveuser/pxe-sync-daemon/venv/bin/python3 /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
 Hidden=false
 X-GNOME-Autostart-enabled=true
 Name[en_US]=PXE Sync Daemon

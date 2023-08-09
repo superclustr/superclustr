@@ -9,12 +9,15 @@ mount | grep "$INSTALL_ROOT" | awk '{ print $3 }' | sort -r | while read mnt; do
     umount $mnt
 done
 
-MAX_RETRIES=10
+MAX_RETRIES=5
 RETRY_COUNT=0
 
 while lsof | grep "$INSTALL_ROOT" && [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     echo "Processes still using $INSTALL_ROOT:"
     lsof | grep "$INSTALL_ROOT"
+
+    echo "Stopping gpg-agent..."
+    killall gpg-agent
 
     # Kill processes using fuser
     echo "Attempting to kill processes using fuser..."

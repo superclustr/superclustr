@@ -122,13 +122,10 @@ done
 %end
 
 %post --nochroot
-# Copying desired wallpaper image to the target system
-cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/
-%end
-
-%post
-# Set the new wallpaper image for GNOME
-gsettings set org.gnome.desktop.background picture-uri file:///usr/share/backgrounds/wallpaper.png
+# Copying desired wallpaper image to the target system (default, day, and night)
+cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-01-day.png
+cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-02-night.png
+cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36.png
 %end
 
 %post

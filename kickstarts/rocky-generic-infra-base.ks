@@ -408,9 +408,4 @@ syslinux
 
 %end
 
-%post --nochroot
-echo "What requires gpg-agent:"
-rpm -q --whatrequires gpg-agent
-%end
-
 %include lazy-umount.ks

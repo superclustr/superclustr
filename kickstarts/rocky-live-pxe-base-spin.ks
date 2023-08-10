@@ -42,6 +42,9 @@ anaconda-live
 @anaconda-tools
 python3.11
 python3.11-pip
+dhcp-server
+cobbler
+cobbler-web
 git
 
 # Required for SVG rnotes images

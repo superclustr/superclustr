@@ -130,20 +130,11 @@ cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/defa
 
 %post
 # Install Cobbler PXE Server
-dnf install -y cobbler cobbler-web
-
-# Install and configure DHCP
-dnf install -y dhcp
-
 # Let cobbler handle the DHCP configuration
-sudo -S sed -i 's/manage_dhcp: false/manage_dhcp: true/g' /etc/cobbler/settings
+sudo -S sed -i 's/manage_dhcp: false/manage_dhcp: true/g' /etc/cobbler/settings.yaml
 
 # Enable and start services
 systemctl enable --force cobblerd.service
-systemctl start cobblerd.service
-
-# Allow Cobbler to sync changes to DHCP and TFTP configuration
-cobbler sync
 %end
 
 %post --nochroot

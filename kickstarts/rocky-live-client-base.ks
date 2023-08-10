@@ -17,7 +17,7 @@ network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
 rootpw --lock --iscrypted locked
 shutdown
 
-%include rocky-repo.ks
+%include rocky-repo-epel.ks
 
 %packages
 @base-x
@@ -295,7 +295,7 @@ for i in $(seq 1 $ATTEMPTS); do
 done
 %end
 
-%post --erroronfail
+%post
 # Nvidia DeepOps
 git clone --branch 22.08 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
 

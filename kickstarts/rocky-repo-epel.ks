@@ -6,7 +6,7 @@ repo --name=AppStream --cost=200 --baseurl=http://dl.rockylinux.org/pub/rocky/8/
 repo --name=PowerTools --cost=200 --baseurl=http://dl.rockylinux.org/pub/rocky/8/PowerTools/$basearch/os/
 repo --name=extras --cost=200 --baseurl=http://dl.rockylinux.org/pub/rocky/8/extras/$basearch/os
 
-# EPEL (required for KDE and XFCE)
+# EPEL
 repo --name=epel --cost=200 --baseurl=https://dl.fedoraproject.org/pub/epel/8/Everything/$basearch/
 repo --name=epel-modular --cost=200 --baseurl=https://dl.fedoraproject.org/pub/epel/8/Modular/$basearch/
 

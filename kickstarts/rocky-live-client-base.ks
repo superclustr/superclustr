@@ -295,9 +295,21 @@ for i in $(seq 1 $ATTEMPTS); do
 done
 %end
 
+
+%post --nochroot
+# Copying Nvidia DeepOps Patch
+cp /kickstarts/assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
+%end
+
 %post
 # Nvidia DeepOps
-git clone --branch 22.08 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
+git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
+
+# Patch Rocky Linux Support
+(
+cd /root/deepops
+git apply deepops-release-22.04-rocky-support.patch
+)
 
 # Setup DeepOps
 /root/deepops/scripts/setup.sh

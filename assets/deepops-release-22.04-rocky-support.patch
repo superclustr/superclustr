@@ -1,0 +1,65 @@
+diff --git a/scripts/k8s/deploy_kubeflow.sh b/scripts/k8s/deploy_kubeflow.sh
+index a40f966d..d146e84e 100755
+--- a/scripts/k8s/deploy_kubeflow.sh
++++ b/scripts/k8s/deploy_kubeflow.sh
+@@ -83,7 +83,7 @@ function install_dependencies() {
+   # Install dependencies
+   . /etc/os-release
+   case "$ID" in
+-      rhel*|centos*)
++      rhel*|centos*|rocky*)
+           type curl >/dev/null 2>&1
+           if [ $? -ne 0 ] ; then
+               sudo yum -y install curl wget
+diff --git a/scripts/k8s/install_helm.sh b/scripts/k8s/install_helm.sh
+index 3df86614..fce0c072 100755
+--- a/scripts/k8s/install_helm.sh
++++ b/scripts/k8s/install_helm.sh
+@@ -19,7 +19,7 @@ fi
+ # Install dependencies
+ . /etc/os-release
+ case "$ID" in
+-    rhel*|centos*)
++    rhel*|centos*|rocky*)
+         if ! type curl >/dev/null 2>&1 ; then
+             sudo yum -y install curl
+         fi
+diff --git a/scripts/k8s/setup_remote_k8s.sh b/scripts/k8s/setup_remote_k8s.sh
+index 70462b87..c2390837 100755
+--- a/scripts/k8s/setup_remote_k8s.sh
++++ b/scripts/k8s/setup_remote_k8s.sh
+@@ -10,7 +10,7 @@ KUBECTL_BINARY_URL="${KUBECTL_BINARY_URL:-https://storage.googleapis.com/kuberne
+ # Install dependencies
+ . /etc/os-release
+ case "$ID" in
+-    rhel*|centos*)
++    rhel*|centos*|rocky*)
+         type curl >/dev/null 2>&1
+         if [ $? -ne 0 ] ; then
+             sudo yum -y install curl
+diff --git a/scripts/setup.sh b/scripts/setup.sh
+index fde5a900..f1b15dc0 100755
+--- a/scripts/setup.sh
++++ b/scripts/setup.sh
+@@ -65,7 +65,7 @@ as_user(){
+ 
+ # Install software dependencies
+ case "$ID" in
+-    rhel*|centos*)
++    rhel*|centos*|rocky*)
+         as_sudo "yum -y -q install ${EPEL_URL} |& grep -v 'Nothing to do'"       # Enable EPEL (required for sshpass package)
+         case "$EPEL_VERSION" in
+             7)
+diff --git a/virtual/vagrant_startup.sh b/virtual/vagrant_startup.sh
+index f7f9bf1b..3de8973b 100755
+--- a/virtual/vagrant_startup.sh
++++ b/virtual/vagrant_startup.sh
+@@ -17,7 +17,7 @@ DEEPOPS_OS_VERSION=${DEEPOPS_OS_VERSION:-20.04}
+ #####################################
+ 
+ case "$ID" in
+-  rhel*|centos*)
++  rhel*|centos*|rocky*)
+     # Install Vagrant & Dependencies for RHEL Systems
+ 
+     export YUM_DEPENDENCIES="centos-release-qemu-ev qem-kvm-ev qemu-kvm libvirt virt-install \

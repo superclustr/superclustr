@@ -196,4 +196,6 @@ cat > /etc/netdata/netdata.conf << EOF
     type = pxe
 EOF
 
+%end
+
 %include lazy-umount.ks

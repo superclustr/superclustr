@@ -38,6 +38,7 @@ anaconda-live
 @anaconda-tools
 python3.11
 python3.11-pip
+ansible
 git
 
 # RHBZ#1242586 - Required for initramfs creation
@@ -297,6 +298,21 @@ done
 %post --erroronfail
 # Nvidia DeepOps
 git clone --branch 22.08 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
+
+# Setup DeepOps
+/root/deepops/scripts/setup.sh
+
+# Install Kubernetes
+ansible-playbook /root/deepops/playbooks/k8s-cluster.yml
+
+# Ensure that NFS is used as a backend for dynamic provisioning of PVCs
+ansible-playbook /root/deepops/playbooks/k8s-cluster/nfs-client-provisioner.yml
+
+# Install Prometheus and Grafana
+/root/deepops/scripts/k8s/deploy_monitoring.sh
+
+# Install Kubeflow
+/root/deepops/scripts/k8s/deploy_kubeflow.sh
 %end
 
 %post --erroronfail

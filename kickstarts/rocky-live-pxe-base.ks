@@ -136,7 +136,7 @@ dnf install -y cobbler cobbler-web
 dnf install -y dhcp
 
 # Let cobbler handle the DHCP configuration
-echo 'manage_dhcp: 1' >> /etc/cobbler/settings
+sudo -S sed -i 's/manage_dhcp: false/manage_dhcp: true/g' /etc/cobbler/settings
 
 # Enable and start services
 systemctl enable --force cobblerd.service
@@ -152,7 +152,7 @@ cobbler sync
 # Ensure GitHub's authenticity
 echo "github.com,140.82.121.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=" > /root/.ssh/known_hosts
 
-git clone --branch v1.0.1 --depth 1 git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+git clone --branch v1.0.2 --depth 1 git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
 %end
 
 %post

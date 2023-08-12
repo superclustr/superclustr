@@ -296,15 +296,19 @@ done
 %end
 
 
+
+
+%post
+# Nvidia DeepOps
+git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
+%end
+
 %post --nochroot
 # Copying Nvidia DeepOps Patch
 cp /kickstarts/assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
 %end
 
 %post
-# Nvidia DeepOps
-git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git /root/deepops
-
 # Patch Rocky Linux Support
 (
 cd /root/deepops

@@ -131,8 +131,8 @@ cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/defa
 %post
 # Setup Cobbler PXE Server
 
+mkdir -p /etc/selinux/
 cat > /etc/selinux/config << EOF
-
 # This file controls the state of SELinux on the system.
 # SELINUX= can take one of these three values:
 #       enforcing - SELinux security policy is enforced.
@@ -143,7 +143,6 @@ SELINUX=permissive
 #       targeted - Targeted processes are protected,
 #       mls - Multi Level Security protection.
 SELINUXTYPE=targeted
-
 EOF
 
 # Let cobbler handle the DHCP configuration

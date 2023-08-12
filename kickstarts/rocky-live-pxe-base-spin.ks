@@ -27,7 +27,6 @@ shutdown
 @core
 @fonts
 @input-methods
-@dial-up
 @multimedia
 @hardware-support
 
@@ -44,6 +43,7 @@ python3.11
 python3.11-pip
 dhcp-server
 cobbler
+cobbler-web
 git
 
 # Required for SVG rnotes images

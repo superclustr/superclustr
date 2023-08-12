@@ -129,10 +129,7 @@ cp /kickstarts/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/defa
 %end
 
 %post
-# Install Cobbler PXE Server
-
-# Set SELinux mode to Permissive
-setenforce 0
+# Setup Cobbler PXE Server
 
 cat > /etc/selinux/config << EOF
 

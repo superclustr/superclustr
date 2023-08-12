@@ -45,6 +45,18 @@ python3.11-pip
 dhcp-server
 cobbler
 cobbler-web
+dbus-devel
+cmake
+autoconf
+automake
+glib2-devel
+python3.11-devel
+gobject-introspection
+gobject-introspection-devel
+ciaro
+cairo-devel
+cairo-gobject
+cairo-gobject-devel
 git
 
 # Required for SVG rnotes images

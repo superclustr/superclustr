@@ -7,7 +7,7 @@
 lang en_US.UTF-8
 keyboard us
 timezone US/Eastern
-selinux --enforcing
+selinux --permissive
 firewall --enabled --service=mdns
 xconfig --startxonboot
 zerombr

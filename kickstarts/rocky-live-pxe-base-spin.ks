@@ -8,7 +8,8 @@ lang en_US.UTF-8
 keyboard us
 timezone US/Eastern
 selinux --permissive
-firewall --enabled --service=mdns
+#firewall --enabled --service=mdns
+firewall --disabled
 xconfig --startxonboot
 zerombr
 clearpart --all

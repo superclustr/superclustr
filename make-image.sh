@@ -90,13 +90,14 @@ docker run --privileged \
         chmod 400 /root/.ssh/id_rsa && \
         livemedia-creator --ks $kickstart_file \
         --no-virt \
-        --resultdir /kickstarts/out \
-        --project='Rocky Live' \
+        --resultdir /var/lmc \
+        --project='Rocky Linux' \
         --make-iso \
         --volid Rocky-Workstation-8 \
         --iso-only \
         --iso-name $image_name.iso \
         --releasever=8 \
-        --nomacboot"
+        --nomacboot && \
+        mv /var/lmc/$image_name.iso /kickstarts/out"
 
 echo "Done."

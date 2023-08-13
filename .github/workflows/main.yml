@@ -40,7 +40,7 @@ jobs:
       run: sudo ./make-image.sh -k rocky-${{ matrix.build_type }}-base.ks -i rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -p "${{ secrets.PRIVATE_KEY }}"
 
     - name: Upload artifact
-      if: env.IS_TAG_PUSH == 'true'
+      #if: env.IS_TAG_PUSH == 'true'
       uses: sonatype-nexus-community/nexus-repo-github-action@master
       with:
         serverUrl: https://nexus.superclustr.net

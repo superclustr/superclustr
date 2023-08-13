@@ -20,7 +20,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         lfs: true
-        
+
     - name: Checkout LFS objects
       run: git lfs checkout
 
@@ -42,7 +42,7 @@ jobs:
         fi
 
     - name: Build ${{ matrix.build_type }}
-      run: sudo ./make-image.sh -k rocky-${{ matrix.build_type }}-base.ks -i rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -p "${{ secrets.PRIVATE_KEY }}"
+      run: ./make-image.sh -k rocky-${{ matrix.build_type }}-base.ks -i rocky-${{ matrix.build_type }}-x86_64-${{ steps.get_version.outputs.VERSION }} -p "${{ secrets.PRIVATE_KEY }}"
 
     - name: Upload artifact
       #if: env.IS_TAG_PUSH == 'true'

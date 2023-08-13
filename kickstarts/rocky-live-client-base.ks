@@ -302,7 +302,7 @@ git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git
 
 %post --nochroot
 # Copying Nvidia DeepOps Patch
-cp /mnt/assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
+cp assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
 %end
 
 %post

@@ -337,6 +337,9 @@ EOF
 systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
 
+systemctl enable --force libvirtd
+usermod -a -G libvirt liveuser
+
 %end
 
 %post --nochroot
@@ -359,6 +362,90 @@ if [ "$(uname -i)" = "i386" -o "$(uname -i)" = "x86_64" ]; then
     ' /usr/share/lorax/templates.d/99-generic/live/x86.tmpl
 fi
 
+%end
+
+%post --nochroot
+echo "u352129.your-storagebox.de u352129 ${NEXUS_STORAGE_BOX_PASSWORD}" > $INSTALL_ROOT/etc/davfs2/secrets
+
+chmod 600 /etc/davfs2/secrets
+mkdir /mnt/nexus-storage
+
+cat > /etc/systemd/system/nexus-storage.service << EOF
+Description=Mount Hetzner Storage Box using WebDAV
+
+[Mount]
+What=${NEXUS_STORAGE_BOX_URL}
+Where=/mnt/nexus-storage
+Type=davfs
+Options=_netdev,uid=<your_user_id>,gid=<your_group_id>,conf=/etc/davfs2/davfs2.conf
+
+[Install]
+WantedBy=multi-user.target
+EOF
+%end
+
+%post
+# Install Sonatype
+
+
+
+
+
+%end
+
+%post
+# Install Sonartype Nexus
+docker pull sonatype/nexus
+docker build –rm –tag sonatype/nexus oss/
+docker create --name nexus -p 8081:8081 sonatype/nexus:oss
+cat > /etc/systemd/system/nexus-docker.service << EOF
+[Unit]
+Description=Nexus Server
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE = 65536
+ExecStart=/usr/bin/docker run -d -p 8081:8081 –name nexus sonatype/nexus:oss
+ExecStop=/usr/bin/docker stop -t 2 nexus
+User=nexus
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+
+%post
+# Download Rocky Linux 8 GenericCloud Image
+(
+cd /var/lib/libvirt/images/ && \
+curl -O https://download.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
+curl -O https://download.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 && \
+sha256sum -c Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
+rm -f Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
+mv Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2
+)
+
+# Customize GitLab Runner Base Image
+virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 \
+    --network \
+    --hostname gitlab-runner-rhel \
+    --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash > /tmp/gitlab_runner_rpm.log 2>&1' \
+    --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash > /tmp/git_lfs_rpm.log 2>&1' \
+    --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
+    --run-command "git lfs install --skip-repo" \
+    --ssh-inject gitlab-runner:file:/root/.ssh/id_rsa.pub \
+    --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
+    --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
+    --run-command "grub-mkconfig -o /boot/grub/grub.cfg" \
+    --run-command "echo 'auto eth0' >> /etc/network/interfaces" \
+    --run-command "echo 'allow-hotplug eth0' >> /etc/network/interfaces" \
+    --run-command "echo 'iface eth0 inet dhcp' >> /etc/network/interfaces"
+
+# Resize Image
+qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud.latest.x86_64.qcow2 16G
 %end
 
 %post --erroronfail
@@ -397,6 +484,9 @@ kernel-modules
 kernel-modules-extra
 memtest86+
 syslinux
+virt-manager
+libguestfs-tools-c
+davfs2
 -@admin-tools
 -@input-methods
 -desktop-backgrounds-basic

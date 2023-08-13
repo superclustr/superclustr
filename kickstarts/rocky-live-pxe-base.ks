@@ -123,9 +123,9 @@ done
 
 %post --nochroot
 # Copying desired wallpaper image to the target system (default, day, and night)
-cp /mnt/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-01-day.png
-cp /mnt/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-02-night.png
-cp /mnt/assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36.png
+cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-01-day.png
+cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-02-night.png
+cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36.png
 %end
 
 %post

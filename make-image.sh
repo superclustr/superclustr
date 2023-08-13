@@ -77,7 +77,7 @@ virt-install --name $image_name \
              --disk path=$vm_image \
              --import \
              --os-type linux \
-             --os-variant rhel8 \
+             --os-variant rhel8.7 \
              --network default \
              --noautoconsole \
              --filesystem $kickstarts_path,/mnt/kickstarts \

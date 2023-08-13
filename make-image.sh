@@ -33,71 +33,73 @@ if [[ -z "$kickstart_file" || -z "$image_name" || -z "$private_key" ]]; then
     usage
 fi
 
-echo "Building with kickstart file: $kickstart_file and image name: $image_name ..."
+# Define paths
+output_path=$(pwd)/build
+assets_path=$(pwd)/assets
+kickstarts_path=$(pwd)/kickstarts
+base_vm_image="$(pwd)/images/Rocky-8-GenericCloud.latest.x86_64.qcow2" # Replace with the path to your template VM
+vm_image="${image_name}.qcow2"
 
-# Check if image already exists
-if [ -z "$(docker images -q $image_name)" ]; then
-    echo "Image does not exist. Building it now..."
+# Clone the base VM image
+cp $base_vm_image $vm_image
 
-    # Check if the host system is not x86_64
-    if [ $(uname -m) != "x86_64" ]; then
-        echo "Host system is not x86_64. Checking for docker buildx plugin..."
+# Script to run inside the VM
+cat > script_inside_vm.sh <<EOL
+#!/bin/bash
+yum install -y openssh-server
+systemctl start sshd
+systemctl enable sshd
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+systemctl restart sshd
+mkdir -p /root/.ssh
+echo "$private_key" > /root/.ssh/id_rsa
+chmod 400 /root/.ssh/id_rsa
+cd /mnt/kickstarts
+livemedia-creator --ks $kickstart_file \
+    --no-virt \
+    --resultdir /var/lmc \
+    --project='Rocky Linux' \
+    --make-iso \
+    --volid Rocky-Workstation-8 \
+    --iso-only \
+    --iso-name $image_name.iso \
+    --releasever=8 \
+    --nomacboot && \
+    mv /var/lmc/$image_name.iso /mnt/out
+EOL
+chmod +x script_inside_vm.sh
 
-        # Make sure you have the docker buildx plugin
-        docker buildx version > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo "The docker buildx plugin is not installed."
-            echo "Please update Docker to the latest version."
-            exit 1
-        fi
+# Start VM and run the script inside
+virt-install --name $image_name \
+             --memory 2048 \
+             --vcpus 2 \
+             --disk path=$vm_image \
+             --import \
+             --os-type linux \
+             --os-variant rhel8 \
+             --network default \
+             --noautoconsole \
+             --filesystem $kickstarts_path,/mnt/kickstarts \
+             --filesystem $assets_path,/mnt/assets \
+             --filesystem $output_path,/mnt/out \
+             --filesystem $(pwd)/script_inside_vm.sh,/mnt/script_inside_vm.sh \
+             --init /mnt/script_inside_vm.sh
 
-        # Create a new builder
-        builder_name=$image_name-builder-$(date +%s)
-        echo "Creating a new builder with name: $builder_name..."
+# NOTE: At this point, you might want to add a delay or a check to ensure the VM has fully started up and the SSH server is running.
+sleep 120 # wait for 2 minutes. Adjust as needed.
 
-        # Create a new builder which gives access to the features of buildx
-        docker buildx create --name $builder_name --use
+# Assuming your VM gets an IP address from the default DHCP, you should try to find out this IP, replace VM_IP with the appropriate method to retrieve it
+# Get the VM's IP address
+VM_IP=$(virsh domifaddr $image_name | grep ipv4 | awk '{print $4}' | cut -d'/' -f1)
 
-        # Build the Docker image for current platform
-        echo "Building the Docker image for current platform..."
-        docker buildx build --platform linux/amd64 -t $image_name . --load
-    else
-        echo "Building the Docker image for x86_64 without buildx..."
-        # Build the Docker image for x86_64 without buildx
-        docker build -t $image_name .
-    fi
-else
-    echo "Image already exists. Using the existing image..."
+# Check if we got an IP
+if [[ -z "$VM_IP" ]]; then
+    echo "Failed to retrieve the VM's IP address."
+    exit 1
 fi
 
-# Define the output path on your host
-mkdir -p $(pwd)/out
-output_path=$(pwd)/out
-assets_path=$(pwd)/assets
-source_path=$(pwd)/kickstarts
+# Copy the generated ISO from VM to host
+scp -i ~/.ssh/id_rsa root@$VM_IP:/mnt/out/$image_name.iso $output_path/
 
-docker run --privileged \
-    --platform linux/amd64 \
-    --rm \
-    --workdir /kickstarts/source \
-    --volume $output_path:/kickstarts/out \
-    --volume $assets_path:/kickstarts/assets \
-    --volume $source_path:/kickstarts/source \
-    $image_name \
-    /bin/bash -c "
-        mkdir -p /root/.ssh && \
-        echo \"$private_key\" > /root/.ssh/id_rsa && \
-        chmod 400 /root/.ssh/id_rsa && \
-        livemedia-creator --ks $kickstart_file \
-        --no-virt \
-        --resultdir /var/lmc \
-        --project='Rocky Linux' \
-        --make-iso \
-        --volid Rocky-Workstation-8 \
-        --iso-only \
-        --iso-name $image_name.iso \
-        --releasever=8 \
-        --nomacboot && \
-        mv /var/lmc/$image_name.iso /kickstarts/out"
-
-echo "Done."
+# Optionally, you can shut down the VM or perform other cleanup tasks here.

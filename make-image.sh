@@ -91,7 +91,7 @@ docker run --privileged \
         livemedia-creator --ks $kickstart_file \
         --no-virt \
         --resultdir /kickstarts/out \
-        --project="Rocky Live" \
+        --project='Rocky Live' \
         --make-iso \
         --volid Rocky-Workstation-8 \
         --iso-only \

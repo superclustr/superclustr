@@ -33,7 +33,7 @@ if [[ -z "$kickstart_file" || -z "$image_name" || -z "$private_key" ]]; then
     usage
 fi
 
-echo "Building with kickstart file: $kickstart_file and image name: $image_name..."
+echo "Building with kickstart file: $kickstart_file and image name: $image_name ..."
 
 # Check if image already exists
 if [ -z "$(docker images -q $image_name)" ]; then
@@ -88,7 +88,15 @@ docker run --privileged \
         mkdir -p /root/.ssh && \
         echo \"$private_key\" > /root/.ssh/id_rsa && \
         chmod 400 /root/.ssh/id_rsa && \
-        livecd-creator --verbose -c $kickstart_file -f $image_name && \
-        mv $image_name.iso /kickstarts/out"
+        livemedia-creator --ks $kickstart_file \
+        --no-virt \
+        --resultdir /kickstarts/out \
+        --project="Rocky Live" \
+        --make-iso \
+        --volid Rocky-Workstation-8 \
+        --iso-only \
+        --iso-name $image_name.iso \
+        --releasever=8 \
+        --nomacboot"
 
 echo "Done."

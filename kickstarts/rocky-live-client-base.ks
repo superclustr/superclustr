@@ -11,7 +11,7 @@ firewall --enabled --service=mdns
 xconfig --startxonboot
 zerombr
 clearpart --all
-part / --size 10240 --fstype ext4 --fsoptions="ro"
+part / --size 5120 --fstype ext4
 services --enabled=NetworkManager,ModemManager --disabled=sshd
 network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
 rootpw --lock --iscrypted locked
@@ -54,14 +54,170 @@ chkconfig
 
 %end
 
-%post --log=/root/ks-post.log
-# Make sure dracut will embed the whole system
-cat > /etc/dracut.conf.d/embed-whole-os.conf <<EOF
-hostonly="no"
+%post
+# FIXME: it'd be better to get this installed from a package
+cat > /etc/rc.d/init.d/livesys << EOF
+#!/bin/bash
+#
+# live: Init script for live image
+#
+# chkconfig: 345 00 99
+# description: Init script for live image.
+### BEGIN INIT INFO
+# X-Start-Before: display-manager chronyd
+### END INIT INFO
+
+. /etc/init.d/functions
+
+if ! strstr "\`cat /proc/cmdline\`" rd.live.image || [ "\$1" != "start" ]; then
+    exit 0
+fi
+
+if [ -e /.liveimg-configured ] ; then
+    configdone=1
+fi
+
+exists() {
+    which \$1 >/dev/null 2>&1 || return
+    \$*
+}
+
+livedir="LiveOS"
+for arg in \`cat /proc/cmdline\` ; do
+  if [ "\${arg##rd.live.dir=}" != "\${arg}" ]; then
+    livedir=\${arg##rd.live.dir=}
+    continue
+  fi
+  if [ "\${arg##live_dir=}" != "\${arg}" ]; then
+    livedir=\${arg##live_dir=}
+  fi
+done
+
+# Enable swap unless requested otherwise
+swaps=\`blkid -t TYPE=swap -o device\`
+if ! strstr "\`cat /proc/cmdline\`" noswap && [ -n "\$swaps" ] ; then
+  for s in \$swaps ; do
+    action "Enabling swap partition \$s" swapon \$s
+  done
+fi
+if ! strstr "\`cat /proc/cmdline\`" noswap && [ -f /run/initramfs/live/\${livedir}/swap.img ] ; then
+  action "Enabling swap file" swapon /run/initramfs/live/\${livedir}/swap.img
+fi
+
+if [ -e /run/initramfs/live/\${livedir}/home.img ]; then
+  homedev=/run/initramfs/live/\${livedir}/home.img
+fi
+
+if [ -n "\$configdone" ]; then
+  exit 0
+fi
+
+# Create the liveuser (no password) so automatic logins and sudo works
+action "Adding live user" useradd \$USERADDARGS -c "Live System User" liveuser
+passwd -d liveuser > /dev/null
+usermod -aG wheel liveuser > /dev/null
+
+# Same for root
+passwd -d root > /dev/null
+
+# Turn off firstboot (similar to a DVD/minimal install, where it asks
+# for the user to accept the EULA before bringing up a TTY)
+systemctl --no-reload disable firstboot-text.service 2> /dev/null || :
+systemctl --no-reload disable firstboot-graphical.service 2> /dev/null || :
+systemctl stop firstboot-text.service 2> /dev/null || :
+systemctl stop firstboot-graphical.service 2> /dev/null || :
+
+# Prelinking damages the images
+sed -i 's/PRELINKING=yes/PRELINKING=no/' /etc/sysconfig/prelink &>/dev/null || :
+
+# Turn off mdmonitor by default
+systemctl --no-reload disable mdmonitor.service 2> /dev/null || :
+systemctl --no-reload disable mdmonitor-takeover.service 2> /dev/null || :
+systemctl stop mdmonitor.service 2> /dev/null || :
+systemctl stop mdmonitor-takeover.service 2> /dev/null || :
+
+# Even if there isn't gnome, this doesn't hurt.
+gsettings set org.gnome.software download-updates 'false' || :
+
+# Disable cron
+systemctl --no-reload disable crond.service 2> /dev/null || :
+systemctl --no-reload disable atd.service 2> /dev/null || :
+systemctl stop crond.service 2> /dev/null || :
+systemctl stop atd.service 2> /dev/null || :
+
+# Disable abrt
+systemctl --no-reload disable abrtd.service 2> /dev/null || :
+systemctl stop abrtd.service 2> /dev/null || :
+
+# Don't sync the system clock when running live (RHBZ #1018162)
+sed -i 's/rtcsync//' /etc/chrony.conf
+
+# Mark things as configured
+touch /.liveimg-configured
+
+# add static hostname to work around xauth bug
+# https://bugzilla.redhat.com/show_bug.cgi?id=679486
+# the hostname must be something else than 'localhost'
+# https://bugzilla.redhat.com/show_bug.cgi?id=1370222
+echo "localhost" > /etc/hostname
+
 EOF
 
-# Now rebuild initramfs with dracut to include the entire OS
-dracut --force --no-hostonly
+# HAL likes to start late.
+cat > /etc/rc.d/init.d/livesys-late << EOF
+#!/bin/bash
+#
+# live: Late init script for live image
+#
+# chkconfig: 345 99 01
+# description: Late init script for live image.
+
+. /etc/init.d/functions
+
+if ! strstr "\`cat /proc/cmdline\`" rd.live.image || [ "\$1" != "start" ] || [ -e /.liveimg-late-configured ] ; then
+    exit 0
+fi
+
+exists() {
+    which \$1 >/dev/null 2>&1 || return
+    \$*
+}
+
+touch /.liveimg-late-configured
+
+# Read some stuff out of the kernel cmdline
+for o in \`cat /proc/cmdline\` ; do
+    case \$o in
+    ks=*)
+        ks="--kickstart=\${o#ks=}"
+        ;;
+    xdriver=*)
+        xdriver="\${o#xdriver=}"
+        ;;
+    esac
+done
+
+# If liveinst or textinst is given, start installer
+if strstr "\`cat /proc/cmdline\`" liveinst ; then
+   plymouth --quit
+   /usr/sbin/liveinst \$ks
+fi
+if strstr "\`cat /proc/cmdline\`" textinst ; then
+   plymouth --quit
+   /usr/sbin/liveinst --text \$ks
+fi
+
+# Configure X, allowing user to override xdriver
+if [ -n "\$xdriver" ]; then
+   cat > /etc/X11/xorg.conf.d/00-xdriver.conf <<FOE
+Section "Device"
+	Identifier	"Videocard0"
+	Driver	"\$xdriver"
+EndSection
+FOE
+fi
+
+EOF
 
 chmod 755 /etc/rc.d/init.d/livesys
 /sbin/restorecon /etc/rc.d/init.d/livesys
@@ -106,6 +262,10 @@ rm -f /var/lib/systemd/random-seed
 
 echo 'File created by kickstart. See systemd-update-done.service(8).' \
     | tee /etc/.updated >/var/.updated
+
+# Drop the rescue kernel and initramfs, we don't need them on the live media itself.
+# See bug 1317709
+rm -f /boot/*-rescue*
 
 # Disable network service here, as doing it in the services line
 # fails due to RHBZ #1369794 - the error is expected

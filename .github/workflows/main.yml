@@ -13,7 +13,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        build_type: ["live-client", "live-pxe", "disk-infra"]
+        build_type: ["live-client"]
 
     steps:
     - name: Checkout repository

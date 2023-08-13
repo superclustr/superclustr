@@ -9,7 +9,7 @@ USER root
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
     && dnf config-manager --set-enabled epel \
     && dnf -y update \
-    && dnf install -y lorax-lmc-novirt vim-minimal pykickstart git lsof git openssh-clients \
+    && dnf install -y lorax-lmc-novirt vim-minimal pykickstart git lsof git openssh-clients anaconda \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 

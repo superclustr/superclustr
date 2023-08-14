@@ -539,13 +539,13 @@ cat > /opt/libvirt-driver/prepare-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${currentDir}/base.sh # Get variables from base script.
+source ${currentDir}/base-rocky-8.sh # Get variables from base script.
 
 set -eo pipefail
 
 # Cleanup function
 cleanup_on_error() {
-    /opt/libvirt-driver/cleanup.sh
+    /opt/libvirt-driver/cleanup-rocky-8.sh
     exit $SYSTEM_FAILURE_EXIT_CODE
 }
 

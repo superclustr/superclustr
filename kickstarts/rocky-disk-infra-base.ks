@@ -535,7 +535,7 @@ _get_vm_ip() {
 EOF
 chmod +x /opt/libvirt-driver/base-rocky-8.sh
 
-cat > /opt/libvirt-driver/prepare.sh << 'EOF'
+cat > /opt/libvirt-driver/prepare-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -607,7 +607,7 @@ for i in $(seq 1 30); do
     sleep 1s
 done
 EOF
-chmod +x /opt/libvirt-driver/prepare.sh
+chmod +x /opt/libvirt-driver/prepare-rocky-8.sh
 
 cat > /opt/libvirt-driver/run-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
@@ -657,77 +657,60 @@ set -x
 # Variables for GitLab Runner
 GITLAB_SERVER_URL="https://gitlab.com/"
 
-# Associative array of your registration tokens with a name for each runner
+# Declare your Runners
 declare -A RUNNERS=(
     ["rocky-8"]="GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER" # Rocky Linux 8
     # Add more runners like this:
     # ["another_name"]="ANOTHER_TOKEN_PLACEHOLDER"
 )
 
-# Number of instances per runner
-INSTANCES=4
+# Concurrent Instances per Runner
+CONCURRENT_INSTANCES=4
 
-# Loop through each runner name-token pair and register the runner
-for RUNNER_NAME in "${!RUNNERS[@]}"; do
-    for ((i=1; i<=INSTANCES; i++)); do
-        # Generate a runner name with a leading zero-padded number
-        INSTANCE_NAME=$(printf "%s_runner-%03d" "$RUNNER_NAME" $i)
+# Advanced settings
+CHECK_INTERVAL=0
+SHUTDOWN_TIMEOUT=0
+SESSION_TIMEOUT=1800
 
-        # Register the runner with the generated name
-        gitlab-runner register \
-          --non-interactive \
-          --name "$INSTANCE_NAME" \
-          --url "${GITLAB_SERVER_URL}" \
-          --executor "custom" \
-          --builds-dir "/home/gitlab-runner/builds" \
-          --cache-dir "/home/gitlab-runner/cache" \
-          --custom-prepare-exec "/opt/libvirt-driver/prepare-$RUNNER_NAME.sh" \
-          --custom-run-exec "/opt/libvirt-driver/run-$RUNNER_NAME.sh" \
-          --custom-cleanup-exec "/opt/libvirt-driver/cleanup-$RUNNER_NAME.sh" \
-          --token "${RUNNERS[$RUNNER_NAME]}"
+generate_id() {
+    echo $((RANDOM % 90000000 + 10000000))
+}
+
+# Backup the old configuration
+mv /etc/gitlab-runner/config.toml "/etc/gitlab-runner/config.toml.$(date +"%Y-%m-%dT%H:%M:%SZ").bak"
+
+cat >> "/etc/gitlab-runner/config.toml" <<EOL
+concurrent = $CONCURRENT_INSTANCES
+check_interval = $CHECK_INTERVAL
+shutdown_timeout = $SHUTDOWN_TIMEOUT
+
+[session_server]
+  session_timeout = $SESSION_TIMEOUT
+
+EOL
+
+for runner in "${!RUNNERS[@]}"; do
+    for i in $(seq 1 $CONCURRENT_INSTANCES); do
+        cat >> "/etc/gitlab-runner/config.toml" <<EOL
+[[runners]]
+  name = "${runner}_runner-$(printf "%03d" $i)"
+  url = "https://gitlab.com/"
+  id = $(generate_id)
+  token = "${RUNNERS[$runner]}"
+  token_obtained_at = "$(date +"%Y-%m-%dT%H:%M:%SZ")"
+  token_expires_at = "0001-01-01T00:00:00Z"
+  executor = "custom"
+  builds_dir = "/home/gitlab-runner/builds"
+  cache_dir = "/home/gitlab-runner/cache"
+  [runners.custom]
+    prepare_exec = "/opt/libvirt-driver/prepare-${runner}.sh"
+    run_exec = "/opt/libvirt-driver/run-${runner}.sh"
+    cleanup_exec = "/opt/libvirt-driver/cleanup-${runner}.sh"
+
+EOL
     done
 done
 
-input_file="/etc/gitlab-runner/config.toml"
-output_file="$(mktemp)"
-
-# Add header
-cat > $output_file << EOF
-concurrent = 8
-check_interval = 0
-shutdown_timeout = 0
-
-[session_server]
-  session_timeout = 1800
-
-EOF
-
-# Split the file into segments based on [[runners]] separator.
-awk 'BEGIN { RS="\\[\\[runners\\]\\]"; ORS=""; nr=0 }
-NR > 1 {
-    filename = "segment" nr ".txt";
-    print "[[runners]]" $0 > filename;
-    nr++
-}
-' "$input_file"
-
-# Process each segment separately.
-srand_seed=$(date +%s)
-for segment in segment*.txt; do
-    awk -v seed="$srand_seed" '
-    BEGIN { srand(seed); }
-    /id = [0-9]+/ {
-        # Generate a random number up to 8 characters long (between 10000000 and 99999999).
-        sub(/[0-9]+/, sprintf("%d", int(1e7 + rand() * (1e8 - 1e7))));
-    }
-    1
-    ' "$segment" >> "$output_file"
-    rm "$segment"
-    srand_seed=$((srand_seed + 1))
-done
-
-# Replace the original file with the modified one.
-mv "$output_file" "$input_file"
 
 # Start GitLab Runners
 gitlab-runner start

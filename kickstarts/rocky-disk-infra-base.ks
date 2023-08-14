@@ -650,8 +650,26 @@ done
 EOF
 chmod +x /root/register_gitlab_runners.sh
 
+cat > /etc/libvirt/qemu/networks/default.xml << EOF
+<network>
+  <name>default</name>
+  <uuid>ddb7c5f1-73f7-44f1-8f16-2c11d335e525</uuid>
+  <forward mode='nat'/>
+  <bridge name='virbr0' stp='on' delay='0'/>
+  <mac address='52:54:00:9E:F5:49'/>
+  <ip address='192.168.122.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.122.2' end='192.168.122.254'/>
+    </dhcp>
+  </ip>
+</network>
+EOF
+rm -f /etc/libvirt/qemu/networks/autostart/default.xml
+ln -s /etc/libvirt/qemu/networks/default.xml /etc/libvirt/qemu/networks/autostart/
+
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
+systemctl enable --force libvirtd
 %end
 
 %post --erroronfail
@@ -691,6 +709,8 @@ kernel-modules-extra
 memtest86+
 syslinux
 virt-manager
+libvirt
+virt-install
 libguestfs-tools-c
 davfs2
 certbot

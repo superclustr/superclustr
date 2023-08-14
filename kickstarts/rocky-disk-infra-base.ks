@@ -522,11 +522,12 @@ qemu-img create -f qcow2 -b "$BASE_VM_IMAGE" "$VM_IMAGE" -F qcow2
 # Install the VM
 virt-install \
     --name "$VM_ID" \
-    --os-variant debian11 \
+    --os-variant rocky8 \
     --disk "$VM_IMAGE" \
+    --check path_in_use=of \
     --import \
     --vcpus=2 \
-    --ram=2048 \
+    --ram=14336 \
     --network default \
     --graphics none \
     --noautoconsole

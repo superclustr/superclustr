@@ -301,13 +301,6 @@ touch /etc/machine-id
 # add initscript
 cat >> /etc/rc.d/init.d/livesys << EOF
 
-# debrand
-#sed -i "s/Red Hat Enterprise/Rocky/g" /usr/share/anaconda/gnome/rhel-welcome.desktop
-#sed -i "s/RHEL/Rocky Linux/g" /usr/share/anaconda/gnome/rhel-welcome
-#sed -i "s/Red Hat Enterprise/Rocky/g" /usr/share/anaconda/gnome/rhel-welcome
-#sed -i "s/org.fedoraproject.AnacondaInstaller/fedora-logo-icon/g" /usr/share/anaconda/gnome/rhel-welcome
-#sed -i "s/org.fedoraproject.AnacondaInstaller/fedora-logo-icon/g" /usr/share/applications/liveinst.desktop
-
 if [ -f /usr/share/anaconda/gnome/rhel-welcome.desktop  ]; then
   mkdir -p ~liveuser/.config/autostart
   cp /usr/share/anaconda/gnome/rhel-welcome.desktop /usr/share/applications/
@@ -365,7 +358,7 @@ fi
 %end
 
 %post --nochroot
-echo "u352129.your-storagebox.de u352129 ${NEXUS_STORAGE_BOX_PASSWORD}" > $INSTALL_ROOT/etc/davfs2/secrets
+echo "NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER NEXUS_HETZNER_STORAGE_BOX_USERNAME_PLACEHOLDER NEXUS_HETZNER_STORAGE_BOX_PASSWORD_PLACEHOLDER" > $INSTALL_ROOT/etc/davfs2/secrets
 
 chmod 600 /etc/davfs2/secrets
 mkdir /mnt/nexus-storage
@@ -374,10 +367,10 @@ cat > /etc/systemd/system/nexus-storage.service << EOF
 Description=Mount Hetzner Storage Box using WebDAV
 
 [Mount]
-What=${NEXUS_STORAGE_BOX_URL}
+What=NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER
 Where=/mnt/nexus-storage
 Type=davfs
-Options=_netdev,uid=<your_user_id>,gid=<your_group_id>,conf=/etc/davfs2/davfs2.conf
+Options=_netdev,uid=$(id -u),gid=$(id -g),conf=/etc/davfs2/davfs2.conf
 
 [Install]
 WantedBy=multi-user.target
@@ -385,19 +378,12 @@ EOF
 %end
 
 %post
-# Install Sonatype
+# Set permissions for /mnt/nexus-storage to be only readable and writable by root
+chmod 700 /mnt/nexus-storage
 
-
-
-
-
-%end
-
-%post
-# Install Sonartype Nexus
-docker pull sonatype/nexus
-docker build –rm –tag sonatype/nexus oss/
+# Create Sonatype Nexus Docker Container
 docker create --name nexus -p 8081:8081 sonatype/nexus:oss
+
 cat > /etc/systemd/system/nexus-docker.service << EOF
 [Unit]
 Description=Nexus Server
@@ -406,7 +392,7 @@ After=network.target
 [Service]
 Type=forking
 LimitNOFILE = 65536
-ExecStart=/usr/bin/docker run -d -p 8081:8081 –name nexus sonatype/nexus:oss
+ExecStart=/usr/bin/docker run -d -p 8081:8081 -v /mnt/nexus-storage:/nexus-storage -e INSTALL4J_ADD_VM_PARAMS="-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g -Djava.util.prefs.userRoot=/nexus-storage/javadir" --name nexus sonatype/nexus:oss
 ExecStop=/usr/bin/docker stop -t 2 nexus
 User=nexus
 Restart=on-abort
@@ -415,7 +401,62 @@ Restart=on-abort
 WantedBy=multi-user.target
 EOF
 
+mkdir -p /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER
+cat > /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER/fullchain.pem << EOF
+NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY_PLACEHOLDER
+EOF
 
+mkdir -p /etc/ssl/private/NEXUS_DOMAIN_NAME_PLACEHOLDER
+cat > /etc/ssl/private/NEXUS_DOMAIN_NAME_PLACEHOLDER/privkey.pem << EOF
+NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY_PLACEHOLDER
+EOF
+
+cat > /etc/ssl/private/ssl-dhparams.pem << EOF
+NEXUS_DOMAIN_SSL_DHPARAMS_PLACEHOLDER
+EOF
+
+chown root:root /etc/ssl/private
+find /etc/ssl/private -type d -exec chmod 700 {} \;
+find /etc/ssl/private -type f -exec chmod 600 {} \;
+
+cat > /etc/nginx/conf.d/nexus.conf << EOF
+server {
+    listen 80;
+    server_name NEXUS_DOMAIN_NAME_PLACEHOLDER;
+
+    return 301 https://$server_name$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name NEXUS_DOMAIN_NAME_PLACEHOLDER;
+
+    # allow large uploads of files - refer to nginx documentation
+    client_max_body_size 10G;
+
+    ssl_certificate /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER/fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/NEXUS_DOMAIN_NAME_PLACEHOLDER/privkey.pem;
+
+    ssl_session_cache shared:le_nginx_SSL:10m;
+    ssl_session_timeout 1440m;
+    ssl_session_tickets off;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+    ssl_dhparam  /etc/ssl/private/ssl-dhparams.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+%end
 
 %post
 # Download Rocky Linux 8 GenericCloud Image
@@ -432,20 +473,185 @@ mv Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 GitLab-Runner-Rocky-8-Ge
 virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 \
     --network \
     --hostname gitlab-runner-rhel \
-    --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash > /tmp/gitlab_runner_rpm.log 2>&1' \
-    --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash > /tmp/git_lfs_rpm.log 2>&1' \
+    --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
+    --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
     --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
     --run-command "git lfs install --skip-repo" \
     --ssh-inject gitlab-runner:file:/root/.ssh/id_rsa.pub \
     --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
     --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-    --run-command "grub-mkconfig -o /boot/grub/grub.cfg" \
-    --run-command "echo 'auto eth0' >> /etc/network/interfaces" \
-    --run-command "echo 'allow-hotplug eth0' >> /etc/network/interfaces" \
-    --run-command "echo 'iface eth0 inet dhcp' >> /etc/network/interfaces"
+    --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
 
 # Resize Image
-qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud.latest.x86_64.qcow2 16G
+qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 16G
+
+# Install GitLab Runner
+curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash
+dnf install -y gitlab-runner
+
+mkdir -p /opt/libvirt-driver/
+
+cat > /opt/libvirt-driver/base.sh << 'EOF'
+#!/usr/bin/env bash
+
+VM_IMAGES_PATH="/var/lib/libvirt/images"
+BASE_VM_IMAGE="$VM_IMAGES_PATH/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2"
+VM_ID="runner-$CUSTOM_ENV_CI_RUNNER_ID-project-$CUSTOM_ENV_CI_PROJECT_ID-concurrent-$CUSTOM_ENV_CI_CONCURRENT_PROJECT_ID-job-$CUSTOM_ENV_CI_JOB_ID"
+VM_IMAGE="$VM_IMAGES_PATH/$VM_ID.qcow2"
+
+_get_vm_ip() {
+    virsh -q domifaddr "$VM_ID" | awk '{print $4}' | sed -E 's|/([0-9]+)?$||'
+}
+EOF
+chmod +x /opt/libvirt-driver/base.sh
+
+cat > /opt/libvirt-driver/prepare.sh << 'EOF'
+#!/usr/bin/env bash
+
+currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${currentDir}/base.sh # Get variables from base script.
+
+set -eo pipefail
+
+# trap any error, and mark it as a system failure.
+trap "exit $SYSTEM_FAILURE_EXIT_CODE" ERR
+
+# Copy base disk to use for Job.
+qemu-img create -f qcow2 -b "$BASE_VM_IMAGE" "$VM_IMAGE" -F qcow2
+
+# Install the VM
+virt-install \
+    --name "$VM_ID" \
+    --os-variant debian11 \
+    --disk "$VM_IMAGE" \
+    --import \
+    --vcpus=2 \
+    --ram=2048 \
+    --network default \
+    --graphics none \
+    --noautoconsole
+
+# Wait for VM to get IP
+echo 'Waiting for VM to get IP'
+for i in $(seq 1 30); do
+    VM_IP=$(_get_vm_ip)
+
+    if [ -n "$VM_IP" ]; then
+        echo "VM got IP: $VM_IP"
+        break
+    fi
+
+    if [ "$i" == "30" ]; then
+        echo 'Waited 30 seconds for VM to start, exiting...'
+        # Inform GitLab Runner that this is a system failure, so it
+        # should be retried.
+        exit "$SYSTEM_FAILURE_EXIT_CODE"
+    fi
+
+    sleep 1s
+done
+
+# Wait for ssh to become available
+echo "Waiting for sshd to be available"
+for i in $(seq 1 30); do
+    if ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab-runner@"$VM_IP" >/dev/null 2>/dev/null; then
+        break
+    fi
+
+    if [ "$i" == "30" ]; then
+        echo 'Waited 30 seconds for sshd to start, exiting...'
+        # Inform GitLab Runner that this is a system failure, so it
+        # should be retried.
+        exit "$SYSTEM_FAILURE_EXIT_CODE"
+    fi
+
+    sleep 1s
+done
+EOF
+chmod +x /opt/libvirt-driver/prepare.sh
+
+cat > /opt/libvirt-driver/run.sh << 'EOF'
+#!/usr/bin/env bash
+
+currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${currentDir}/base.sh # Get variables from base script.
+
+VM_IP=$(_get_vm_ip)
+
+ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab-runner@"$VM_IP" /bin/bash < "${1}"
+if [ $? -ne 0 ]; then
+    # Exit using the variable, to make the build as failure in GitLab
+    # CI.
+    exit "$BUILD_FAILURE_EXIT_CODE"
+fi
+EOF
+chmod +x /opt/libvirt-driver/run.sh
+
+cat > /opt/libvirt-driver/cleanup.sh << 'EOF'
+#!/usr/bin/env bash
+
+currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${currentDir}/base.sh # Get variables from base script.
+
+set -eo pipefail
+
+# Destroy VM.
+virsh shutdown "$VM_ID"
+
+# Undefine VM.
+virsh undefine "$VM_ID"
+
+# Delete VM disk.
+if [ -f "$VM_IMAGE" ]; then
+    rm "$VM_IMAGE"
+fi
+EOF
+chmod +x /opt/libvirt-driver/cleanup.sh
+
+cat > /root/register_gitlab_runners.sh << 'EOF'
+# Register GitLab Runners
+# Usage: ./register_gitlab_runners.sh
+
+# Variables for GitLab Runner
+GITLAB_SERVER_URL="https://gitlab.com/"
+
+# List of your registration tokens for each runner
+declare -a RUNNER_TOKENS=(
+    "GITLAB_RUNNER_1_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_2_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_3_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_4_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_5_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_6_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_7_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_8_TOKEN_PLACEHOLDER"
+)
+
+# Loop through each token, replace it in the configuration template, and register the runner
+for TOKEN in "${RUNNER_TOKENS[@]}"; do
+    # Unregister old runner
+    gitlab runner unregister \
+      --non-interactive \
+      --url "${GITLAB_SERVER_URL}" \
+      --token "${TOKEN}"
+
+    # Register the runner
+    gitlab-runner register \
+      --non-interactive \
+      --url "${GITLAB_SERVER_URL}" \
+      --executor "custom" \
+      --builds-dir "/home/gitlab-runner/builds" \
+      --cache-dir "/home/gitlab-runner/cache" \
+      --custom-prepare-exec "/opt/libvirt-driver/prepare.sh" \
+      --custom-run-exec "/opt/libvirt-driver/run.sh" \
+      --custom-cleanup-exec "/opt/libvirt-driver/cleanup.sh" \
+      --token "${TOKEN}"
+done
+EOF
+chmod +x /root/register_gitlab_runners.sh
+
+# Enable the GitLab Runner service
+systemctl enable --force gitlab-runner
 %end
 
 %post --erroronfail
@@ -487,6 +693,12 @@ syslinux
 virt-manager
 libguestfs-tools-c
 davfs2
+certbot
+python3-certbot-nginx
+python3-certbot-dns-cloudflare
+openssh-clients
+git
+git-lfs
 -@admin-tools
 -@input-methods
 -desktop-backgrounds-basic

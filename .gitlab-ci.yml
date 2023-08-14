@@ -1,0 +1,59 @@
+stages:
+  - build
+
+variables:
+  GIT_LFS_SKIP_SMUDGE: "1" # To skip auto LFS checkout
+
+build:
+  stage: build
+  script:
+    # Export Secrets
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    - export SECRET_ONE_ENV=$SECRET_ONE
+    
+    # Checkout git repository (LFS is automatically checked out with GitLab Runner)
+    - git clone ${CI_REPOSITORY_URL} .
+    - git checkout ${CI_COMMIT_SHA}
+
+    # Determine if tag push
+    - |
+      if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then
+        export IS_TAG_PUSH=true
+      else
+        export IS_TAG_PUSH=false
+      fi
+
+    # Extract version from git tag or default to 'dev'
+    - |
+      if [[ "${IS_TAG_PUSH}" == "true" ]]; then
+        export VERSION=${CI_COMMIT_REF_NAME#v}
+      else
+        export VERSION=dev
+      fi
+
+    # Build based on matrix type
+    - ./make-image.sh -k rocky-live-client-base.ks -i rocky-live-client-x86_64-${VERSION} -p "${PRIVATE_KEY}"
+    # Similarly for live-pxe and disk-infra...
+
+    # Upload artifact
+    - |
+      if [[ "${IS_TAG_PUSH}" == "true" ]]; then
+        # Your upload command goes here.
+      fi
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_TAG =~ /^v/'
+
+  variables:
+    PRIVATE_KEY: $PRIVATE_KEY
+    NEXUS_USER: $NEXUS_USER
+    NEXUS_PASS: $NEXUS_PASS
+
+  tags:
+    - rocky-8

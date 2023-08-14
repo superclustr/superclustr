@@ -41,6 +41,52 @@ fi
 
 echo "Building with kickstart file: $kickstart_file and image name: $image_name ..."
 
+# List of environment variables to be replaced in the Kickstart files.
+# You can extend this list as needed.
+ENV_VARS_TO_SUBSTITUTE=(
+    "NEXUS_DOMAIN_NAME"
+    "NEXUS_DOMAIN_SSL_DHPARAMS"
+    "NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY"
+    "NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY"
+    "NEXUS_HETZNER_STORAGE_BOX_URL"
+    "NEXUS_HETZNER_STORAGE_BOX_USERNAME"
+    "NEXUS_HETZNER_STORAGE_BOX_PASSWORD"
+    "GITLAB_RUNNER_1_TOKEN"
+    "GITLAB_RUNNER_2_TOKEN"
+    "GITLAB_RUNNER_3_TOKEN"
+    "GITLAB_RUNNER_4_TOKEN"
+    "GITLAB_RUNNER_5_TOKEN"
+    "GITLAB_RUNNER_6_TOKEN"
+    "GITLAB_RUNNER_7_TOKEN"
+    "GITLAB_RUNNER_8_TOKEN"
+    # Add more as needed
+)
+
+# Path to your original Kickstart files
+ORIGINAL_KICKSTART_PATH="kickstarts"
+
+# Path to the directory where substituted Kickstart files will be saved
+OUTPUT_KICKSTART_PATH="build/kickstarts"
+
+# Create the output directory if it doesn't exist
+mkdir -p "$OUTPUT_KICKSTART_PATH"
+
+# Loop over each environment variable and substitute its value in the Kickstart files
+for env_var in "${ENV_VARS_TO_SUBSTITUTE[@]}"; do
+    # Check if the environment variable is set
+    if [ -z "${!env_var}" ]; then
+        echo "Warning: $env_var is not set!"
+    fi
+
+    # Substitute the placeholder with the actual value in the Kickstart files and output to the specified directory
+    find "$ORIGINAL_KICKSTART_PATH" -name "*.ks" | while read -r ks_file; do
+        output_file="$OUTPUT_KICKSTART_PATH/$(basename $ks_file)"
+        sed "s/${env_var}_PLACEHOLDER/${!env_var}/g" "$ks_file" > "$output_file"
+    done
+done
+
+# Now, we can call livemedia-creator with the Kickstart files from the output directory...
+
 function cleanup {
     # Reset back to enforcing mode
     sudo setenforce 1

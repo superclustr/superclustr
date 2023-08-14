@@ -4,7 +4,7 @@ stages:
 variables:
   GIT_LFS_SKIP_SMUDGE: "1" # To skip auto LFS checkout
 
-build:
+.build_template: &build_definition
   stage: build
   script:
     # Export Secrets
@@ -51,7 +51,7 @@ build:
     # Upload artifact
     - |
       if [[ "${IS_TAG_PUSH}" == "true" ]]; then
-        # Your upload command goes here.
+        curl --upload-file out/rocky-${BUILD_TYPE}-x86_64-${VERSION}.iso -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/directory=${BUILD_TYPE}/x86_64/
       fi
 
   rules:
@@ -65,3 +65,19 @@ build:
 
   tags:
     - rocky-8
+
+live-client:
+  <<: *build_definition
+  variables:
+    BUILD_TYPE: live-client
+
+live-pxe:
+  <<: *build_definition
+  variables:
+    BUILD_TYPE: live-pxe
+
+disk-infra:
+  <<: *build_definition
+  variables:
+    BUILD_TYPE: disk-infra
+

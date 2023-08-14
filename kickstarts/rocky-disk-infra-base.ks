@@ -524,7 +524,6 @@ virt-install \
     --name "$VM_ID" \
     --os-variant rocky8 \
     --disk "$VM_IMAGE" \
-    --check path_in_use=off \
     --import \
     --vcpus=2 \
     --ram=14336 \
@@ -668,8 +667,43 @@ EOF
 rm -f /etc/libvirt/qemu/networks/autostart/default.xml
 ln -s /etc/libvirt/qemu/networks/default.xml /etc/libvirt/qemu/networks/autostart/
 
+cat > /usr/local/bin/cleanup_vms.sh << 'EOF'
+#!/bin/bash
+
+VM_LIST=$(LC_ALL=C virsh list --all --name)
+
+for VM in $VM_LIST; do
+    virsh destroy $VM       # Forcefully power off VM
+    virsh undefine $VM      # Undefine VM
+
+    # Delete associated disk if you wish
+    VM_DISK="/var/lib/libvirt/images/${VM}.qcow2"
+    if [ -f "$VM_DISK" ]; then
+        rm -f "$VM_DISK"
+    fi
+done
+EOF
+sudo chmod +x /usr/local/bin/cleanup_vms.sh
+
+cat > /etc/systemd/system/cleanup_vms.service << EOF
+[Unit]
+Description=Clean up VMs on Boot
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/cleanup_vms.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
+
+# Enable VM Cleanup Service
+systemctl enable --force cleanup_vms.service
+
+# Enable Libvirt Daemon
 systemctl enable --force libvirtd
 %end
 
@@ -713,6 +747,7 @@ virt-manager
 libvirt
 virt-install
 libguestfs-tools-c
+glibc-common
 davfs2
 certbot
 python3-certbot-nginx

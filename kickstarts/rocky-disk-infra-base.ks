@@ -513,6 +513,15 @@ source ${currentDir}/base.sh # Get variables from base script.
 
 set -eo pipefail
 
+# Cleanup function
+cleanup_on_error() {
+    /opt/libvirt-driver/cleanup.sh
+    exit $SYSTEM_FAILURE_EXIT_CODE
+}
+
+# Trap the ERR signal
+trap 'cleanup_on_error' ERR
+
 # trap any error, and mark it as a system failure.
 trap "exit $SYSTEM_FAILURE_EXIT_CODE" ERR
 

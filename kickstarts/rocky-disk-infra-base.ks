@@ -524,7 +524,7 @@ virt-install \
     --name "$VM_ID" \
     --os-variant rocky8 \
     --disk "$VM_IMAGE" \
-    --check path_in_use=of \
+    --check path_in_use=off \
     --import \
     --vcpus=2 \
     --ram=14336 \

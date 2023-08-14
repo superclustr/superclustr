@@ -701,6 +701,12 @@ EOF
 iptables -A FORWARD -m physdev --physdev-is-bridged -j ACCEPT
 iptables-save > /etc/sysconfig/iptables
 
+cat > /etc/sysctl.d/99-libvirt.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 0
+net.bridge.bridge-nf-call-iptables = 0
+net.bridge.bridge-nf-call-arptables = 0 
+EOF
+
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
 

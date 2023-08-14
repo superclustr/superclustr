@@ -697,6 +697,10 @@ ExecStart=/usr/local/bin/cleanup_vms.sh
 WantedBy=multi-user.target
 EOF
 
+# Allo Libvirt Network in IP Tables
+iptables -A FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+iptables-save > /etc/sysconfig/iptables
+
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
 

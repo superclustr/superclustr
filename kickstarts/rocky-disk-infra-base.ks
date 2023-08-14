@@ -357,27 +357,45 @@ fi
 
 %end
 
-%post --nochroot
-echo "NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER NEXUS_HETZNER_STORAGE_BOX_USERNAME_PLACEHOLDER NEXUS_HETZNER_STORAGE_BOX_PASSWORD_PLACEHOLDER" > $INSTALL_ROOT/etc/davfs2/secrets
+%post
+echo "[hetzner]
+type = webdav
+url = NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER
+vendor = other
+user = NEXUS_HETZNER_STORAGE_BOX_USERNAME_PLACEHOLDER
+pass = $(rclone obscure NEXUS_HETZNER_STORAGE_BOX_PASSWORD_PLACEHOLDER)" > /root/.config/rclone/rclone.conf
 
-chmod 600 /etc/davfs2/secrets
 mkdir /mnt/nexus-storage
 
-cat > /etc/systemd/system/nexus-storage.service << EOF
-Description=Mount Hetzner Storage Box using WebDAV
+adduser nexus
+RANDOM_PASSWORD=$(openssl rand -base64 12)
+echo "nexus:${RANDOM_PASSWORD}" | chpasswd
+echo "Generated password for 'nexus' is: ${RANDOM_PASSWORD}"
 
-[Mount]
-What=NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER
-Where=/mnt/nexus-storage
-Type=davfs
-Options=_netdev,uid=$(id -u),gid=$(id -g),conf=/etc/davfs2/davfs2.conf
+# Change Shell to Prevent Direct Login
+usermod -s /sbin/nologin nexus
+
+# Grant Permissions to the Storage
+chown nexus:nexus /mnt/nexus-storage
+chmod 700 /mnt/nexus-storage
+
+cat > /etc/systemd/system/nexus-storage.service << EOF
+[Unit]
+Description=Mount Hetzner Storage Box using rclone/WebDAV
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/rclone mount hetzner:/ /mnt/nexus-storage --daemon
+ExecStop=/bin/fusermount -uz /mnt/nexus-storage
+Restart=on-failure
+User=root
+Group=root
 
 [Install]
 WantedBy=multi-user.target
 EOF
-%end
 
-%post
 # Set permissions for /mnt/nexus-storage to be only readable and writable by root
 chmod 700 /mnt/nexus-storage
 
@@ -400,6 +418,10 @@ Restart=on-abort
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# Enable Nexus Services
+systemctl enable --force nexus-storage.service
+systemctl enable --force nexus-docker.service
 
 mkdir -p /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER
 cat > /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER/fullchain.pem << EOF
@@ -456,6 +478,7 @@ server {
 }
 EOF
 
+systemctl enable --force nginx
 %end
 
 %post
@@ -468,6 +491,11 @@ sha256sum -c Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
 rm -f Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
 mv Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2
 )
+
+systemctl start libvirt
+systemctl enable --force libvirt
+
+ssh-keygen -t rsa -b 4096 -f /root/.ssh/id_rsa -N "ops@superclustr.net"
 
 # Customize GitLab Runner Base Image
 virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 \
@@ -482,6 +510,8 @@ virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM
     --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
     --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
 
+systemctl stop libvirt
+
 # Resize Image
 qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 16G
 
@@ -491,7 +521,7 @@ dnf install -y gitlab-runner
 
 mkdir -p /opt/libvirt-driver/
 
-cat > /opt/libvirt-driver/base.sh << 'EOF'
+cat > /opt/libvirt-driver/base-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
 
 VM_IMAGES_PATH="/var/lib/libvirt/images"
@@ -503,7 +533,7 @@ _get_vm_ip() {
     virsh -q domifaddr "$VM_ID" | awk '{print $4}' | sed -E 's|/([0-9]+)?$||'
 }
 EOF
-chmod +x /opt/libvirt-driver/base.sh
+chmod +x /opt/libvirt-driver/base-rocky-8.sh
 
 cat > /opt/libvirt-driver/prepare.sh << 'EOF'
 #!/usr/bin/env bash
@@ -579,7 +609,7 @@ done
 EOF
 chmod +x /opt/libvirt-driver/prepare.sh
 
-cat > /opt/libvirt-driver/run.sh << 'EOF'
+cat > /opt/libvirt-driver/run-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -594,9 +624,9 @@ if [ $? -ne 0 ]; then
     exit "$BUILD_FAILURE_EXIT_CODE"
 fi
 EOF
-chmod +x /opt/libvirt-driver/run.sh
+chmod +x /opt/libvirt-driver/run-rocky-8.sh
 
-cat > /opt/libvirt-driver/cleanup.sh << 'EOF'
+cat > /opt/libvirt-driver/cleanup-rocky-8.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -615,66 +645,119 @@ if [ -f "$VM_IMAGE" ]; then
     rm "$VM_IMAGE"
 fi
 EOF
-chmod +x /opt/libvirt-driver/cleanup.sh
+chmod +x /opt/libvirt-driver/cleanup-rocky-8.sh
 
 cat > /root/register_gitlab_runners.sh << 'EOF'
+#!/bin/bash -e
+set -x
+
 # Register GitLab Runners
 # Usage: ./register_gitlab_runners.sh
 
 # Variables for GitLab Runner
 GITLAB_SERVER_URL="https://gitlab.com/"
 
+# Associative array of your registration tokens with a name for each runner
+declare -A RUNNERS=(
+    ["rocky-8"]="GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER" # Rocky Linux 8
+    # Add more runners like this:
+    # ["another_name"]="ANOTHER_TOKEN_PLACEHOLDER"
+)
+
+# Number of instances per runner
+INSTANCES=4
+
+# Loop through each runner name-token pair and register the runner
+for RUNNER_NAME in "${!RUNNERS[@]}"; do
+    for ((i=1; i<=INSTANCES; i++)); do
+        # Generate a runner name with a leading zero-padded number
+        INSTANCE_NAME=$(printf "%s_runner-%03d" "$RUNNER_NAME" $i)
+
+        # Register the runner with the generated name
+        gitlab-runner register \
+          --non-interactive \
+          --name "$INSTANCE_NAME" \
+          --url "${GITLAB_SERVER_URL}" \
+          --executor "custom" \
+          --builds-dir "/home/gitlab-runner/builds" \
+          --cache-dir "/home/gitlab-runner/cache" \
+          --custom-prepare-exec "/opt/libvirt-driver/prepare-$RUNNER_NAME.sh" \
+          --custom-run-exec "/opt/libvirt-driver/run-$RUNNER_NAME.sh" \
+          --custom-cleanup-exec "/opt/libvirt-driver/cleanup-$RUNNER_NAME.sh" \
+          --token "${RUNNERS[$RUNNER_NAME]}"
+    done
+done
+
+input_file="/etc/gitlab-runner/config.toml"
+output_file="$(mktemp)"
+
+# Add header
+cat > $output_file << EOF
+concurrent = 8
+check_interval = 0
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+
+EOF
+
+# Split the file into segments based on [[runners]] separator.
+awk 'BEGIN { RS="\\[\\[runners\\]\\]"; ORS=""; nr=0 }
+NR > 1 {
+    filename = "segment" nr ".txt";
+    print "[[runners]]" $0 > filename;
+    nr++
+}
+' "$input_file"
+
+# Process each segment separately.
+srand_seed=$(date +%s)
+for segment in segment*.txt; do
+    awk -v seed="$srand_seed" '
+    BEGIN { srand(seed); }
+    /id = [0-9]+/ {
+        # Generate a random number up to 8 characters long (between 10000000 and 99999999).
+        sub(/[0-9]+/, sprintf("%d", int(1e7 + rand() * (1e8 - 1e7))));
+    }
+    1
+    ' "$segment" >> "$output_file"
+    rm "$segment"
+    srand_seed=$((srand_seed + 1))
+done
+
+# Replace the original file with the modified one.
+mv "$output_file" "$input_file"
+
+# Start GitLab Runners
+gitlab-runner start
+EOF
+chmod +x /root/register_gitlab_runners.sh
+
+cat > /root/unregister_gitlab_runners.sh << 'EOF'
+#!/bin/bash -e
+set -x
+
+# Unegister GitLab Runners
+# Usage: ./unregister_gitlab_runners.sh
+
+# Variables for GitLab Runner
+GITLAB_SERVER_URL="https://gitlab.com/"
+
 # List of your registration tokens for each runner
 declare -a RUNNER_TOKENS=(
-    "GITLAB_RUNNER_1_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_2_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_3_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_4_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_5_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_6_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_7_TOKEN_PLACEHOLDER"
-    "GITLAB_RUNNER_8_TOKEN_PLACEHOLDER"
+    "GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER" # Rocky Linux 8
 )
 
 # Loop through each token, replace it in the configuration template, and register the runner
 for TOKEN in "${RUNNER_TOKENS[@]}"; do
-    # Unregister old runner
-    gitlab runner unregister \
-      --non-interactive \
+    gitlab-runner unregister \
       --url "${GITLAB_SERVER_URL}" \
-      --token "${TOKEN}"
-
-    # Register the runner
-    gitlab-runner register \
-      --non-interactive \
-      --url "${GITLAB_SERVER_URL}" \
-      --executor "custom" \
-      --builds-dir "/home/gitlab-runner/builds" \
-      --cache-dir "/home/gitlab-runner/cache" \
-      --custom-prepare-exec "/opt/libvirt-driver/prepare.sh" \
-      --custom-run-exec "/opt/libvirt-driver/run.sh" \
-      --custom-cleanup-exec "/opt/libvirt-driver/cleanup.sh" \
       --token "${TOKEN}"
 done
-EOF
-chmod +x /root/register_gitlab_runners.sh
 
-cat > /etc/libvirt/qemu/networks/default.xml << EOF
-<network>
-  <name>default</name>
-  <uuid>ddb7c5f1-73f7-44f1-8f16-2c11d335e525</uuid>
-  <forward mode='nat'/>
-  <bridge name='virbr0' stp='on' delay='0'/>
-  <mac address='52:54:00:9E:F5:49'/>
-  <ip address='192.168.122.1' netmask='255.255.255.0'>
-    <dhcp>
-      <range start='192.168.122.2' end='192.168.122.254'/>
-    </dhcp>
-  </ip>
-</network>
 EOF
-rm -f /etc/libvirt/qemu/networks/autostart/default.xml
-ln -s /etc/libvirt/qemu/networks/default.xml /etc/libvirt/qemu/networks/autostart/
+chmod +x /root/unregister_gitlab_runners.sh
 
 cat > /usr/local/bin/cleanup_vms.sh << 'EOF'
 #!/bin/bash
@@ -692,7 +775,7 @@ for VM in $VM_LIST; do
     fi
 done
 EOF
-sudo chmod +x /usr/local/bin/cleanup_vms.sh
+chmod +x /usr/local/bin/cleanup_vms.sh
 
 cat > /etc/systemd/system/cleanup_vms.service << EOF
 [Unit]
@@ -706,6 +789,9 @@ ExecStart=/usr/local/bin/cleanup_vms.sh
 WantedBy=multi-user.target
 EOF
 
+# Enable VM Cleanup Service
+systemctl enable --force cleanup_vms.service
+
 # Allo Libvirt Network in IP Tables
 iptables -A FORWARD -m physdev --physdev-is-bridged -j ACCEPT
 iptables-save > /etc/sysconfig/iptables
@@ -718,9 +804,6 @@ EOF
 
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
-
-# Enable VM Cleanup Service
-systemctl enable --force cleanup_vms.service
 
 # Enable Libvirt Daemon
 systemctl enable --force libvirtd
@@ -762,15 +845,15 @@ kernel-modules
 kernel-modules-extra
 memtest86+
 syslinux
-virt-manager
 libvirt
 virt-install
 libguestfs-tools-c
 glibc-common
-davfs2
-certbot
-python3-certbot-nginx
-python3-certbot-dns-cloudflare
+rclone
+nginx
+moreutils
+fuse
+docker
 openssh-clients
 git
 git-lfs

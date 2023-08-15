@@ -73,12 +73,10 @@ for env_var in "${ENV_VARS_TO_SUBSTITUTE[@]}"; do
         continue # Skip substitution if the environment variable is not set
     fi
 
-    # Substitute the placeholder with the actual value in the Kickstart files
+    # Substitute the placeholder with the actual value in the Kickstart files using awk
     find "$OUTPUT_KICKSTART_PATH" -name "*.ks" | while read -r ks_file; do
-        # Debugging line: Uncomment the line below to see the sed command for each file and environment variable
-        echo "sed command: sed \"s|${env_var}_PLACEHOLDER|${!env_var}|g\" on $ks_file"
-        
-        sed -i "s|${env_var}_PLACEHOLDER|${!env_var}|g" "$ks_file"
+        placeholder="${env_var}_PLACEHOLDER"
+        awk -v val="${!env_var}" -v ph="$placeholder" '{ gsub(ph, val); print }' "$ks_file" > "${ks_file}.tmp" && mv "${ks_file}.tmp" "$ks_file"
     done
 done
 

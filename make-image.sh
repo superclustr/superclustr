@@ -32,7 +32,7 @@ while getopts "k:i:p:" opt; do
 done
 shift $((OPTIND -1))
 
-if [[ -z "$kickstart_file" || -z "$image_name" || -z "$private_key" ]]; then
+if [[ -z "$kickstart_file" || -z "$image_name" ]]; then
     usage
 fi
 
@@ -83,6 +83,13 @@ done
 # Now, we can call livemedia-creator with the Kickstart files from the output directory...
 
 function cleanup {
+    # Reset Private key
+    if [ -n "${private_key}" ]; then
+        if [[ -e "~/.ssh/id_rsa.bak" ]]; then
+            mv "~/.ssh/id_rsa.bak" "~/.ssh/id_rsa"
+            chmod 400 ~/.ssh/id_rsa
+        fi
+    fi
     # Reset back to enforcing mode
     sudo setenforce 1
 }
@@ -91,9 +98,15 @@ trap cleanup EXIT
 # You will need to be in permissive mode temporarily
 sudo setenforce 0
 
-mkdir -p /root/.ssh
-echo \"${private_key}\" > /root/.ssh/id_rsa
-chmod 400 /root/.ssh/id_rsa
+if [ -n "${private_key}" ]; then
+    # Replace Private key
+    mkdir -p ~/.ssh
+    if [[ -e "~/.ssh/id_rsa" ]]; then
+        mv "~/.ssh/id_rsa" "~/.ssh/id_rsa.bak"
+    fi
+    echo \"${private_key}\" > ~/.ssh/id_rsa
+    chmod 400 ~/.ssh/id_rsa
+fi
 
 livemedia-creator --ks build/${kickstart_file} \
     --no-virt \

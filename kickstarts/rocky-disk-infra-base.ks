@@ -419,12 +419,9 @@ gitlab-runner list
 
 # Currently running Virtual Machines
 echo -e "\n=== Currently running Virtual Machines ==="
-VM_LIST=$(virsh list --all)
-if [[ ! -z $VM_LIST ]]; then
-    echo "$VM_LIST"
-else
-    echo "No virtual machines are currently running."
-fi
+virsh list --all
+echo "\n(Erase all Virtual Machines using 'systemctl start cleanup_vms.service')"
+
 
 # Currently running Docker Containers
 echo -e "\n=== Currently Running Docker Containers ==="

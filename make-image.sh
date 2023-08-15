@@ -110,6 +110,8 @@ fi
 
 (
     cd $OUTPUT_KICKSTART_PATH
+    pwd
+    ls -la
     sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/${kickstart_file} \
         --no-virt \
         --resultdir ${OUTPUT_KICKSTART_PATH}/images \

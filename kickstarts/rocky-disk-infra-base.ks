@@ -482,41 +482,110 @@ systemctl enable --force nginx
 %end
 
 %post
-# Download Rocky Linux 8 GenericCloud Image
-(
-cd /var/lib/libvirt/images/ && \
-curl -O https://download.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
-curl -O https://download.rockylinux.org/pub/rocky/8/images/x86_64/Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 && \
-sha256sum -c Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
-rm -f Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
-mv Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2
-)
+cat > /usr/local/bin/build_libvirt_images.sh << 'EOF'
+#!/bin/bash
 
-systemctl start libvirtd
+download_and_setup_image() {
+    IMAGE_PATH="/var/lib/libvirt/images/$(basename $2)"
+    if [ ! -f "$IMAGE_PATH" ]; then
+        cd /var/lib/libvirt/images/ && \
+        curl -O $1 && \
+        curl -O $2 && \
+        sha256sum -c $(basename $1) && \
+        rm -f $(basename $1)
+    fi
+    return IMAGE_PATH
+}
+
+#############################################
+# Rocky Linux 8
+#############################################
+local VERSION="8.8"
+local IMAGE_NAME="Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2"
+download_and_setup_image \
+    "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}.CHECKSUM" \
+    "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}"
+
+if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
+  cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
+  virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
+      --network \
+      --hostname "$(hostname)-rocky-${VERSION}" \
+      --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
+      --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
+      --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
+      --run-command "git lfs install --skip-repo" \
+      --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
+      --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
+      --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
+  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB 16G
+fi
+
+#############################################
+# Rocky Linux 9
+#############################################
+local VERSION="9.2"
+local IMAGE_NAME="Rocky-9-GenericCloud-LVM-9.2-20230513.0.x86_64.qcow2"
+download_and_setup_image \
+    "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}.CHECKSUM" \
+    "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}"
+
+if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
+  cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
+  virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
+      --network \
+      --hostname "$(hostname)-rocky-${VERSION}" \
+      --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
+      --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
+      --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
+      --run-command "git lfs install --skip-repo" \
+      --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
+      --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
+      --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
+  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB 16G
+fi
+
+EOF
+
+cat > /etc/systemd/system/build_libvirt_images.service << 'EOF'
+[Unit]
+Description=Build libvirt images
+After=libvirtd.service
+
+[Service]
+ExecStart=/usr/local/bin/build_libvirt_images.sh
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable Libvirtd
 systemctl enable --force libvirtd
+%end
+
+%post
+# Setup GitLab Runners
 
 # Generate Key with empty passphrase
 mkdir -p /home/gitlab-runner/.ssh
 ssh-keygen -t rsa -b 4096 -f /home/gitlab-runner/.ssh/id_rsa -N ""
 
-# Customize GitLab Runner Base Image
-virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 \
-    --network \
-    --hostname "$(hostname)-rocky-8" \
-    --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
-    --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
-    --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-    --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
-    --run-command "git lfs install --skip-repo" \
-    --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
-    --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
-    --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-    --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
-
-systemctl stop libvirtd
-
-# Resize Image
-qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 16G
+# Declare your Runners
+declare -A RUNNERS=(
+    ["rocky-8.token"]="GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER"
+    ["rocky-8.qcow2"]="Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.GITLAB"
+    ["rocky-9.token"]="GITLAB_RUNNER_ROCKY_9_TOKEN_PLACEHOLDER"
+    ["rocky-9.qcow2"]="Rocky-9-GenericCloud-LVM-9.2-20230513.0.x86_64.qcow2.GITLAB"
+    # Add more runners like this:
+    # ["another_name.token"]="ANOTHER_TOKEN_PLACEHOLDER"
+    # ["another_name.qcow2"]="ANOTHER_QCOW2_FILENAME"
+)
 
 # Install GitLab Runner
 curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash
@@ -524,11 +593,17 @@ dnf install -y gitlab-runner
 
 mkdir -p /opt/libvirt-driver/
 
-cat > /opt/libvirt-driver/base-rocky-8.sh << 'EOF'
+for runner_key in "${!RUNNERS[@]}"; do
+    if [[ $runner_key == *.token ]]; then
+        runner_name="${runner_key%.token}"
+        runner_token="${RUNNERS[$runner_name.token]}"
+        runner_qcow2="${RUNNERS[$runner_name.qcow2]}"
+        for i in $(seq 1 $CONCURRENT_INSTANCES); do
+            cat > /opt/libvirt-driver/base-${runner_name}.sh << 'EOF'
 #!/usr/bin/env bash
 
 VM_IMAGES_PATH="/var/lib/libvirt/images"
-BASE_VM_IMAGE="$VM_IMAGES_PATH/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2"
+BASE_VM_IMAGE="$VM_IMAGES_PATH/${runner_qcow2}"
 VM_ID="runner-$CUSTOM_ENV_CI_RUNNER_ID-project-$CUSTOM_ENV_CI_PROJECT_ID-concurrent-$CUSTOM_ENV_CI_CONCURRENT_PROJECT_ID-job-$CUSTOM_ENV_CI_JOB_ID"
 VM_IMAGE="$VM_IMAGES_PATH/$VM_ID.qcow2"
 
@@ -536,19 +611,19 @@ _get_vm_ip() {
     virsh -q domifaddr "$VM_ID" | awk '{print $4}' | sed -E 's|/([0-9]+)?$||'
 }
 EOF
-chmod +x /opt/libvirt-driver/base-rocky-8.sh
+            chmod +x /opt/libvirt-driver/base-${runner_name}.sh
 
-cat > /opt/libvirt-driver/prepare-rocky-8.sh << 'EOF'
+            cat > /opt/libvirt-driver/prepare-${runner_name}.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${currentDir}/base-rocky-8.sh # Get variables from base script.
+source ${currentDir}/base-${runner_name}.sh # Get variables from base script.
 
 set -eo pipefail
 
 # Cleanup function
 cleanup_on_error() {
-    /opt/libvirt-driver/cleanup-rocky-8.sh
+    /opt/libvirt-driver/cleanup.sh
     exit $SYSTEM_FAILURE_EXIT_CODE
 }
 
@@ -610,13 +685,13 @@ for i in $(seq 1 30); do
     sleep 1s
 done
 EOF
-chmod +x /opt/libvirt-driver/prepare-rocky-8.sh
+            chmod +x /opt/libvirt-driver/prepare-${runner_name}.sh
 
-cat > /opt/libvirt-driver/run-rocky-8.sh << 'EOF'
+            cat > /opt/libvirt-driver/run-${runner_name}.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${currentDir}/base.sh # Get variables from base script.
+source ${currentDir}/base-${runner_name}.sh # Get variables from base script.
 
 VM_IP=$(_get_vm_ip)
 
@@ -627,13 +702,13 @@ if [ $? -ne 0 ]; then
     exit "$BUILD_FAILURE_EXIT_CODE"
 fi
 EOF
-chmod +x /opt/libvirt-driver/run-rocky-8.sh
+            chmod +x /opt/libvirt-driver/run-${runner_name}.sh
 
-cat > /opt/libvirt-driver/cleanup-rocky-8.sh << 'EOF'
+            cat > /opt/libvirt-driver/cleanup-${runner_name}.sh << 'EOF'
 #!/usr/bin/env bash
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${currentDir}/base.sh # Get variables from base script.
+source ${currentDir}/base-${runner_name}.sh # Get variables from base script.
 
 set -eo pipefail
 
@@ -648,17 +723,13 @@ if [ -f "$VM_IMAGE" ]; then
     rm "$VM_IMAGE"
 fi
 EOF
-chmod +x /opt/libvirt-driver/cleanup-rocky-8.sh
+            chmod +x /opt/libvirt-driver/cleanup-${runner_name}.sh
+        done
+    fi
+done
 
 # Variables for GitLab Runner
 GITLAB_SERVER_URL="https://gitlab.com/"
-
-# Declare your Runners
-declare -A RUNNERS=(
-    ["rocky-8"]="GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER" # Rocky Linux 8
-    # Add more runners like this:
-    # ["another_name"]="ANOTHER_TOKEN_PLACEHOLDER"
-)
 
 # Concurrent Instances per Runner
 CONCURRENT_INSTANCES=4
@@ -682,26 +753,31 @@ shutdown_timeout = $SHUTDOWN_TIMEOUT
 
 EOF
 
-for runner in "${!RUNNERS[@]}"; do
-    for i in $(seq 1 $CONCURRENT_INSTANCES); do
-        cat >> "/etc/gitlab-runner/config.toml" <<EOF
+for runner_key in "${!RUNNERS[@]}"; do
+    if [[ $runner_key == *.token ]]; then
+        runner_name="${runner_key%.token}"
+        runner_token="${RUNNERS[$runner_name.token]}"
+        runner_qcow2="${RUNNERS[$runner_name.qcow2]}"
+        for i in $(seq 1 $CONCURRENT_INSTANCES); do
+            cat >> "/etc/gitlab-runner/config.toml" <<EOF
 [[runners]]
-  name = "${runner}_runner-$(printf "%03d" $i)"
+  name = "${runner_name}_runner-$(printf "%03d" $i)"
   url = "https://gitlab.com/"
   id = $(generate_id)
-  token = "${RUNNERS[$runner]}"
+  token = "$runner_token"
   token_obtained_at = "$(date +"%Y-%m-%dT%H:%M:%SZ")"
   token_expires_at = "0001-01-01T00:00:00Z"
   executor = "custom"
   builds_dir = "/home/gitlab-runner/builds"
   cache_dir = "/home/gitlab-runner/cache"
   [runners.custom]
-    prepare_exec = "/opt/libvirt-driver/prepare-${runner}.sh"
-    run_exec = "/opt/libvirt-driver/run-${runner}.sh"
-    cleanup_exec = "/opt/libvirt-driver/cleanup-${runner}.sh"
+    prepare_exec = "/opt/libvirt-driver/prepare-${runner_name}.sh"
+    run_exec = "/opt/libvirt-driver/run-${runner_name}.sh"
+    cleanup_exec = "/opt/libvirt-driver/cleanup-${runner_name}.sh"
 
 EOF
-    done
+        done
+    fi
 done
 
 # Enable GitLab Runner

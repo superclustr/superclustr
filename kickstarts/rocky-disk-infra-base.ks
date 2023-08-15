@@ -25,7 +25,7 @@ repo --name="epel-modular" --baseurl=https://dl.fedoraproject.org/pub/epel/8/Mod
 # System timezone
 timezone US/Eastern
 # SELinux configuration
-selinux --enforcing
+selinux --permissive
 # System services
 services --disabled="sshd" --enabled="NetworkManager,ModemManager"
 # System bootloader configuration

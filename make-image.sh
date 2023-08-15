@@ -108,11 +108,13 @@ if [ -n "${private_key}" ]; then
     chmod 400 ~/.ssh/id_rsa
 fi
 
+# Note: The %include statement as they are not supported by livemedia-creator. 
+# All Kickstart files must be flattened using the ksflatten tool before they can be used. 
+
 (
     cd $OUTPUT_KICKSTART_PATH
-    pwd
-    ls -la
-    sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/${kickstart_file} \
+    ksflatten -c ${kickstart_file} -o flattened-${kickstart_file}
+    sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
         --no-virt \
         --resultdir ${OUTPUT_KICKSTART_PATH}/images \
         --project='Rocky Linux' \

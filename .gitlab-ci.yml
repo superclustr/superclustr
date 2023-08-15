@@ -21,7 +21,7 @@ variables:
     # Rescan all SCSI devices dynamically
     - for host in /sys/class/scsi_host/*; do sudo sh -c "echo '- - -' > ${host}/scan"; done
     # Resize the physical LVM volume
-    - sudo pvresize /dev/sda3
+    - sudo pvresize /dev/sda4
     # Check available space in the volume group and resize the logical volume
     - sudo lvresize -l +100%FREE /dev/rocky/root
     # Resize the XFS filesystem

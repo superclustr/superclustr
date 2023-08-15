@@ -358,6 +358,97 @@ fi
 %end
 
 %post
+# Configure custom MOTD
+cat > /etc/custom-motd.sh << 'EOF'
+#!/bin/bash
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Display Legal Warning
+echo -e "\nWARNING: Unauthorized access to this system is forbidden and will be prosecuted by law."
+echo -e "By accessing this system, you agree that your actions may be monitored if unauthorized usage is suspected.\n"
+
+# Display OS & Host details
+echo -e "Hostname: $(hostname)"
+echo -e "Operating System: $(cat /etc/redhat-release)"
+
+# Display IP addresses
+echo -e "\nIPv4 Addresses:"
+ip -o -4 addr list | awk -F '[ /]+' '/global/ {print $4}' | while read -r line; do
+    echo "- $line"
+done
+
+IPV6_ADDRS=$(ip -o -6 addr list | awk -F '[ /]+' '/global/ {print $4}')
+if [[ ! -z $IPV6_ADDRS ]]; then
+    echo -e "IPv6 Addresses:"
+    echo "$IPV6_ADDRS" | while read -r line; do
+        echo "- $line"
+    done
+fi
+
+# Netdata Monitoring Notification
+echo -e "\nThis system is attached to Netdata Cloud monitoring system.\nhttps://www.netdata.cloud/\n"
+
+# Failed SSH Login Attempts
+echo -e "=== Failed SSH Login Attempts ==="
+FAILED_ATTEMPTS=$(journalctl _SYSTEMD_UNIT=sshd.service | grep 'Failed password' | tail -n 5)
+if [[ ! -z $FAILED_ATTEMPTS ]]; then
+    echo "$FAILED_ATTEMPTS"
+    echo -e "${YELLOW}Please review any suspicious activity.${NC}"
+else
+    echo "No recent failed SSH attempts."
+fi
+
+# Recent sudo executions without permission
+echo -e "\n=== Recent sudo executions without permission ==="
+SUDO_DENIED=$(journalctl _SYSTEMD_UNIT=sudo.service | grep 'permission denied' | tail -n 5)
+if [[ ! -z $SUDO_DENIED ]]; then
+    echo "$SUDO_DENIED"
+    echo -e "${YELLOW}Ensure user permissions are correctly configured.${NC}"
+else
+    echo "No recent sudo permission denials."
+fi
+
+# Active GitLab Runners
+echo -e "\n=== Active GitLab Runners ==="
+gitlab-runner list
+
+# Currently running Virtual Machines
+echo -e "\n=== Currently running Virtual Machines ==="
+VM_LIST=$(virsh list --all)
+if [[ ! -z $VM_LIST ]]; then
+    echo "$VM_LIST"
+else
+    echo "No virtual machines are currently running."
+fi
+
+# Currently running Docker Containers
+echo -e "\n=== Currently Running Docker Containers ==="
+DOCKER_CONTAINERS=$(docker ps --format '{{.Names}} - {{.Image}}')
+if [[ ! -z $DOCKER_CONTAINERS ]]; then
+    echo "$DOCKER_CONTAINERS"
+else
+    echo "No Docker containers are currently running."
+fi
+
+# Other custom checks can be added below
+
+echo
+EOF
+chmod +x /etc/custom-motd.sh
+
+cat >> /etc/profile <<EOF
+
+# Log motd
+/etc/custom-motd.sh
+EOF
+%end
+
+%post
 echo "[hetzner]
 type = webdav
 url = NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER

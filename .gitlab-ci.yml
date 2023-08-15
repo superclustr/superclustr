@@ -18,6 +18,15 @@ variables:
     - export GITLAB_RUNNER_ROCKY_8_TOKEN=$GITLAB_RUNNER_ROCKY_8_TOKEN
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
 
+    # Rescan the SCSI bus
+    - sudo sh -c 'echo 1 > /sys/class/scsi_device/0:0:0:0/device/rescan'
+    # Resize the physical volume
+    - sudo pvresize /dev/sda5
+    # Check available space in the volume group and resize the logical volume
+    - sudo lvresize -l +100%FREE /dev/rocky/root
+    # Resize the XFS filesystem
+    - sudo xfs_growfs /dev/rocky/root
+
     # Determine if tag push
     - |
       if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then

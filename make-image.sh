@@ -108,7 +108,7 @@ if [ -n "${private_key}" ]; then
     chmod 400 ~/.ssh/id_rsa
 fi
 
-livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/${kickstart_file} \
+sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/${kickstart_file} \
     --no-virt \
     --resultdir ${OUTPUT_KICKSTART_PATH}/images \
     --project='Rocky Linux' \

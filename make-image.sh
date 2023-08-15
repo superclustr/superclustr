@@ -57,7 +57,7 @@ ENV_VARS_TO_SUBSTITUTE=(
 ORIGINAL_KICKSTART_PATH="kickstarts"
 
 # Path to the directory where substituted Kickstart files will be saved
-OUTPUT_KICKSTART_PATH="build/kickstarts"
+OUTPUT_KICKSTART_PATH="${currDir}/build/kickstarts"
 
 # Create the output directory if it doesn't exist
 mkdir -p "$OUTPUT_KICKSTART_PATH"
@@ -108,9 +108,9 @@ if [ -n "${private_key}" ]; then
     chmod 400 ~/.ssh/id_rsa
 fi
 
-livemedia-creator --ks build/${kickstart_file} \
+livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/${kickstart_file} \
     --no-virt \
-    --resultdir $currDir/build \
+    --resultdir ${OUTPUT_KICKSTART_PATH}/images \
     --project='Rocky Linux' \
     --make-iso \
     --volid Rocky-Linux-8 \

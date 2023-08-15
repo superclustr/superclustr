@@ -842,7 +842,6 @@ cat > /etc/netdata/netdata.conf << EOF
 [host labels]
     type = infra
 EOF
-
 %end
 
 %packages

@@ -23,6 +23,8 @@ variables:
     - export GITLAB_RUNNER_6_TOKEN=$GITLAB_RUNNER_6_TOKEN
     - export GITLAB_RUNNER_7_TOKEN=$GITLAB_RUNNER_7_TOKEN
     - export GITLAB_RUNNER_8_TOKEN=$GITLAB_RUNNER_8_TOKEN
+    - ls -la
+    - pwd
 
     # Checkout git repository (LFS is automatically checked out with GitLab Runner)
     - git clone ${CI_REPOSITORY_URL} .

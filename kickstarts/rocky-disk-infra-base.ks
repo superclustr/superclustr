@@ -492,25 +492,28 @@ rm -f Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.CHECKSUM && \
 mv Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2
 )
 
-systemctl start libvirt
-systemctl enable --force libvirt
+systemctl start libvirtd
+systemctl enable --force libvirtd
 
-ssh-keygen -t rsa -b 4096 -f /root/.ssh/id_rsa -N "ops@superclustr.net"
+# Generate Key with empty passphrase
+mkdir -p /home/gitlab-runner/.ssh
+ssh-keygen -t rsa -b 4096 -f /home/gitlab-runner/.ssh/id_rsa -N ""
 
 # Customize GitLab Runner Base Image
 virt-customize -a /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 \
     --network \
-    --hostname gitlab-runner-rhel \
+    --hostname "$(hostname)-rocky-8" \
     --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
     --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
+    --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
     --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
     --run-command "git lfs install --skip-repo" \
-    --ssh-inject gitlab-runner:file:/root/.ssh/id_rsa.pub \
+    --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
     --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
     --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
     --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
 
-systemctl stop libvirt
+systemctl stop libvirtd
 
 # Resize Image
 qemu-img resize /var/lib/libvirt/images/GitLab-Runner-Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2 16G
@@ -647,13 +650,6 @@ fi
 EOF
 chmod +x /opt/libvirt-driver/cleanup-rocky-8.sh
 
-cat > /root/register_gitlab_runners.sh << 'EOF'
-#!/bin/bash -e
-set -x
-
-# Register GitLab Runners
-# Usage: ./register_gitlab_runners.sh
-
 # Variables for GitLab Runner
 GITLAB_SERVER_URL="https://gitlab.com/"
 
@@ -676,10 +672,7 @@ generate_id() {
     echo $((RANDOM % 90000000 + 10000000))
 }
 
-# Backup the old configuration
-mv /etc/gitlab-runner/config.toml "/etc/gitlab-runner/config.toml.$(date +"%Y-%m-%dT%H:%M:%SZ").bak"
-
-cat >> "/etc/gitlab-runner/config.toml" <<EOL
+cat >> "/etc/gitlab-runner/config.toml" <<EOF
 concurrent = $CONCURRENT_INSTANCES
 check_interval = $CHECK_INTERVAL
 shutdown_timeout = $SHUTDOWN_TIMEOUT
@@ -687,11 +680,11 @@ shutdown_timeout = $SHUTDOWN_TIMEOUT
 [session_server]
   session_timeout = $SESSION_TIMEOUT
 
-EOL
+EOF
 
 for runner in "${!RUNNERS[@]}"; do
     for i in $(seq 1 $CONCURRENT_INSTANCES); do
-        cat >> "/etc/gitlab-runner/config.toml" <<EOL
+        cat >> "/etc/gitlab-runner/config.toml" <<EOF
 [[runners]]
   name = "${runner}_runner-$(printf "%03d" $i)"
   url = "https://gitlab.com/"
@@ -707,40 +700,12 @@ for runner in "${!RUNNERS[@]}"; do
     run_exec = "/opt/libvirt-driver/run-${runner}.sh"
     cleanup_exec = "/opt/libvirt-driver/cleanup-${runner}.sh"
 
-EOL
+EOF
     done
 done
 
-
-# Start GitLab Runners
-gitlab-runner start
-EOF
-chmod +x /root/register_gitlab_runners.sh
-
-cat > /root/unregister_gitlab_runners.sh << 'EOF'
-#!/bin/bash -e
-set -x
-
-# Unegister GitLab Runners
-# Usage: ./unregister_gitlab_runners.sh
-
-# Variables for GitLab Runner
-GITLAB_SERVER_URL="https://gitlab.com/"
-
-# List of your registration tokens for each runner
-declare -a RUNNER_TOKENS=(
-    "GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER" # Rocky Linux 8
-)
-
-# Loop through each token, replace it in the configuration template, and register the runner
-for TOKEN in "${RUNNER_TOKENS[@]}"; do
-    gitlab-runner unregister \
-      --url "${GITLAB_SERVER_URL}" \
-      --token "${TOKEN}"
-done
-
-EOF
-chmod +x /root/unregister_gitlab_runners.sh
+# Enable GitLab Runner
+systemctl enable --force gitlab-runner
 
 cat > /usr/local/bin/cleanup_vms.sh << 'EOF'
 #!/bin/bash

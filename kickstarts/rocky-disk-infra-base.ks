@@ -330,6 +330,21 @@ EOF
 systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
 
+cat > /etc/systemd/system/libvirtd.timer << EOF
+[Unit]
+Description=Starting Virtualization daemon
+
+[Timer]
+# Time to wait after boot before activation
+OnBootSec=5min
+# The unit that this timer activates
+Unit=libvirtd.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl enable --force libvirtd.timer
 systemctl enable --force libvirtd
 usermod -a -G libvirt liveuser
 

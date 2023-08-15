@@ -49,6 +49,7 @@ ENV_VARS_TO_SUBSTITUTE=(
     "NEXUS_HETZNER_STORAGE_BOX_USERNAME"
     "NEXUS_HETZNER_STORAGE_BOX_PASSWORD"
     "GITLAB_RUNNER_ROCKY_8_TOKEN"
+    "GITLAB_RUNNER_ROCKY_9_TOKEN"
     # Add more as needed
 )
 
@@ -61,17 +62,23 @@ OUTPUT_KICKSTART_PATH="build/kickstarts"
 # Create the output directory if it doesn't exist
 mkdir -p "$OUTPUT_KICKSTART_PATH"
 
+# Copy the original Kickstart files to the output directory
+cp "$ORIGINAL_KICKSTART_PATH"/* "$OUTPUT_KICKSTART_PATH"/
+
 # Loop over each environment variable and substitute its value in the Kickstart files
 for env_var in "${ENV_VARS_TO_SUBSTITUTE[@]}"; do
     # Check if the environment variable is set
     if [ -z "${!env_var}" ]; then
         echo "Warning: $env_var is not set!"
+        continue # Skip substitution if the environment variable is not set
     fi
 
-    # Substitute the placeholder with the actual value in the Kickstart files and output to the specified directory
-    find "$ORIGINAL_KICKSTART_PATH" -name "*.ks" | while read -r ks_file; do
-        output_file="$OUTPUT_KICKSTART_PATH/$(basename $ks_file)"
-        sed "s/${env_var}_PLACEHOLDER/${!env_var}/g" "$ks_file" > "$output_file"
+    # Substitute the placeholder with the actual value in the Kickstart files
+    find "$OUTPUT_KICKSTART_PATH" -name "*.ks" | while read -r ks_file; do
+        # Debugging line: Uncomment the line below to see the sed command for each file and environment variable
+        # echo "sed command: sed \"s|${env_var}_PLACEHOLDER|${!env_var}|g\" on $ks_file"
+        
+        sed -i "s|${env_var}_PLACEHOLDER|${!env_var}|g" "$ks_file"
     done
 done
 

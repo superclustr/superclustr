@@ -796,6 +796,9 @@ for VM in $VM_LIST; do
         rm -f "$VM_DISK"
     fi
 done
+
+# Delete stale images
+rm -f /var/lib/libvirt/images/runner-*
 EOF
 chmod +x /usr/local/bin/cleanup_vms.sh
 

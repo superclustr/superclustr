@@ -18,8 +18,8 @@ variables:
     - export GITLAB_RUNNER_ROCKY_8_TOKEN=$GITLAB_RUNNER_ROCKY_8_TOKEN
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
 
-    # Rescan the SCSI bus
-    - sudo sh -c 'echo 1 > /sys/class/scsi_device/0:0:0:0/device/rescan'
+    # Rescan all SCSI devices dynamically
+    - for host in /sys/class/scsi_host/*; do sudo sh -c "echo '- - -' > ${host}/scan"; done
     # Resize the physical volume
     - sudo pvresize /dev/sda5
     # Check available space in the volume group and resize the logical volume

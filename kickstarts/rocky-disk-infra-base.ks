@@ -565,16 +565,10 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-# Enable Libvirtd
-systemctl enable --force libvirtd
 %end
 
 %post
 # Setup GitLab Runners
-
-# Generate Key with empty passphrase
-mkdir -p /home/gitlab-runner/.ssh
-ssh-keygen -t rsa -b 4096 -f /home/gitlab-runner/.ssh/id_rsa -N ""
 
 # Declare your Runners
 declare -A RUNNERS=(
@@ -590,6 +584,10 @@ declare -A RUNNERS=(
 # Install GitLab Runner
 curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash
 dnf install -y gitlab-runner
+
+# Generate Key with empty passphrase
+mkdir -p /home/gitlab-runner/.ssh
+ssh-keygen -t rsa -b 4096 -f /home/gitlab-runner/.ssh/id_rsa -N ""
 
 mkdir -p /opt/libvirt-driver/
 
@@ -671,7 +669,7 @@ done
 # Wait for ssh to become available
 echo "Waiting for sshd to be available"
 for i in $(seq 1 30); do
-    if ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab-runner@"$VM_IP" >/dev/null 2>/dev/null; then
+    if ssh -i /home/gitlab-runner/.ssh/id_rsa -o StrictHostKeyChecking=no gitlab-runner@"$VM_IP" >/dev/null 2>/dev/null; then
         break
     fi
 
@@ -828,9 +826,6 @@ EOF
 
 # Enable the GitLab Runner service
 systemctl enable --force gitlab-runner
-
-# Enable Libvirt Daemon
-systemctl enable --force libvirtd
 %end
 
 %post --erroronfail

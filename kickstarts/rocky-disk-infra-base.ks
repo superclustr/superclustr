@@ -573,6 +573,8 @@ systemctl enable --force nginx
 cat > /usr/local/bin/build_libvirt_images.sh << 'EOF'
 #!/bin/bash
 
+DISK_SPACE="50G"
+
 download_and_setup_image() {
     IMAGE_PATH="/var/lib/libvirt/images/$(basename $2)"
     if [ ! -f "$IMAGE_PATH" ]; then
@@ -582,20 +584,20 @@ download_and_setup_image() {
         sha256sum -c $(basename $1) && \
         rm -f $(basename $1)
     fi
-    return IMAGE_PATH
 }
 
 #############################################
 # Rocky Linux 8
 #############################################
-local VERSION="8.8"
-local IMAGE_NAME="Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2"
+VERSION="8.8"
+IMAGE_NAME="Rocky-8-GenericCloud-Base-8.8-20230518.0.x86_64.qcow2"
 download_and_setup_image \
     "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}.CHECKSUM" \
     "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}"
 
 if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
   cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
+  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB ${DISK_SPACE}
   virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
       --network \
       --hostname "$(hostname)-rocky-${VERSION}" \
@@ -607,21 +609,22 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
       --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
-  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB 16G
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg" \
+      --run-command "xfs_growfs /"
 fi
 
 #############################################
 # Rocky Linux 9
 #############################################
-local VERSION="9.2"
-local IMAGE_NAME="Rocky-9-GenericCloud-LVM-9.2-20230513.0.x86_64.qcow2"
+VERSION="9.2"
+IMAGE_NAME="Rocky-9-GenericCloud-Base-9.2-20230513.0.x86_64.qcow2"
 download_and_setup_image \
     "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}.CHECKSUM" \
     "https://download.rockylinux.org/pub/rocky/${VERSION}/images/x86_64/${IMAGE_NAME}"
 
 if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
   cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
+  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB ${DISK_SPACE}
   virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
       --network \
       --hostname "$(hostname)-rocky-${VERSION}" \
@@ -633,11 +636,13 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
       --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
-  qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB 16G
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg" \
+      --run-command "xfs_growfs /"
 fi
 
 EOF
+
+chmod +x /usr/local/bin/build_libvirt_images.sh
 
 cat > /etc/systemd/system/build_libvirt_images.service << 'EOF'
 [Unit]
@@ -653,6 +658,7 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
+systemctl enable --force build_libvirt_images.service
 %end
 
 %post

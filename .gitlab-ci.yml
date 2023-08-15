@@ -18,19 +18,6 @@ variables:
     - export GITLAB_RUNNER_ROCKY_8_TOKEN=$GITLAB_RUNNER_ROCKY_8_TOKEN
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
 
-    # Delete /dev/vda5 partition and recreate it
-    - echo -e "d\n5\nn\np\n5\n\n\nw" | sudo fdisk /dev/vda
-    # Rescan the partitions
-    - sudo partprobe /dev/vda
-    # Wait for 5 seconds
-    - sleep 5
-    # Resize the physical LVM volume
-    - sudo pvresize /dev/vda5
-    # Check available space in the volume group and resize the logical volume
-    - sudo lvresize -l +100%FREE /dev/rocky/root
-    # Resize the XFS filesystem
-    - sudo xfs_growfs /dev/rocky/root
-
     # Determine if tag push
     - |
       if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then

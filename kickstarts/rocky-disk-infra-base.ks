@@ -330,6 +330,7 @@ EOF
 systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
 
+# Libvirtd does not like booting on its own
 cat > /etc/systemd/system/libvirtd.timer << EOF
 [Unit]
 Description=Starting Virtualization daemon

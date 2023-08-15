@@ -35,7 +35,7 @@ variables:
       fi
 
     # Build based on matrix type
-    - ./make-image.sh -k rocky-live-client-base.ks -i rocky-live-client-x86_64-${VERSION} -p "${PRIVATE_KEY}"
+    - ./make-image.sh -k rocky-${BUILD_TYPE}-base.ks -i rocky-${BUILD_TYPE}-x86_64-${VERSION} -p "${PRIVATE_KEY}"
     # Similarly for live-pxe and disk-infra...
 
     # Upload artifact

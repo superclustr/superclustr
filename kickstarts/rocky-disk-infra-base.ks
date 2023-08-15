@@ -639,7 +639,6 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg" \
       --run-command "xfs_growfs /"
 fi
-
 EOF
 
 chmod +x /usr/local/bin/build_libvirt_images.sh

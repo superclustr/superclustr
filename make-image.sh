@@ -76,7 +76,7 @@ for env_var in "${ENV_VARS_TO_SUBSTITUTE[@]}"; do
     # Substitute the placeholder with the actual value in the Kickstart files
     find "$OUTPUT_KICKSTART_PATH" -name "*.ks" | while read -r ks_file; do
         # Debugging line: Uncomment the line below to see the sed command for each file and environment variable
-        # echo "sed command: sed \"s|${env_var}_PLACEHOLDER|${!env_var}|g\" on $ks_file"
+        echo "sed command: sed \"s|${env_var}_PLACEHOLDER|${!env_var}|g\" on $ks_file"
         
         sed -i "s|${env_var}_PLACEHOLDER|${!env_var}|g" "$ks_file"
     done
@@ -97,7 +97,7 @@ mkdir -p /root/.ssh
 echo \"${private_key}\" > /root/.ssh/id_rsa
 chmod 400 /root/.ssh/id_rsa
 
-livemedia-creator --ks ${kickstart_file} \
+livemedia-creator --ks build/${kickstart_file} \
     --no-virt \
     --resultdir $currDir/build \
     --project='Rocky Linux' \

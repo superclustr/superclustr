@@ -701,14 +701,14 @@ EOF
 #!/usr/bin/env bash
 
 # Get the script name
-SCRIPT_NAME="${0##*/}"
+script_name_base="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-DESIRED_VALUE="${SCRIPT_NAME#base-}"
-DESIRED_VALUE="${DESIRED_VALUE%.sh}"
+desired_value_base="${script_name_base#base-}"
+desired_value_base="${desired_value_base%.sh}"
 
 # Source variables
-source /opt/libvirt-driver/vars-${DESIRED_VALUE}.sh
+source /opt/libvirt-driver/vars-${desired_value_base}.sh
 
 VM_IMAGES_PATH="/var/lib/libvirt/images"
 BASE_VM_IMAGE="$VM_IMAGES_PATH/${runner_qcow2}"
@@ -725,14 +725,14 @@ EOF
 #!/usr/bin/env bash
 
 # Get the script name
-SCRIPT_NAME="${0##*/}"
+script_name_prepare="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-DESIRED_VALUE="${SCRIPT_NAME#prepare-}"
-DESIRED_VALUE="${DESIRED_VALUE%.sh}"
+desired_value_prepare="${script_name_prepare#prepare-}"
+desired_value_prepare="${desired_value_prepare%.sh}"
 
 # Source variables
-source /opt/libvirt-driver/vars-${DESIRED_VALUE}.sh
+source /opt/libvirt-driver/vars-${desired_value_prepare}.sh
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${currentDir}/base-${runner_name}.sh # Get variables from base script.
@@ -809,14 +809,14 @@ EOF
 #!/usr/bin/env bash
 
 # Get the script name
-SCRIPT_NAME="${0##*/}"
+script_name_run="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-DESIRED_VALUE="${SCRIPT_NAME#run-}"
-DESIRED_VALUE="${DESIRED_VALUE%.sh}"
+desired_value_run="${script_name_run#run-}"
+desired_value_run="${desired_value_run%.sh}"
 
 # Source variables
-source /opt/libvirt-driver/vars-${DESIRED_VALUE}.sh
+source /opt/libvirt-driver/vars-${desired_value_run}.sh
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${currentDir}/base-${runner_name}.sh # Get variables from base script.
@@ -836,14 +836,14 @@ EOF
 #!/usr/bin/env bash
 
 # Get the script name
-SCRIPT_NAME="${0##*/}"
+script_name_cleanup="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-DESIRED_VALUE="${SCRIPT_NAME#cleanup-}"
-DESIRED_VALUE="${DESIRED_VALUE%.sh}"
+desired_value_cleanup="${script_name_cleanup#cleanup-}"
+desired_value_cleanup="${desired_value_cleanup%.sh}"
 
 # Source variables
-source /opt/libvirt-driver/vars-${DESIRED_VALUE}.sh
+source /opt/libvirt-driver/vars-${desired_value_cleanup}.sh
 
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${currentDir}/base-${runner_name}.sh # Get variables from base script.

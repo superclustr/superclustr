@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-# Logging 
-set -x
-
 usage() {
     echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key>"
     echo "Example: $0 -k kickstarts/rocky-live-client-base.ks -i my-rocky-live-client -p \"\$(cat ~/.ssh/id_rsa)\""

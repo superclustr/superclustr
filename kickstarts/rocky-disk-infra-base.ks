@@ -11,7 +11,7 @@ lang en_US.UTF-8
 # Shutdown after installation
 shutdown
 # Network information
-network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
+network --bootproto=dhcp --device=eth0 --nameserver=8.8.8.8,8.8.4.4 --activate
 # Firewall configuration
 firewall --enabled --service=mdns
 # Use network installation
@@ -27,7 +27,7 @@ timezone US/Eastern
 # SELinux configuration
 selinux --permissive
 # System services
-services --disabled="sshd" --enabled="NetworkManager,ModemManager"
+services --disabled="sshd" --enabled="NetworkManager"
 # System bootloader configuration
 bootloader --location=none
 # Clear the Master Boot Record

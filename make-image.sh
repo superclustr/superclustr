@@ -125,7 +125,7 @@ fi
     #    --releasever=8 \
     #    --nomacboot \
     #    --no-virt
-    livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
+    sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
         --fslabel ${image_name}
         --verbose
     mkdir -p ${OUTPUT_KICKSTART_PATH}/images

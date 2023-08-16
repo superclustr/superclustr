@@ -115,7 +115,6 @@ fi
     cd $OUTPUT_KICKSTART_PATH
     ksflatten -c ${kickstart_file} -o flattened-${kickstart_file}
     sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
-        --no-virt \
         --resultdir ${OUTPUT_KICKSTART_PATH}/images \
         --project='Rocky Linux' \
         --make-iso \

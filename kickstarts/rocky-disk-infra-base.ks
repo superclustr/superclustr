@@ -680,7 +680,7 @@ systemctl enable --force nginx
 
 %post
 cat > /usr/local/bin/build_libvirt_images.sh << 'EOF'
-#!/bin/bash
+#!/bin/bash -e
 
 DISK_SPACE="50G"
 
@@ -755,7 +755,7 @@ chmod +x /usr/local/bin/build_libvirt_images.sh
 cat > /etc/systemd/system/build_libvirt_images.service << 'EOF'
 [Unit]
 Description=Build libvirt images
-After=libvirtd.service
+After=network-online.target
 
 [Service]
 ExecStart=/usr/local/bin/build_libvirt_images.sh
@@ -990,7 +990,7 @@ generate_id() {
     echo $((RANDOM % 90000000 + 10000000))
 }
 
-cat >> "/etc/gitlab-runner/config.toml" <<EOF
+cat > "/etc/gitlab-runner/config.toml" <<EOF
 concurrent = $CONCURRENT_INSTANCES
 check_interval = $CHECK_INTERVAL
 shutdown_timeout = $SHUTDOWN_TIMEOUT
@@ -1121,7 +1121,6 @@ libguestfs-tools-c
 glibc-common
 rclone
 nginx
-moreutils
 fuse
 docker
 openssh-clients

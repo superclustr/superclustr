@@ -127,7 +127,6 @@ fi
     #    --no-virt
     sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
         --fslabel ${image_name}
-        --verbose
     mkdir -p ${OUTPUT_KICKSTART_PATH}/images
     mv ${image_name}.iso ${OUTPUT_KICKSTART_PATH}/images
 )

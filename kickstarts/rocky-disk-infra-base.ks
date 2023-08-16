@@ -707,6 +707,9 @@ download_and_setup_image \
 if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
   cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
   qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB ${DISK_SPACE}
+  cp /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED
+  virt-resize --expand /dev/vda5 /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED
+  mv /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
   virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
       --network \
       --hostname "$(hostname)-rocky-${VERSION}" \
@@ -733,6 +736,9 @@ download_and_setup_image \
 if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
   cp /var/lib/libvirt/images/${IMAGE_NAME} /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
   qemu-img resize /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB ${DISK_SPACE}
+  cp /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED
+  virt-resize --expand /dev/vda5 /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED
+  mv /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB.EXPANDED /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB
   virt-customize -a /var/lib/libvirt/images/${IMAGE_NAME}.GITLAB \
       --network \
       --hostname "$(hostname)-rocky-${VERSION}" \

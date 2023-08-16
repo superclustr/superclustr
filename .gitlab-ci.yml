@@ -17,11 +17,6 @@ variables:
     - export NEXUS_HETZNER_STORAGE_BOX_PASSWORD=$NEXUS_HETZNER_STORAGE_BOX_PASSWORD
     - export GITLAB_RUNNER_ROCKY_8_TOKEN=$GITLAB_RUNNER_ROCKY_8_TOKEN
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
-    
-    # Grow Filesystem to 100%
-    - sudo dnf install -y cloud-utils-growpart
-    - sudo growpart /dev/vda 5
-    - sudo xfs_growfs /dev/vda5
 
     # Determine if tag push
     - |

@@ -19,6 +19,11 @@ variables:
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
 
     - lsblk
+    - ping -c1 google.com
+    - ping -c1 google.com
+    - ping -c1 google.com
+    - ping -c1 google.com
+    - ping -c1 google.com
 
     # Determine if tag push
     - |

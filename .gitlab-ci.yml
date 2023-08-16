@@ -19,7 +19,7 @@ variables:
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
     
     # Grow Filesystem to 100%
-    - dnf install -y cloud-utils-growpart
+    - sudo dnf install -y cloud-utils-growpart
     - sudo growpart /dev/vda 5
     - sudo xfs_growfs /dev/vda5
 

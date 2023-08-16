@@ -18,6 +18,8 @@ variables:
     - export GITLAB_RUNNER_ROCKY_8_TOKEN=$GITLAB_RUNNER_ROCKY_8_TOKEN
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
 
+    - lsblk
+
     # Determine if tag push
     - |
       if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then

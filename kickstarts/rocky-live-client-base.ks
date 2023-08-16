@@ -286,10 +286,22 @@ for i in $(seq 1 $ATTEMPTS); do
         break
     elif [ $i -eq $ATTEMPTS ]; then
         # If this was the last attempt, exit with an error
+        echo "===== INTERFACES ====="
         ip addr
+        
+        echo "===== IP ROUTES ====="
         ip route
+
+        echo "===== NETWORK MANAGER STATUS ====="
         systemctl status NetworkManager
+        
+        echo "===== PING 8.8.8.8 ====="
         ping -c1 8.8.8.8
+        
+        echo "===== PING google.com ====="
+        ping -c1 google.com
+
+        echo "===== NSLOOKUP google.com 8.8.8.8 ====="
         nslookup google.com 8.8.8.8
         
         echo "Network is not up, exiting"

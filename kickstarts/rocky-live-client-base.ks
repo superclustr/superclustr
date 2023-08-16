@@ -288,6 +288,10 @@ for i in $(seq 1 $ATTEMPTS); do
         # If this was the last attempt, exit with an error
         ip addr
         ip route
+        systemctl status NetworkManager
+        ping -c1 8.8.8.8
+        nslookup google.com 8.8.8.8
+        
         echo "Network is not up, exiting"
         exit 1
     else

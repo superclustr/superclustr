@@ -372,3 +372,11 @@ if [ "$(uname -i)" = "i386" -o "$(uname -i)" = "x86_64" ]; then
 fi
 
 %end
+
+%post --nochroot
+echo "==== LSOF /mnt/sysimage ===="
+sudo lsof /mnt/sysimage
+echo "==== UMOUNT /mnt/sysimage ===="
+sudo umount -f /mnt/sysimage
+echo "==== DONE! ===="
+%end

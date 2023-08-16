@@ -19,7 +19,7 @@ variables:
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
     
     # Grow Filesystem to 100%
-    - sudo parted /dev/vda -- resizepart 5 100%
+    - yes | sudo parted /dev/vda -- resizepart 5 100%
     - sudo hdparm -z /dev/vda
     - sudo xfs_growfs /dev/vda5
 

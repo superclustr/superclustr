@@ -22,6 +22,8 @@ variables:
     - sudo dnf install -y cloud-utils-growpart
     - sudo growpart /dev/vda 5
     - sudo xfs_growfs /dev/vda5
+    - df -h /
+    - df -i /
 
     # Determine if tag push
     - |

@@ -101,6 +101,13 @@ EOF
 
 systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
+
+# Define Nameservers explicitly
+cat > /etc/resolv.conf << EOF
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+
 %end
 
 %post --erroronfail
@@ -112,8 +119,6 @@ for i in $(seq 1 $ATTEMPTS); do
         break
     elif [ $i -eq $ATTEMPTS ]; then
         # If this was the last attempt, exit with an error
-        ip addr
-        ip route
         echo "Network is not up, exiting"
         exit 1
     else

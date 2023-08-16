@@ -108,9 +108,6 @@ if [ -n "${private_key}" ]; then
     chmod 400 ~/.ssh/id_rsa
 fi
 
-# Create tmp directory
-mkdir -p ${currDir}/lmc_tmp
-
 # Note: The %include statement as they are not supported by livemedia-creator. 
 # All Kickstart files must be flattened using the ksflatten tool before they can be used. 
 
@@ -126,8 +123,7 @@ mkdir -p ${currDir}/lmc_tmp
         --iso-only \
         --iso-name ${image_name}.iso \
         --releasever=8 \
-        --nomacboot \
-        --tmp ${currDir}/lmc_tmp
+        --nomacboot
 )
 
 echo "Done."

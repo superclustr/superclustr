@@ -11,7 +11,7 @@ lang en_US.UTF-8
 # Shutdown after installation
 shutdown
 # Network information
-network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
+network --bootproto=dhcp --device=link --activate
 # Firewall configuration
 firewall --enabled --service=mdns
 # Use network installation
@@ -328,6 +328,31 @@ restorecon -R /
 EOF
 dnf config-manager --set-enabled powertools
 systemctl enable --force sddm.service
+
+# Define Nameservers explicitly
+cat > /etc/resolv.conf << EOF
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+
+%end
+
+%post --erroronfail
+# Attempt to ping google.com 10 times, and exit if it's unsuccessful
+ATTEMPTS=10
+for i in $(seq 1 $ATTEMPTS); do
+    if ping -c1 google.com &>/dev/null; then
+        # Success, break the loop and move on
+        break
+    elif [ $i -eq $ATTEMPTS ]; then
+        # If this was the last attempt, exit with an error
+        echo "Network is not up, exiting"
+        exit 1
+    else
+        # Sleep for a second before the next attempt
+        sleep 1
+    fi
+done
 %end
 
 %post

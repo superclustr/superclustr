@@ -1179,5 +1179,3 @@ dnf-automatic
 -xsane-gimp
 
 %end
-
-%include lazy-umount.ks

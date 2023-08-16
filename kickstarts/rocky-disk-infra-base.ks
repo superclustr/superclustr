@@ -718,8 +718,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
       --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg" \
-      --run-command "xfs_growfs /"
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
 fi
 
 #############################################
@@ -745,8 +744,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
       --run-command "sed -E 's/GRUB_CMDLINE_LINUX=\"\"/GRUB_CMDLINE_LINUX=\"net.ifnames=0 biosdevname=0\"/' -i /etc/default/grub" \
-      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg" \
-      --run-command "xfs_growfs /"
+      --run-command "grub2-mkconfig -o /boot/grub2/grub.cfg"
 fi
 EOF
 

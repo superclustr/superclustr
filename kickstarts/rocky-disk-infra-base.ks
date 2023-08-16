@@ -326,10 +326,11 @@ restorecon -R /home/liveuser/
 restorecon -R /
 
 EOF
-
-systemctl enable --force sddm.service
 dnf config-manager --set-enabled powertools
+systemctl enable --force sddm.service
+%end
 
+%post
 # Libvirtd does not like booting on its own
 cat > /etc/systemd/system/libvirtd.timer << EOF
 [Unit]
@@ -348,7 +349,6 @@ EOF
 systemctl enable --force libvirtd.timer
 systemctl enable --force libvirtd
 usermod -a -G libvirt liveuser
-
 %end
 
 %post --nochroot
@@ -459,6 +459,99 @@ cat >> /etc/profile <<EOF
 # Log motd
 /etc/custom-motd.sh
 EOF
+%end
+
+%post
+# Setup automatic updates
+cat > /etc/dnf/automatic.conf << 'EOF'
+[commands]
+#  What kind of upgrade to perform:
+# default                            = all available upgrades
+# security                           = only the security upgrades
+upgrade_type = default
+random_sleep = 0
+
+# Maximum time in seconds to wait until the system is on-line and able to
+# connect to remote repositories.
+network_online_timeout = 60
+
+# To just receive updates use dnf-automatic-notifyonly.timer
+
+# Whether updates should be downloaded when they are available, by
+# dnf-automatic.timer. notifyonly.timer, download.timer and
+# install.timer override this setting.
+download_updates = yes
+
+# Whether updates should be applied when they are available, by
+# dnf-automatic.timer. notifyonly.timer, download.timer and
+# install.timer override this setting.
+apply_updates = yes
+
+
+[emitters]
+# Name to use for this system in messages that are emitted.  Default is the
+# hostname.
+# system_name = my-host
+
+# How to send messages.  Valid options are stdio, email and motd.  If
+# emit_via includes stdio, messages will be sent to stdout; this is useful
+# to have cron send the messages.  If emit_via includes email, this
+# program will send email itself according to the configured options.
+# If emit_via includes motd, /etc/motd file will have the messages. if
+# emit_via includes command_email, then messages will be send via a shell
+# command compatible with sendmail.
+# Default is email,stdio.
+# If emit_via is None or left blank, no messages will be sent.
+emit_via = stdio
+
+
+[email]
+# The address to send email messages from.
+email_from = root@example.com
+
+# List of addresses to send messages to.
+email_to = root
+
+# Name of the host to connect to to send email messages.
+email_host = localhost
+
+
+[command]
+# The shell command to execute. This is a Python format string, as used in
+# str.format(). The format function will pass a shell-quoted argument called
+# `body`.
+# command_format = "cat"
+
+# The contents of stdin to pass to the command. It is a format string with the
+# same arguments as `command_format`.
+# stdin_format = "{body}"
+
+
+[command_email]
+# The shell command to use to send email. This is a Python format string,
+# as used in str.format(). The format function will pass shell-quoted arguments
+# called body, subject, email_from, email_to.
+# command_format = "mail -Ssendwait -s {subject} -r {email_from} {email_to}"
+
+# The contents of stdin to pass to the command. It is a format string with the
+# same arguments as `command_format`.
+# stdin_format = "{body}"
+
+# The address to send email messages from.
+email_from = root@example.com
+
+# List of addresses to send messages to.
+email_to = root
+
+
+[base]
+# This section overrides dnf.conf
+
+# Use this to filter DNF core messages
+debuglevel = 1
+EOF
+
+sudo systemctl enable --now dnf-automatic.timer
 %end
 
 %post
@@ -682,9 +775,9 @@ systemctl enable --force build_libvirt_images.service
 # Declare your Runners
 declare -A RUNNERS=(
     ["rocky-8.token"]="GITLAB_RUNNER_ROCKY_8_TOKEN_PLACEHOLDER"
-    ["rocky-8.qcow2"]="Rocky-8-GenericCloud-LVM-8.8-20230518.0.x86_64.qcow2.GITLAB"
+    ["rocky-8.qcow2"]="Rocky-8-GenericCloud-Base-8.8-20230518.0.x86_64.qcow2.GITLAB"
     ["rocky-9.token"]="GITLAB_RUNNER_ROCKY_9_TOKEN_PLACEHOLDER"
-    ["rocky-9.qcow2"]="Rocky-9-GenericCloud-LVM-9.2-20230513.0.x86_64.qcow2.GITLAB"
+    ["rocky-9.qcow2"]="Rocky-9-GenericCloud-Base-9.2-20230513.0.x86_64.qcow2.GITLAB"
     # Add more runners like this:
     # ["another_name.token"]="ANOTHER_TOKEN_PLACEHOLDER"
     # ["another_name.qcow2"]="ANOTHER_QCOW2_FILENAME"
@@ -1034,6 +1127,8 @@ docker
 openssh-clients
 git
 git-lfs
+chrony
+dnf-automatic
 -@admin-tools
 -@input-methods
 -desktop-backgrounds-basic

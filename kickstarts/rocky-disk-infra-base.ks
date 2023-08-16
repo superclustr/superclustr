@@ -740,8 +740,10 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --hostname "$(hostname)-rocky-${VERSION}" \
       --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
       --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
+      --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm" \
+      --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
@@ -769,8 +771,10 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --hostname "$(hostname)-rocky-${VERSION}" \
       --run-command 'curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh" | bash' \
       --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
+      --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm" \
+      --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \

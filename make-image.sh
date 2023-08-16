@@ -114,6 +114,7 @@ fi
 (
     cd $OUTPUT_KICKSTART_PATH
     ksflatten -c ${kickstart_file} -o flattened-${kickstart_file}
+    # FIXME: Livemedia-creator has issues with unmounting after building, we use livecd-creator as alternative
     #sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
     #    --resultdir ${OUTPUT_KICKSTART_PATH}/images \
     #    --project='Rocky Linux' \
@@ -127,7 +128,7 @@ fi
     livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
         --fslabel ${image_name}
         --verbose
-    mkdir -p ${OUTPUT_KICKSTART_PATH}/images 
+    mkdir -p ${OUTPUT_KICKSTART_PATH}/images
     mv ${image_name}.iso ${OUTPUT_KICKSTART_PATH}/images
 )
 

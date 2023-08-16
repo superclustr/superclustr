@@ -19,7 +19,8 @@ variables:
     - export GITLAB_RUNNER_ROCKY_9_TOKEN=$GITLAB_RUNNER_ROCKY_9_TOKEN
     
     # Grow Filesystem to 100%
-    - sudo fdisk /dev/vda <<< $'d\n5\nn\np\n5\n\n\nt\n5\n83\nw'
+    - sudo parted /dev/vda -- resizepart 5 100%
+    - sudo hdparm -z /dev/vda
     - sudo xfs_growfs /dev/vda5
 
     # Determine if tag push

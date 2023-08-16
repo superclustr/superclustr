@@ -114,15 +114,21 @@ fi
 (
     cd $OUTPUT_KICKSTART_PATH
     ksflatten -c ${kickstart_file} -o flattened-${kickstart_file}
-    sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
-        --resultdir ${OUTPUT_KICKSTART_PATH}/images \
-        --project='Rocky Linux' \
-        --make-iso \
-        --volid Rocky-Linux-8 \
-        --iso-only \
-        --iso-name ${image_name}.iso \
-        --releasever=8 \
-        --nomacboot
+    #sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
+    #    --resultdir ${OUTPUT_KICKSTART_PATH}/images \
+    #    --project='Rocky Linux' \
+    #    --make-iso \
+    #    --volid Rocky-Linux-8 \
+    #    --iso-only \
+    #    --iso-name ${image_name}.iso \
+    #    --releasever=8 \
+    #    --nomacboot \
+    #    --no-virt
+    livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
+        --fslabel ${image_name}
+        --verbose
+    mkdir -p ${OUTPUT_KICKSTART_PATH}/images 
+    mv ${image_name}.iso ${OUTPUT_KICKSTART_PATH}/images
 )
 
 echo "Done."

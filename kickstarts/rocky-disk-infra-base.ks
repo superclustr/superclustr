@@ -811,7 +811,7 @@ EOF
 script_name_base="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-desired_value_base="${script_name_base#base-}"
+desired_value_base="${script_name_base#*-}"
 desired_value_base="${desired_value_base%.sh}"
 
 # Source variables
@@ -835,7 +835,7 @@ EOF
 script_name_prepare="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-desired_value_prepare="${script_name_prepare#prepare-}"
+desired_value_prepare="${script_name_prepare#*-}"
 desired_value_prepare="${desired_value_prepare%.sh}"
 
 # Source variables
@@ -919,7 +919,7 @@ EOF
 script_name_run="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-desired_value_run="${script_name_run#run-}"
+desired_value_run="${script_name_run#*-}"
 desired_value_run="${desired_value_run%.sh}"
 
 # Source variables
@@ -946,7 +946,7 @@ EOF
 script_name_cleanup="${0##*/}"
 
 # Strip prefix and ".sh" suffix
-desired_value_cleanup="${script_name_cleanup#cleanup-}"
+desired_value_cleanup="${script_name_cleanup#*-}"
 desired_value_cleanup="${desired_value_cleanup%.sh}"
 
 # Source variables

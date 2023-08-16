@@ -13,7 +13,7 @@ zerombr
 clearpart --all
 part / --size 51200 --fstype ext4
 services --enabled=NetworkManager --disabled=sshd
-network --bootproto=dhcp --device=link --nameserver=8.8.8.8,8.8.4.4 --activate
+network --bootproto=dhcp --device=link --activate
 rootpw --lock --iscrypted locked
 shutdown
 
@@ -274,6 +274,12 @@ rm -f /boot/*-rescue*
 # Remove machine-id on generated images
 rm -f /etc/machine-id
 touch /etc/machine-id
+
+# Define Nameservers explicitly
+cat > /etc/resolv.conf << EOF
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
 
 %end
 

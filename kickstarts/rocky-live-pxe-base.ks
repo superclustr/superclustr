@@ -112,6 +112,8 @@ for i in $(seq 1 $ATTEMPTS); do
         break
     elif [ $i -eq $ATTEMPTS ]; then
         # If this was the last attempt, exit with an error
+        ip addr
+        ip route
         echo "Network is not up, exiting"
         exit 1
     else

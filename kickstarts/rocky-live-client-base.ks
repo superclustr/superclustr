@@ -278,12 +278,6 @@ touch /etc/machine-id
 %end
 
 %post --erroronfail
-ip addr
-ip route
-nslookup google.com 8.8.8.8
-%end
-
-%post --erroronfail
 # Attempt to ping google.com 10 times, and exit if it's unsuccessful
 ATTEMPTS=10
 for i in $(seq 1 $ATTEMPTS); do
@@ -292,6 +286,8 @@ for i in $(seq 1 $ATTEMPTS); do
         break
     elif [ $i -eq $ATTEMPTS ]; then
         # If this was the last attempt, exit with an error
+        ip addr
+        ip route
         echo "Network is not up, exiting"
         exit 1
     else

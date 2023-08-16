@@ -194,3 +194,5 @@ cat > /etc/netdata/netdata.conf << EOF
 EOF
 
 %end
+
+%include lazy-umount.ks

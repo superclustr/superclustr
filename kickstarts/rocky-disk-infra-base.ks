@@ -466,7 +466,7 @@ echo "(Erase all Virtual Machines using 'systemctl start cleanup_vms.service')"
 
 # Currently running Docker Containers
 echo -e "\n=== Currently Running Docker Containers ==="
-DOCKER_CONTAINERS=$(docker ps --format '{{.Names}} - {{.Image}}')
+DOCKER_CONTAINERS=$(podman ps -a)
 if [[ ! -z $DOCKER_CONTAINERS ]]; then
     echo "$DOCKER_CONTAINERS"
 else
@@ -621,21 +621,19 @@ EOF
 # Set permissions for /mnt/nexus-storage to be only readable and writable by root
 chmod 700 /mnt/nexus-storage
 
-# Create Sonatype Nexus Docker Container
-docker create --name nexus -p 8081:8081 sonatype/nexus:oss
-
 cat > /etc/systemd/system/nexus-docker.service << EOF
 [Unit]
 Description=Nexus Server
 After=network.target
 
 [Service]
-Type=forking
-LimitNOFILE = 65536
-ExecStart=/usr/bin/docker run -d -p 8081:8081 -v /mnt/nexus-storage:/nexus-storage -e INSTALL4J_ADD_VM_PARAMS="-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g -Djava.util.prefs.userRoot=/nexus-storage/javadir" --name nexus sonatype/nexus:oss
-ExecStop=/usr/bin/docker stop -t 2 nexus
+Type=simple
+LimitNOFILE=65536
+ExecStartPre=-/usr/bin/podman rm -f nexus
+ExecStart=/usr/bin/podman run -d -p 8081:8081 -v /mnt/nexus-storage:/nexus-storage -e INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-storage/javadir" --name nexus sonatype/nexus3:oss
+ExecStop=/usr/bin/podman stop -t 2 nexus
 User=nexus
-Restart=on-abort
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -663,7 +661,7 @@ chown root:root /etc/ssl/private
 find /etc/ssl/private -type d -exec chmod 700 {} \;
 find /etc/ssl/private -type f -exec chmod 600 {} \;
 
-cat > /etc/nginx/conf.d/nexus.conf << EOF
+cat > /etc/nginx/conf.d/nexus.conf << 'EOF'
 server {
     listen 80;
     server_name NEXUS_DOMAIN_NAME_PLACEHOLDER;
@@ -743,7 +741,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm" \
       --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
@@ -774,7 +772,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm" \
       --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
@@ -1183,3 +1181,5 @@ dnf-automatic
 -xsane-gimp
 
 %end
+
+%include lazy-umount.ks

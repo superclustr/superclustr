@@ -675,6 +675,11 @@ server {
     # allow large uploads of files - refer to nginx documentation
     client_max_body_size 10G;
 
+    proxy_request_buffering off;
+    proxy_connect_timeout 900s;
+    proxy_send_timeout 900s;
+    proxy_read_timeout 900s;
+
     ssl_certificate /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER/fullchain.pem;
     ssl_certificate_key /etc/ssl/private/NEXUS_DOMAIN_NAME_PLACEHOLDER/privkey.pem;
 

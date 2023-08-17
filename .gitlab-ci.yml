@@ -39,7 +39,7 @@ variables:
     # Similarly for live-pxe and disk-infra...
 
     # Upload artifact
-    - curl --upload-file build/kickstarts/images/rocky-${BUILD_TYPE}-x86_64-${VERSION}.iso -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/directory=${BUILD_TYPE}/x86_64/
+    - curl --upload-file build/kickstarts/images/rocky-${BUILD_TYPE}-x86_64-${VERSION}.iso -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/x86_64/
 
 
   rules:

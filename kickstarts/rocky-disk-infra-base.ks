@@ -464,13 +464,13 @@ virsh list --all
 echo "(Erase all Virtual Machines using 'systemctl start cleanup_vms.service')"
 
 
-# Currently running Docker Containers
-echo -e "\n=== Currently Running Docker Containers ==="
+# Docker Containers on System
+echo -e "\n=== Docker Containers on System ==="
 DOCKER_CONTAINERS=$(podman ps -a)
 if [[ ! -z $DOCKER_CONTAINERS ]]; then
     echo "$DOCKER_CONTAINERS"
 else
-    echo "No Docker containers are currently running."
+    echo "No Docker containers are created."
 fi
 
 # Other custom checks can be added below
@@ -580,36 +580,39 @@ sudo systemctl enable --now dnf-automatic.timer
 %end
 
 %post
-echo "[hetzner]
-type = webdav
-url = NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER
-vendor = other
-user = NEXUS_HETZNER_STORAGE_BOX_USERNAME_PLACEHOLDER
-pass = $(rclone obscure NEXUS_HETZNER_STORAGE_BOX_PASSWORD_PLACEHOLDER)" > /root/.config/rclone/rclone.conf
-
-mkdir /mnt/nexus-storage
-
 adduser nexus
 RANDOM_PASSWORD=$(openssl rand -base64 12)
 echo "nexus:${RANDOM_PASSWORD}" | chpasswd
 echo "Generated password for 'nexus' is: ${RANDOM_PASSWORD}"
+loginctl enable-linger nexus
 
 # Change Shell to Prevent Direct Login
 usermod -s /sbin/nologin nexus
 
 # Grant Permissions to the Storage
-chown nexus:nexus /mnt/nexus-storage
-chmod 700 /mnt/nexus-storage
+# Set permissions for /mnt/nexus-storage to be only readable and writable by root
+mkdir -p /mnt/nexus/nexus-data /mnt/nexus/nexus-storage
+chown -R nexus:nexus /mnt/nexus
+chmod 700 /mnt/nexus
 
-cat > /etc/systemd/system/nexus-storage.service << EOF
+cat >> /root/.config/rclone/rclone.conf << EOF
+[nexus]
+type = sftp
+host = NEXUS_HETZNER_STORAGE_BOX_URL_PLACEHOLDER
+user = NEXUS_HETZNER_STORAGE_BOX_USERNAME_PLACEHOLDER
+port = 23
+pass = $(rclone obscure NEXUS_HETZNER_STORAGE_BOX_PASSWORD_PLACEHOLDER)
+EOF
+
+cat > /etc/systemd/system/nexus-sftp.service << EOF
 [Unit]
-Description=Mount Hetzner Storage Box using rclone/WebDAV
+Description=Mount Hetzner Storage Box using rclone/SFTP
 After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/rclone mount hetzner:/ /mnt/nexus-storage --daemon
-ExecStop=/bin/fusermount -uz /mnt/nexus-storage
+ExecStart=/usr/bin/rclone -vvv mount nexus: /mnt/nexus --allow-other --vfs-read-chunk-size 512M --vfs-cache-mode minimal --buffer-size 512M
+ExecStop=/bin/fusermount -uz /mnt/nexus
 Restart=on-failure
 User=root
 Group=root
@@ -618,19 +621,16 @@ Group=root
 WantedBy=multi-user.target
 EOF
 
-# Set permissions for /mnt/nexus-storage to be only readable and writable by root
-chmod 700 /mnt/nexus-storage
-
 cat > /etc/systemd/system/nexus-docker.service << EOF
 [Unit]
 Description=Nexus Server
-After=network.target
+After=nexus-storage.service
 
 [Service]
 Type=simple
 LimitNOFILE=65536
 ExecStartPre=-/usr/bin/podman rm -f nexus
-ExecStart=/usr/bin/podman run -d -p 8081:8081 -v /mnt/nexus-storage:/nexus-storage -e INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-storage/javadir" --name nexus sonatype/nexus3:oss
+ExecStart=/usr/bin/podman run -p 8081:8081 -v /mnt/nexus/nexus-storage:/nexus-storage -v /mnt/nexus/nexus-data:/nexus-data -e INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-storage/javadir" --name nexus docker.io/sonatype/nexus3:3.59.0
 ExecStop=/usr/bin/podman stop -t 2 nexus
 User=nexus
 Restart=on-failure
@@ -640,7 +640,7 @@ WantedBy=multi-user.target
 EOF
 
 # Enable Nexus Services
-systemctl enable --force nexus-storage.service
+systemctl enable --force nexus-sftp.service
 systemctl enable --force nexus-docker.service
 
 mkdir -p /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER

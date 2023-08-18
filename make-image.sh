@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
 usage() {
-    echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key>"
-    echo "Example: $0 -k kickstarts/rocky-live-client-base.ks -i my-rocky-live-client -p \"\$(cat ~/.ssh/id_rsa)\""
+    echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key> -f <format = iso|rootfs|squashfs >"
+    echo "Example: $0 -k kickstarts/rocky-live-client-base.ks -i my-rocky-live-client -p \"\$(cat ~/.ssh/id_rsa)\" -f iso"
     exit 1
 }
 
 # Environment
 currDir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
 
-while getopts "k:i:p:" opt; do
+while getopts "k:i:p:f:" opt; do
     case ${opt} in
         k)
             kickstart_file=$OPTARG
@@ -19,6 +19,9 @@ while getopts "k:i:p:" opt; do
             ;;
         p)
             private_key=$OPTARG
+            ;;
+        f)
+            format=$OPTARG
             ;;
         \?)
             echo "Invalid option: $OPTARG" 1>&2
@@ -127,8 +130,47 @@ fi
     #    --no-virt
     sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
         --fslabel ${image_name}
-    mkdir -p ${OUTPUT_KICKSTART_PATH}/images
-    mv ${image_name}.iso ${OUTPUT_KICKSTART_PATH}/images
+   
 )
+
+mkdir -p ${OUTPUT_KICKSTART_PATH}/images   
+
+case "$format" in
+    rootfs)
+        echo "Exporting as rootfs..."
+
+        mkdir -p /tmp/iso_mount /tmp/squashfs_mount
+        sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
+        sudo mount -o loop /tmp/iso_mount/LiveOS/squashfs.img /tmp/squashfs_mount
+
+        cp /tmp/squashfs_mount/LiveOS/rootfs.img ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img
+        
+        sudo umount /tmp/iso_mount
+        sudo umount /tmp/squashfs_mount
+
+        echo -e "Exported as rootfs to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img"
+        ;;
+    iso)
+        echo "Exporting as iso..."
+
+        mv ${OUTPUT_KICKSTART_PATH}/${image_name}.iso ${OUTPUT_KICKSTART_PATH}/images
+
+        echo -e "Exported as iso to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.iso"
+        ;;
+    squashfs)
+        echo "Exporting as squashfs..."
+
+        mkdir -p /tmp/iso_mount
+        sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
+        cp /tmp/iso_mount/LiveOS/squashfs.img ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img
+        sudo umount /tmp/iso_mount
+
+        echo -e "Exported as squashfs to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img"
+        ;;
+    *)
+        echo "Invalid option: $format" 1>&2
+        usage
+        ;;
+esac
 
 echo "Done."

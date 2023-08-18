@@ -35,12 +35,18 @@ variables:
       fi
 
     # Build based on matrix type
-    - ./make-image.sh -k rocky-${BUILD_TYPE}-base.ks -i rocky-${BUILD_TYPE}-x86_64-${VERSION} -p "${PRIVATE_KEY}"
+    - ./make-image.sh -k rocky-${BUILD_TYPE}-base.ks -i rocky-${BUILD_TYPE}-x86_64-${VERSION} -p "${PRIVATE_KEY}" -f ${BUILD_FORMAT}
     # Similarly for live-pxe and disk-infra...
 
     # Upload artifact
-    - curl --upload-file build/kickstarts/images/rocky-${BUILD_TYPE}-x86_64-${VERSION}.iso -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/x86_64/
-
+    - |
+      if [[ "${BUILD_FORMAT}" == "iso" ]]; then
+        export FILE_EXTENSION=iso
+      else
+        export FILE_EXTENSION=img
+      fi
+      curl --upload-file build/kickstarts/images/rocky-${BUILD_TYPE}-x86_64-${VERSION}.${FILE_EXTENSION} \
+        -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/x86_64/
 
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -54,18 +60,20 @@ variables:
   tags:
     - rocky-8
 
-live-client:
+root-client:
   <<: *build_definition
   variables:
-    BUILD_TYPE: live-client
+    BUILD_TYPE: root-client
+    BUILD_FORMAT: rootfs
 
 live-pxe:
   <<: *build_definition
   variables:
     BUILD_TYPE: live-pxe
+    BUILD_FORMAT: iso
 
 disk-infra:
   <<: *build_definition
   variables:
     BUILD_TYPE: disk-infra
-
+    BUILD_FORMAT: iso

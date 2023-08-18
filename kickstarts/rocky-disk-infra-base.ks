@@ -611,7 +611,20 @@ After=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/rclone -vvv mount nexus: /mnt/nexus --allow-other --vfs-read-chunk-size 512M --vfs-cache-mode minimal --buffer-size 512M
+ExecStart=/usr/bin/rclone mount nexus: /mnt/nexus \
+    --allow-other \
+    --vfs-read-chunk-size 1G \ # Increase read chunk size to 1GB
+    --vfs-read-chunk-size-limit off \ # No limit to how big the chunk size can grow
+    --vfs-cache-mode writes \ # Cache writes (helpful for large files)
+    --buffer-size 4G \ # 4GB buffer
+    --dir-cache-time 72h \ # Cache directory entries for 3 days
+    --vfs-cache-max-age 72h \ # Max age of objects in cache is 3 days
+    --vfs-cache-max-size 20G \ # Set the max cache size to 20GB
+    --vfs-write-back 5s \ # Time to writeback files after last use when using cache
+    --async-read \ # Use asynchronous reads
+    --attr-timeout 1s \ # Time for which file/directory attributes are cached
+    --no-checksum \ # Avoid checksums for speed, though this reduces data integrity checks
+    --max-read-ahead 1G # Prefetch 1GB for sequential reads
 ExecStop=/bin/fusermount -uz /mnt/nexus
 Restart=on-failure
 User=root
@@ -675,11 +688,6 @@ server {
     # allow large uploads of files - refer to nginx documentation
     client_max_body_size 10G;
 
-    proxy_request_buffering off;
-    proxy_connect_timeout 900s;
-    proxy_send_timeout 900s;
-    proxy_read_timeout 900s;
-
     ssl_certificate /etc/ssl/certs/NEXUS_DOMAIN_NAME_PLACEHOLDER/fullchain.pem;
     ssl_certificate_key /etc/ssl/private/NEXUS_DOMAIN_NAME_PLACEHOLDER/privkey.pem;
 
@@ -699,6 +707,12 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_request_buffering off;
+        proxy_connect_timeout 900s;
+        proxy_send_timeout 900s;
+        proxy_read_timeout 900s;
+        send_timeout 900s;
     }
 }
 EOF

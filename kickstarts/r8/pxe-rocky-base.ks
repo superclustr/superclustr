@@ -1,7 +1,7 @@
 # Maintained by RelEng
 
-%include rocky-live-pxe-base-spin.ks
-%include rocky-live-pxe-common.ks
+%include pxe-rocky-base-spin.ks
+%include pxe-rocky-common.ks
 
 %post
 
@@ -146,10 +146,10 @@ systemctl enable --force cobblerd.service
 %post --nochroot
 # Install PXE Syc Daemon
 
-# Ensure GitHub's authenticity
-echo "github.com,140.82.121.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=" > /root/.ssh/known_hosts
+# Ensure GitLab's authenticity
+echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" > /root/.ssh/known_hosts
 
-git clone --branch v1.0.4 --depth 1 git@github.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+git clone --branch v1.0.4 --depth 1 git@gitlab.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
 %end
 
 %post

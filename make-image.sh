@@ -2,7 +2,7 @@
 
 usage() {
     echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key> -f <format = iso|rootfs|squashfs >"
-    echo "Example: $0 -k kickstarts/rocky-live-client-base.ks -i my-rocky-live-client -p \"\$(cat ~/.ssh/id_rsa)\" -f iso"
+    echo "Example: $0 -k kickstarts/r8/client-rocky-base.ks -i client-rocky-8.8-x86_64-1.0.0 -p \"\$(cat ~/.ssh/id_rsa)\" -f iso"
     exit 1
 }
 
@@ -57,7 +57,7 @@ ENV_VARS_TO_SUBSTITUTE=(
 )
 
 # Path to your original Kickstart files
-ORIGINAL_KICKSTART_PATH="kickstarts"
+ORIGINAL_KICKSTART_PATH=$(dirname "$kickstart_file")
 
 # Path to the directory where substituted Kickstart files will be saved
 OUTPUT_KICKSTART_PATH="${currDir}/build/kickstarts"
@@ -116,7 +116,7 @@ fi
 
 (
     cd $OUTPUT_KICKSTART_PATH
-    ksflatten -c ${kickstart_file} -o flattened-${kickstart_file}
+    ksflatten -c $(basename "$kickstart_file") -o flattened-$(basename "$kickstart_file")
     # FIXME: Livemedia-creator has issues with unmounting after building, we use livecd-creator as alternative
     #sudo livemedia-creator --ks ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
     #    --resultdir ${OUTPUT_KICKSTART_PATH}/images \
@@ -128,7 +128,7 @@ fi
     #    --releasever=8 \
     #    --nomacboot \
     #    --no-virt
-    sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-${kickstart_file} \
+    sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-$(basename "$kickstart_file") \
         --fslabel ${image_name}
    
 )
@@ -143,12 +143,17 @@ case "$format" in
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
         sudo mount -o loop /tmp/iso_mount/LiveOS/squashfs.img /tmp/squashfs_mount
 
-        cp /tmp/squashfs_mount/LiveOS/rootfs.img ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img
+        tar -czvf ${image_name}.tar.gz \
+            /tmp/squashfs_mount/LiveOS/rootfs.img \
+            /tmp/iso_mount/pxelinux/initrd.img.gz \
+            /tmp/iso_mount/pxelinux/vmlinuz0
+        
+        mv ${image_name}.tar.gz ${OUTPUT_KICKSTART_PATH}/images
         
         sudo umount /tmp/iso_mount
         sudo umount /tmp/squashfs_mount
 
-        echo -e "Exported as rootfs to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.img"
+        echo -e "Exported as rootfs to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.tar.gz"
         ;;
     iso)
         echo "Exporting as iso..."

@@ -613,18 +613,18 @@ After=network-online.target
 Type=simple
 ExecStart=/usr/bin/rclone mount nexus: /mnt/nexus \
     --allow-other \
-    --vfs-read-chunk-size 1G \ # Increase read chunk size to 1GB
-    --vfs-read-chunk-size-limit off \ # No limit to how big the chunk size can grow
-    --vfs-cache-mode writes \ # Cache writes (helpful for large files)
-    --buffer-size 4G \ # 4GB buffer
-    --dir-cache-time 72h \ # Cache directory entries for 3 days
-    --vfs-cache-max-age 72h \ # Max age of objects in cache is 3 days
-    --vfs-cache-max-size 20G \ # Set the max cache size to 20GB
-    --vfs-write-back 5s \ # Time to writeback files after last use when using cache
-    --async-read \ # Use asynchronous reads
-    --attr-timeout 1s \ # Time for which file/directory attributes are cached
-    --no-checksum \ # Avoid checksums for speed, though this reduces data integrity checks
-    --max-read-ahead 1G # Prefetch 1GB for sequential reads
+    --vfs-read-chunk-size 1G \
+    --vfs-read-chunk-size-limit off \
+    --vfs-cache-mode writes \
+    --buffer-size 4G \
+    --dir-cache-time 72h \
+    --vfs-cache-max-age 72h \
+    --vfs-cache-max-size 20G \
+    --vfs-write-back 5s \
+    --async-read \
+    --attr-timeout 1s \
+    --no-checksum \
+    --max-read-ahead 1G
 ExecStop=/bin/fusermount -uz /mnt/nexus
 Restart=on-failure
 User=root
@@ -738,7 +738,7 @@ download_and_setup_image() {
 }
 
 #############################################
-# Rocky Linux 8
+# Rocky Linux 8.8
 #############################################
 VERSION="8.8"
 IMAGE_NAME="Rocky-8-GenericCloud-Base-8.8-20230518.0.x86_64.qcow2"
@@ -769,7 +769,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
 fi
 
 #############################################
-# Rocky Linux 9
+# Rocky Linux 9.2
 #############################################
 VERSION="9.2"
 IMAGE_NAME="Rocky-9-GenericCloud-Base-9.2-20230513.0.x86_64.qcow2"

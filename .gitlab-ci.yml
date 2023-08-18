@@ -65,7 +65,7 @@ variables:
     NEXUS_PASS: $NEXUS_PASS
 
   tags:
-    - rocky-8.8
+    - rocky-8
 
 client:
   <<: *build_definition

@@ -52,7 +52,7 @@ variables:
               ;;
       esac
 
-      curl --upload-file build/kickstarts/images/rocky-${BUILD_TYPE}-x86_64-${VERSION}.${FILE_EXTENSION} \
+      curl --upload-file build/kickstarts/images/${BUILD_TYPE}-rocky-8.8-x86_64-${VERSION}.${FILE_EXTENSION} \
         -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/rocky/8.8/x86_64/
 
   rules:

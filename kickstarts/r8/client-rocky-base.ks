@@ -319,7 +319,7 @@ echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1
 
 (
 echo "******** Cloning ********"
-git clone --branch main --depth 1 git@gitlab.com:superclustr/initramfs-builder.git
+git clone --branch main --depth 1 https://GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
 echo "******** Cd into it ********"
 cd initramfs-builder
 echo "******** Make ********"

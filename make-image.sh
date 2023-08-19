@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 usage() {
-    echo "Usage: $0 -k <kickstart_file> -i <image_name> -p <private_key> -f <format = iso|rootfs|squashfs >"
+    echo "Usage: $0 -k <kickstart_file> -i <image_name> -f <format = iso|rootfs|squashfs >"
     echo "Example: $0 -k kickstarts/r8/client-rocky-base.ks -i client-rocky-8.8-x86_64-1.0.0 -p \"\$(cat ~/.ssh/id_rsa)\" -f iso"
     exit 1
 }
@@ -9,16 +9,13 @@ usage() {
 # Environment
 currDir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
 
-while getopts "k:i:p:f:" opt; do
+while getopts "k:i:f:" opt; do
     case ${opt} in
         k)
             kickstart_file=$OPTARG
             ;;
         i)
             image_name=$OPTARG
-            ;;
-        p)
-            private_key=$OPTARG
             ;;
         f)
             format=$OPTARG
@@ -53,6 +50,10 @@ ENV_VARS_TO_SUBSTITUTE=(
     "NEXUS_HETZNER_STORAGE_BOX_PASSWORD"
     "GITLAB_RUNNER_ROCKY_8_TOKEN"
     "GITLAB_RUNNER_ROCKY_9_TOKEN"
+    "GITLAB_PXE_SYNC_DAEMON_DEPLOY_TOKEN"
+    "GITLAB_PXE_SYNC_DAEMON_DEPLOY_USERNAME"
+    "GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN"
+    "GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME"
     # Add more as needed
 )
 
@@ -86,13 +87,6 @@ done
 # Now, we can call livemedia-creator with the Kickstart files from the output directory...
 
 function cleanup {
-    # Reset Private key
-    if [ -n "${private_key}" ]; then
-        if [[ -e "~/.ssh/id_rsa.bak" ]]; then
-            mv "~/.ssh/id_rsa.bak" "~/.ssh/id_rsa"
-            chmod 400 ~/.ssh/id_rsa
-        fi
-    fi
     # Reset back to enforcing mode
     sudo setenforce 1
 }
@@ -100,16 +94,6 @@ trap cleanup EXIT
 
 # You will need to be in permissive mode temporarily
 sudo setenforce 0
-
-if [ -n "${private_key}" ]; then
-    # Replace Private key
-    mkdir -p ~/.ssh
-    if [[ -e "~/.ssh/id_rsa" ]]; then
-        mv "~/.ssh/id_rsa" "~/.ssh/id_rsa.bak"
-    fi
-    echo \"${private_key}\" > ~/.ssh/id_rsa
-    chmod 400 ~/.ssh/id_rsa
-fi
 
 # Note: The %include statement as they are not supported by livemedia-creator. 
 # All Kickstart files must be flattened using the ksflatten tool before they can be used. 

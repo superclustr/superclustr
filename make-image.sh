@@ -128,15 +128,12 @@ case "$format" in
         git clone --branch main --depth 1 https://$GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:$GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
         cd initramfs-builder
         sudo -E make
-        ls -la
         mv vmlinuz-* vmlinuz0
         )
 
         mkdir -p /tmp/iso_mount /tmp/squashfs_mount
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
         sudo mount -o loop /tmp/iso_mount/LiveOS/squashfs.img /tmp/squashfs_mount
-
-        sudo ls /tmp/iso_mount/pxelinux
 
         sudo tar -czvf ${image_name}.tar.gz \
             /tmp/squashfs_mount/LiveOS/rootfs.img \

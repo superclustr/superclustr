@@ -134,7 +134,7 @@ case "$format" in
         mkdir -p /tmp/iso_mount
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
 
-        sudo tar -czvf ${image_name}.tar.gz \
+        sudo tar -czvf ${image_name}.tar.gz --transform 's,^.*/,,S' \
             /tmp/iso_mount/LiveOS/squashfs.img \
             ${currDir}/initramfs-builder/initrd.img.gz \
             ${currDir}/initramfs-builder/vmlinuz0

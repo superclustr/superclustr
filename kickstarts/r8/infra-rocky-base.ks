@@ -759,6 +759,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
       --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm" \
       --run-command "dnf config-manager --set-enabled epel" \
+      --run-command 'dnf groupinstall -y "Development tools"' \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
       --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc \
       --run-command "git lfs install --skip-repo" \
@@ -790,6 +791,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command 'curl -s "https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh" | bash' \
       --run-command "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm" \
       --run-command "dnf config-manager --set-enabled epel" \
+      --run-command 'dnf groupinstall -y "Development tools"' \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
       --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc \
       --run-command "git lfs install --skip-repo" \

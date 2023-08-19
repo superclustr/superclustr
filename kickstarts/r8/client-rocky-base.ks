@@ -311,19 +311,28 @@ git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git
 cp assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
 %end
 
-%post --nochroot
+%post --nochroot --erroronfail
 # Build Initramfs
 
 # Ensure GitLab's authenticity
 echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" > /root/.ssh/known_hosts
 
 (
+echo "******** Cloning ********"
 git clone --branch main --depth 1 git@gitlab.com:superclustr/initramfs-builder.git
+echo "******** Cd into it ********"
 cd initramfs-builder
+echo "******** Make ********"
 make
+echo "******** LS ********"
+ls -la
+echo -e "******** mkdir $LIVE_ROOT/pxelinux ********"
 mkdir -p $LIVE_ROOT/pxelinux
+echo -e "******** copy files ********"
 cp initrd.img.gz $LIVE_ROOT/pxelinux/initrd.img.gz
 cp vmlinuz-* $LIVE_ROOT/pxelinux/vmlinuz0
+echo -e "******** ls $LIVE_ROOT/pxelinux ********"
+ls -la $LIVE_ROOT/pxelinux
 )
 
 %end

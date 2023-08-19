@@ -149,7 +149,7 @@ systemctl enable --force cobblerd.service
 # Ensure GitLab's authenticity
 echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" > /root/.ssh/known_hosts
 
-git clone --branch v1.0.4 --depth 1 git@gitlab.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+git clone --branch main --depth 1 git@gitlab.com:superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
 %end
 
 %post
@@ -167,7 +167,7 @@ mkdir -p /home/liveuser/.config/autostart/
 cat > /home/liveuser/.config/autostart/pxe-sync-daemon.desktop << EOF
 [Desktop Entry]
 Type=Application
-Exec=sudo /home/liveuser/pxe-sync-daemon/venv/bin/python3.11 /home/liveuser/pxe-sync-daemon/main.py -d /home/liveuser/download_directory
+Exec=sudo /home/liveuser/pxe-sync-daemon/venv/bin/python3.11 /home/liveuser/pxe-sync-daemon/main.py
 Hidden=false
 X-GNOME-Autostart-enabled=true
 Name[en_US]=PXE Sync Daemon

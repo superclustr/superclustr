@@ -143,7 +143,9 @@ case "$format" in
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
         sudo mount -o loop /tmp/iso_mount/LiveOS/squashfs.img /tmp/squashfs_mount
 
-        tar -czvf ${image_name}.tar.gz \
+        sudo ls /tmp/iso_mount/pxelinux
+
+        sudo tar -czvf ${image_name}.tar.gz \
             /tmp/squashfs_mount/LiveOS/rootfs.img \
             /tmp/iso_mount/pxelinux/initrd.img.gz \
             /tmp/iso_mount/pxelinux/vmlinuz0

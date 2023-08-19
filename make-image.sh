@@ -137,8 +137,8 @@ case "$format" in
 
         sudo tar -czvf ${image_name}.tar.gz \
             /tmp/squashfs_mount/LiveOS/rootfs.img \
-            /initramfs-builder/initrd.img.gz \
-            /initramfs-builder/vmlinuz0
+            ${currDir}/initramfs-builder/initrd.img.gz \
+            ${currDir}/initramfs-builder/vmlinuz0
         
         mv ${image_name}.tar.gz ${OUTPUT_KICKSTART_PATH}/images
         

@@ -130,9 +130,9 @@ done
 
 %post --nochroot
 # Copying desired wallpaper image to the target system (default, day, and night)
-cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-01-day.png
-cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-02-night.png
-cp assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36.png
+cp ../../assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-01-day.png
+cp ../../assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36-02-night.png
+cp ../../assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f36.png
 %end
 
 %post
@@ -149,7 +149,7 @@ systemctl enable --force cobblerd.service
 # Ensure GitLab's authenticity
 echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" > /root/.ssh/known_hosts
 
-git clone --branch main --depth 1 https://GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
+git clone --branch main --depth 1 https://GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME_PLACEHOLDER:GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN_PLACEHOLDER@gitlab.com/superclustr/pxe-sync-daemon.git $INSTALL_ROOT/home/liveuser/pxe-sync-daemon
 %end
 
 %post

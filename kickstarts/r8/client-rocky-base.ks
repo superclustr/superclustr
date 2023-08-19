@@ -308,18 +308,15 @@ git clone --branch release-22.04 --depth 1 https://github.com/NVIDIA/deepops.git
 
 %post --nochroot
 # Copying Nvidia DeepOps Patch
-cp assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
+cp ../../assets/deepops-release-22.04-rocky-support.patch $INSTALL_ROOT/root/deepops/deepops-release-22.04-rocky-support.patch
 %end
 
 %post --nochroot --erroronfail
 # Build Initramfs
 
-# Ensure GitLab's authenticity
-echo "gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" > /root/.ssh/known_hosts
-
 (
 echo "******** Cloning ********"
-git clone --branch main --depth 1 https://GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
+git clone --branch main --depth 1 https://GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME_PLACEHOLDER:GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN_PLACEHOLDER@gitlab.com/superclustr/initramfs-builder.git
 echo "******** Cd into it ********"
 cd initramfs-builder
 echo "******** Make ********"

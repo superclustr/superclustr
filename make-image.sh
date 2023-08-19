@@ -112,8 +112,8 @@ sudo setenforce 0
     #    --releasever=8 \
     #    --nomacboot \
     #    --no-virt
-    #sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-$(basename "$kickstart_file") \
-    #    --fslabel ${image_name}
+    sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-$(basename "$kickstart_file") \
+        --fslabel ${image_name}
    
 )
 
@@ -125,14 +125,10 @@ case "$format" in
         
         # Build Initramfs
         (
-        echo "******** Cloning ********"
         git clone --branch main --depth 1 https://$GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:$GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
         cd initramfs-builder
-        echo "******** Make ********"
         sudo -E make
-        echo "******** LS ********"
         ls -la
-        echo "******** rename vmlinuz ********"
         mv vmlinuz-* vmlinuz0
         )
 

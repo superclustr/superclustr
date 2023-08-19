@@ -129,7 +129,7 @@ case "$format" in
         git clone --branch main --depth 1 https://$GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:$GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
         cd initramfs-builder
         echo "******** Make ********"
-        sudo make
+        sudo -E make
         echo "******** LS ********"
         ls -la
         echo "******** rename vmlinuz ********"

@@ -7,7 +7,7 @@ variables:
 .build_template: &build_definition
   stage: build
   script:
-    - dnf install -y kmod
+    - sudo dnf install -y kmod
     # Determine if tag push
     - |
       if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then

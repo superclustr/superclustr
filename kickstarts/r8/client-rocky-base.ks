@@ -334,20 +334,24 @@ ansible-playbook /root/deepops/playbooks/k8s-cluster/nfs-client-provisioner.yml
 /root/deepops/scripts/k8s/deploy_kubeflow.sh
 %end
 
-%post --erroronfail
-# Connect Netdata Monitoring
-curl https://my-netdata.io/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token rP5phC2xRoZkBNJkZsQSbmAJrG3qxI2ZOyL8sOHZKJ0x2Wr0BoZ-6FjFRCIucPyYCbzYlxmXNrfcIkaC5hDANUHHnUn2TvpwnJyEkq6AwUd1QmBzEpIap2rR7Pak_fyugBO-lI8 --claim-rooms 8b3683fd-c4bf-4070-a4de-df6a58856de4 --claim-url https://app.netdata.cloud --dont-wait --dont-start-it
+%post
+# Setup Netdata Monitoring
 
-# Overwrite Netdata configuration
-cat > /etc/netdata/netdata.conf << EOF
-[General]
-    run as user = netdata
-    page cache size = 32
-    dbengine multihost disk space = 256
+cat > /etc/systemd/system/netdata-install.service << EOF
+[Unit]
+Description=Install Netdata Monitoring
+After=network-online.target
+Wants=network-online.target
 
-[host labels]
-    type = client
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl https://my-netdata.io/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token rP5phC2xRoZkBNJkZsQSbmAJrG3qxI2ZOyL8sOHZKJ0x2Wr0BoZ-6FjFRCIucPyYCbzYlxmXNrfcIkaC5hDANUHHnUn2TvpwnJyEkq6AwUd1QmBzEpIap2rR7Pak_fyugBO-lI8 --claim-rooms 8b3683fd-c4bf-4070-a4de-df6a58856de4 --claim-url https://app.netdata.cloud
+
+[Install]
+WantedBy=multi-user.target
 EOF
+
+systemctl enable --foce netdata-install.service
 
 %end
 

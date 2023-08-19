@@ -122,6 +122,19 @@ mkdir -p ${OUTPUT_KICKSTART_PATH}/images
 case "$format" in
     rootfs)
         echo "Exporting as rootfs..."
+        
+        # Build Initramfs
+        (
+        echo "******** Cloning ********"
+        git clone --branch main --depth 1 https://$GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME:$GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN@gitlab.com/superclustr/initramfs-builder.git
+        cd initramfs-builder
+        echo "******** Make ********"
+        make
+        echo "******** LS ********"
+        ls -la
+        echo "******** rename vmlinuz ********"
+        mv vmlinuz-* vmlinuz0
+        )
 
         mkdir -p /tmp/iso_mount /tmp/squashfs_mount
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
@@ -131,8 +144,8 @@ case "$format" in
 
         sudo tar -czvf ${image_name}.tar.gz \
             /tmp/squashfs_mount/LiveOS/rootfs.img \
-            /tmp/iso_mount/pxelinux/initrd.img.gz \
-            /tmp/iso_mount/pxelinux/vmlinuz0
+            /initramfs-builder/initrd.img.gz \
+            /initramfs-builder/vmlinuz0
         
         mv ${image_name}.tar.gz ${OUTPUT_KICKSTART_PATH}/images
         

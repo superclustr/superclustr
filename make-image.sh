@@ -131,19 +131,20 @@ case "$format" in
         mv vmlinuz-* vmlinuz0
         )
 
-        mkdir -p /tmp/iso_mount /tmp/squashfs_mount
+        mkdir -p /tmp/iso_mount
         sudo mount -o loop ${OUTPUT_KICKSTART_PATH}/${image_name}.iso /tmp/iso_mount
-        sudo mount -o loop /tmp/iso_mount/LiveOS/squashfs.img /tmp/squashfs_mount
 
         sudo tar -czvf ${image_name}.tar.gz \
-            /tmp/squashfs_mount/LiveOS/rootfs.img \
+            /tmp/iso_mount/LiveOS/squashfs.img \
             ${currDir}/initramfs-builder/initrd.img.gz \
             ${currDir}/initramfs-builder/vmlinuz0
         
         mv ${image_name}.tar.gz ${OUTPUT_KICKSTART_PATH}/images
+
+        # Give Gzip time to leave /tmp/iso_mount
+        sleep 15
         
         sudo umount /tmp/iso_mount
-        sudo umount /tmp/squashfs_mount
 
         echo -e "Exported as rootfs to ${OUTPUT_KICKSTART_PATH}/images/${image_name}.tar.gz"
         ;;

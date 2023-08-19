@@ -45,6 +45,7 @@ python3.11-pip
 dhcp-server
 cobbler
 cobbler-web
+nfs-utils
 git
 
 # Required for SVG rnotes images

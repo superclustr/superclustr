@@ -1267,26 +1267,11 @@ Subsystem	sftp	/usr/libexec/openssh/sftp-server
 EOF
 %end
 
-%post
-# Setup Netdata Monitoring
-
-curl https://my-netdata.io/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --prepare-offline-install-source /root/netdata-offline
-
-cat > /etc/systemd/system/netdata-install.service << EOF
-[Unit]
-Description=Install Netdata Monitoring
-After=basic.target
-
-[Service]
-Type=oneshot
-ExecStart=sudo /root/netdata-offline/install.sh --stable-channel --claim-token rP5phC2xRoZkBNJkZsQSbmAJrG3qxI2ZOyL8sOHZKJ0x2Wr0BoZ-6FjFRCIucPyYCbzYlxmXNrfcIkaC5hDANUHHnUn2TvpwnJyEkq6AwUd1QmBzEpIap2rR7Pak_fyugBO-lI8 --claim-rooms 8b3683fd-c4bf-4070-a4de-df6a58856de4 --claim-url https://app.netdata.cloud
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable --force netdata-install.service
-
+%post --erroronfail
+# Connect Netdata Monitoring
+curl https://my-netdata.io/kickstart.sh > /tmp/netdata-kickstart.sh && sh /tmp/netdata-kickstart.sh --stable-channel --claim-token rP5phC2xRoZkBNJkZsQSbmAJrG3qxI2ZOyL8sOHZKJ0x2Wr0BoZ-6FjFRCIucPyYCbzYlxmXNrfcIkaC5hDANUHHnUn2TvpwnJyEkq6AwUd1QmBzEpIap2rR7Pak_fyugBO-lI8 --claim-rooms 8b3683fd-c4bf-4070-a4de-df6a58856de4 --claim-url https://app.netdata.cloud --dont-start-it --non-interactive
+systemctl stop netdata
+systemctl enable --force netdata
 %end
 
 %packages

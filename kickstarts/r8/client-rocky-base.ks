@@ -352,7 +352,7 @@ ExecStart=sudo /root/netdata-offline/install.sh --stable-channel --claim-token r
 WantedBy=multi-user.target
 EOF
 
-systemctl enable --foce netdata-install.service
+systemctl enable --force netdata-install.service
 
 %end
 

@@ -144,6 +144,7 @@ sudo -S sed -i 's/next_server: 127.0.0.1/next_server: 0.0.0.0/g' /etc/cobbler/se
 
 # Enable cobbler service
 systemctl enable --force cobblerd.service
+systemctl enable --force tftp
 %end
 
 %post --nochroot

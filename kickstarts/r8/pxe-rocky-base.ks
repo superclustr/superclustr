@@ -176,12 +176,24 @@ EOF
 
 %post
 # Setup NFS Server
+mkdir -p /mnt/nfsroot
 cat > /etc/exports << 'EOF'
-/mnt *(ro,sync,no_root_squash,no_subtree_check)
+/mnt/nfsroot *(ro,sync,nohide,no_root_squash,no_subtree_check)
 EOF
 
 systemctl enable --force nfs-server
+%end
 
+%post
+# Setup Firewall
+firewall-cmd --add-service=nfs --permanent
+firewall-cmd --add-service=dhcp --permanent
+firewall-cmd --add-service=tftp --permanent
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --add-port=19999/tcp --permanent
+firewall-cmd --add-port=67/udp --permanent
+firewall-cmd --add-port=69/udp --permanent
 %end
 
 %post --erroronfail

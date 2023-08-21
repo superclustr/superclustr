@@ -46,6 +46,8 @@ dhcp-server
 dnf-plugins-core
 cobbler
 cobbler-web
+xinetd
+pykickstart
 nfs-utils
 git
 

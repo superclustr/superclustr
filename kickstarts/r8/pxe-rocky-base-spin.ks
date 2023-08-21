@@ -43,6 +43,7 @@ anaconda-live
 python3.11
 python3.11-pip
 dhcp-server
+dnf-plugins-core
 cobbler
 cobbler-web
 nfs-utils

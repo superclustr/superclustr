@@ -637,7 +637,7 @@ EOF
 cat > /etc/systemd/system/nexus-docker.service << EOF
 [Unit]
 Description=Nexus Server
-After=nexus-storage.service
+After=nexus-sftp.service
 
 [Service]
 Type=simple

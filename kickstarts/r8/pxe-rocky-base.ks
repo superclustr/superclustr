@@ -182,7 +182,7 @@ EOF
 systemctl enable --force nfs-server
 %end
 
-%post --erroronfail
+%post
 # Setup Firewall
 firewall-cmd --add-service=nfs --permanent
 firewall-cmd --add-service=dhcp --permanent

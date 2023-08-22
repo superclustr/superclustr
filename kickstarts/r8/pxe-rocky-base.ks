@@ -140,11 +140,16 @@ cp ../../assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f3
 
 mkdir -p /var/lib/cobbler/loaders/
 
-# PXELINUX
+# Legacy BIOS PXELINUX
 cp /usr/share/syslinux/* /var/lib/cobbler/loaders/
 
-# Link pxelinux.0
-ln -s /var/lib/cobbler/loaders/pxelinux.0 /var/lib/tftpboot/pxelinux.0
+# UEFI PXELINUX
+(
+    cd /tmp
+    curl -O https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-6.03.tar.gz
+    tar -xzf syslinux-6.03.tar.gz
+    cp syslinux-6.03/efi64/efi/syslinux.efi /var/lib/tftpboot/
+)
 
 # Enable Cobblers Services
 systemctl enable --force cobblerd.service

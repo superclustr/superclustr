@@ -142,21 +142,9 @@ mkdir -p /var/lib/cobbler/loaders/
 
 # PXELINUX
 cp /usr/share/syslinux/* /var/lib/cobbler/loaders/
-# GRUB2 EFI
-cp /boot/efi/EFI/rocky/grubx64.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/gcdia32.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/gcdx64.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/grubia32.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/mmia32.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/mmx64.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/shim.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/shimia32.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/shimia32-rocky.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/shimx64.efi /var/lib/cobbler/loaders/
-cp /boot/efi/EFI/rocky/shimx64-rocky.efi /var/lib/cobbler/loaders/
 
-# Create grub.0 file for PXE bootable image from GRUB2 EFI / BIOS binaries.
-grub2-mkimage -O i386-pc -o /var/lib/cobbler/loaders/grub.0 -p '(pxe)/grub' pxe tftp
+# Link pxelinux.0
+ln -s /var/lib/cobbler/loaders/pxelinux.0 /var/lib/tftpboot/pxelinux.0
 
 # Enable Cobblers Services
 systemctl enable --force cobblerd.service

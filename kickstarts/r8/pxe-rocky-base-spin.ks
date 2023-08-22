@@ -47,6 +47,8 @@ dnf-plugins-core
 cobbler
 cobbler-web
 xinetd
+tftp-server
+tftp
 pykickstart
 nfs-utils
 git

@@ -136,12 +136,6 @@ cp ../../assets/wallpaper.png $INSTALL_ROOT/usr/share/backgrounds/f36/default/f3
 %end
 
 %post
-# Let cobbler handle the DHCP configuration
-sudo -S sed -i 's/manage_dhcp: false/manage_dhcp: true/g' /etc/cobbler/settings.yaml
-# Expose cobbler to world
-sudo -S sed -i 's/server: 127.0.0.1/server: 0.0.0.0/g' /etc/cobbler/settings.yaml
-sudo -S sed -i 's/next_server: 127.0.0.1/next_server: 0.0.0.0/g' /etc/cobbler/settings.yaml
-
 # Enable cobbler service
 systemctl enable --force cobblerd.service
 systemctl enable --force xinetd

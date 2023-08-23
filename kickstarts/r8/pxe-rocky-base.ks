@@ -148,7 +148,7 @@ cp /usr/share/syslinux/* /var/lib/cobbler/loaders/
     cd /tmp
     curl -O https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/Testing/6.04/syslinux-6.04-pre1.tar.gz
     tar -xzf syslinux-6.04-pre1.tar.gz
-    cp syslinux-6.03/efi64/efi/syslinux.efi /var/lib/tftpboot/
+    cp syslinux-6.04-pre1/efi64/efi/syslinux.efi /var/lib/tftpboot/
 )
 
 # Enable Cobblers Services

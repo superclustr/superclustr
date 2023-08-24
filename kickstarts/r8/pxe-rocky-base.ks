@@ -192,6 +192,7 @@ EOF
 %post
 # Setup NFS Server
 mkdir -p /mnt/nfsroot
+chown nobody:nobody /mnt/nfsroot
 cat > /etc/exports << 'EOF'
 /mnt/nfsroot *(ro,sync,nohide,no_root_squash,no_subtree_check)
 EOF

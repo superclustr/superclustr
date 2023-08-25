@@ -363,4 +363,12 @@ fi
 
 %end
 
+%post
+# Remove obstructive files for initrd
+rm -f /usr/lib/systemd/system/local-fs.target
+rm -f /usr/lib/systemd/system/swap.target
+rm -rf /run/* /tmp/*
+rm -f /var/log/*
+%end
+
 %include lazy-umount.ks

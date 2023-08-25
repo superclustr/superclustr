@@ -150,6 +150,7 @@ cp /usr/share/syslinux/* /var/lib/cobbler/loaders/
     tar -xzf syslinux-6.04-pre1.tar.gz
     cp syslinux-6.04-pre1/efi64/efi/syslinux.efi /var/lib/tftpboot/
     cp syslinux-6.04-pre1/efi64/com32/elflink/ldlinux/ldlinux.e64 /var/lib/tftpboot/
+    chown -R root:root /var/lib/tftpboot
 )
 
 # Enable Cobblers Services

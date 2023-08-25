@@ -368,7 +368,7 @@ fi
 rm -f /usr/lib/systemd/system/local-fs.target
 rm -f /usr/lib/systemd/system/swap.target
 rm -rf /run/* /tmp/*
-rm -f /var/log/*
+find /var/log/ -type f -exec rm -f {} +
 %end
 
 %include lazy-umount.ks

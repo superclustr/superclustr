@@ -367,7 +367,8 @@ fi
 # Remove obstructive files for initrd
 rm -f /usr/lib/systemd/system/local-fs.target
 rm -f /usr/lib/systemd/system/swap.target
-rm -rf /run/* /tmp/*
+rm -rf /run/* 
+#rm -rf /tmp/*
 find /var/log/ -type f -exec rm -f {} +
 %end
 

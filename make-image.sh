@@ -112,8 +112,8 @@ sudo setenforce 0
     #    --releasever=8 \
     #    --nomacboot \
     #    --no-virt
-    #sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-$(basename "$kickstart_file") \
-    #    --fslabel ${image_name}
+    sudo livecd-creator --config ${OUTPUT_KICKSTART_PATH}/flattened-$(basename "$kickstart_file") \
+        --fslabel ${image_name}
    
 )
 

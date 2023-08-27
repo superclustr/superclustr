@@ -842,6 +842,7 @@ dnf install -y gitlab-runner
 # Generate Key with empty passphrase
 mkdir -p /home/gitlab-runner/.ssh
 ssh-keygen -t rsa -b 4096 -f /home/gitlab-runner/.ssh/id_rsa -N ""
+chmod 600 /home/gitlab-runner/.ssh/id_rsa.pub
 
 mkdir -p /opt/libvirt-driver/
 

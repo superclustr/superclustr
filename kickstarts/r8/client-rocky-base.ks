@@ -106,61 +106,8 @@ if ! strstr "\`cat /proc/cmdline\`" noswap && [ -f /run/initramfs/live/\${livedi
   action "Enabling swap file" swapon /run/initramfs/live/\${livedir}/swap.img
 fi
 
-# Support for persistent homes
-mountPersistentHome() {
-  # support label/uuid
-  if [ "\${homedev##LABEL=}" != "\${homedev}" -o "\${homedev##UUID=}" != "\${homedev}" ]; then
-    homedev=\`/sbin/blkid -o device -t "\$homedev"\`
-  fi
-
-  # if we're given a file rather than a blockdev, loopback it
-  if [ "\${homedev##mtd}" != "\${homedev}" ]; then
-    # mtd devs don't have a block device but get magic-mounted with -t jffs2
-    mountopts="-t jffs2"
-  elif [ ! -b "\$homedev" ]; then
-    loopdev=\`losetup -f\`
-    if [ "\${homedev##/run/initramfs/live}" != "\${homedev}" ]; then
-      action "Remounting live store r/w" mount -o remount,rw /run/initramfs/live
-    fi
-    losetup \$loopdev \$homedev
-    homedev=\$loopdev
-  fi
-
-  # if it's encrypted, we need to unlock it
-  if [ "\$(/sbin/blkid -s TYPE -o value \$homedev 2>/dev/null)" = "crypto_LUKS" ]; then
-    echo
-    echo "Setting up encrypted /home device"
-    plymouth ask-for-password --command="cryptsetup luksOpen \$homedev EncHome"
-    homedev=/dev/mapper/EncHome
-  fi
-
-  # and finally do the mount
-  mount \$mountopts \$homedev /home
-  # if we have /home under what's passed for persistent home, then
-  # we should make that the real /home.  useful for mtd device on olpc
-  if [ -d /home/home ]; then mount --bind /home/home /home ; fi
-  [ -x /sbin/restorecon ] && /sbin/restorecon /home
-  if [ -d /home/liveuser ]; then USERADDARGS="-M" ; fi
-}
-
-# Help locate persistent homes
-findPersistentHome() {
-  for arg in \`cat /proc/cmdline\` ; do
-    if [ "\${arg##persistenthome=}" != "\${arg}" ]; then
-      homedev=\${arg##persistenthome=}
-    fi
-  done
-}
-
-if strstr "\`cat /proc/cmdline\`" persistenthome= ; then
-  findPersistentHome
-elif [ -e /run/initramfs/live/\${livedir}/home.img ]; then
+if [ -e /run/initramfs/live/\${livedir}/home.img ]; then
   homedev=/run/initramfs/live/\${livedir}/home.img
-fi
-
-# Mount the persistent home if it's available
-if ! strstr "\`cat /proc/cmdline\`" nopersistenthome && [ -n "\$homedev" ] ; then
-  action "Mounting persistent /home" mountPersistentHome
 fi
 
 if [ -n "\$configdone" ]; then
@@ -171,6 +118,9 @@ fi
 action "Adding live user" useradd \$USERADDARGS -c "Live System User" liveuser
 passwd -d liveuser > /dev/null
 usermod -aG wheel liveuser > /dev/null
+
+echo "Users are:"
+cat /etc/passwd
 
 # Same for root
 passwd -d root > /dev/null

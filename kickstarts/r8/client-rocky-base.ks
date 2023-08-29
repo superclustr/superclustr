@@ -39,118 +39,7 @@ part / --fstype="ext4" --size=10240
 part / --size=7300
 
 %post
-# FIXME: it'd be better to get this installed from a package
-cat > /etc/rc.d/init.d/livesys << EOF
-#!/bin/bash
-#
-# live: Init script for live image
-#
-# chkconfig: 345 00 99
-# description: Init script for live image.
-### BEGIN INIT INFO
-# X-Start-Before: display-manager chronyd
-### END INIT INFO
-
-. /etc/init.d/functions
-
-if ! strstr "\`cat /proc/cmdline\`" rd.live.image || [ "\$1" != "start" ]; then
-    exit 0
-fi
-
-if [ -e /.liveimg-configured ] ; then
-    configdone=1
-fi
-
-exists() {
-    which \$1 >/dev/null 2>&1 || return
-    \$*
-}
-
-livedir="LiveOS"
-for arg in \`cat /proc/cmdline\` ; do
-  if [ "\${arg##rd.live.dir=}" != "\${arg}" ]; then
-    livedir=\${arg##rd.live.dir=}
-    continue
-  fi
-  if [ "\${arg##live_dir=}" != "\${arg}" ]; then
-    livedir=\${arg##live_dir=}
-  fi
-done
-
-# Enable swap unless requested otherwise
-swaps=\`blkid -t TYPE=swap -o device\`
-if ! strstr "\`cat /proc/cmdline\`" noswap && [ -n "\$swaps" ] ; then
-  for s in \$swaps ; do
-    action "Enabling swap partition \$s" swapon \$s
-  done
-fi
-if ! strstr "\`cat /proc/cmdline\`" noswap && [ -f /run/initramfs/live/\${livedir}/swap.img ] ; then
-  action "Enabling swap file" swapon /run/initramfs/live/\${livedir}/swap.img
-fi
-
-# Support for persistent homes
-mountPersistentHome() {
-  # support label/uuid
-  if [ "\${homedev##LABEL=}" != "\${homedev}" -o "\${homedev##UUID=}" != "\${homedev}" ]; then
-    homedev=\`/sbin/blkid -o device -t "\$homedev"\`
-  fi
-
-  # if we're given a file rather than a blockdev, loopback it
-  if [ "\${homedev##mtd}" != "\${homedev}" ]; then
-    # mtd devs don't have a block device but get magic-mounted with -t jffs2
-    mountopts="-t jffs2"
-  elif [ ! -b "\$homedev" ]; then
-    loopdev=\`losetup -f\`
-    if [ "\${homedev##/run/initramfs/live}" != "\${homedev}" ]; then
-      action "Remounting live store r/w" mount -o remount,rw /run/initramfs/live
-    fi
-    losetup \$loopdev \$homedev
-    homedev=\$loopdev
-  fi
-
-  # if it's encrypted, we need to unlock it
-  if [ "\$(/sbin/blkid -s TYPE -o value \$homedev 2>/dev/null)" = "crypto_LUKS" ]; then
-    echo
-    echo "Setting up encrypted /home device"
-    plymouth ask-for-password --command="cryptsetup luksOpen \$homedev EncHome"
-    homedev=/dev/mapper/EncHome
-  fi
-
-  # and finally do the mount
-  mount \$mountopts \$homedev /home
-  # if we have /home under what's passed for persistent home, then
-  # we should make that the real /home.  useful for mtd device on olpc
-  if [ -d /home/home ]; then mount --bind /home/home /home ; fi
-  [ -x /sbin/restorecon ] && /sbin/restorecon /home
-  if [ -d /home/liveuser ]; then USERADDARGS="-M" ; fi
-}
-
-# Help locate persistent homes
-findPersistentHome() {
-  for arg in \`cat /proc/cmdline\` ; do
-    if [ "\${arg##persistenthome=}" != "\${arg}" ]; then
-      homedev=\${arg##persistenthome=}
-    fi
-  done
-}
-
-if strstr "\`cat /proc/cmdline\`" persistenthome= ; then
-  findPersistentHome
-elif [ -e /run/initramfs/live/\${livedir}/home.img ]; then
-  homedev=/run/initramfs/live/\${livedir}/home.img
-fi
-
-# Mount the persistent home if it's available
-if ! strstr "\`cat /proc/cmdline\`" nopersistenthome && [ -n "\$homedev" ] ; then
-  action "Mounting persistent /home" mountPersistentHome
-fi
-
-if [ -n "\$configdone" ]; then
-  exit 0
-fi
-
 # Create the liveuser (no password) so automatic logins and sudo works
-action "Adding live user" useradd \$USERADDARGS -c "Live System User" liveuser
 passwd -d liveuser > /dev/null
 usermod -aG wheel liveuser > /dev/null
 
@@ -173,12 +62,6 @@ systemctl --no-reload disable mdmonitor-takeover.service 2> /dev/null || :
 systemctl stop mdmonitor.service 2> /dev/null || :
 systemctl stop mdmonitor-takeover.service 2> /dev/null || :
 
-# Disable cron
-systemctl --no-reload disable crond.service 2> /dev/null || :
-systemctl --no-reload disable atd.service 2> /dev/null || :
-systemctl stop crond.service 2> /dev/null || :
-systemctl stop atd.service 2> /dev/null || :
-
 # Disable abrt
 systemctl --no-reload disable abrtd.service 2> /dev/null || :
 systemctl stop abrtd.service 2> /dev/null || :
@@ -186,16 +69,11 @@ systemctl stop abrtd.service 2> /dev/null || :
 # Don't sync the system clock when running live (RHBZ #1018162)
 sed -i 's/rtcsync//' /etc/chrony.conf
 
-# Mark things as configured
-touch /.liveimg-configured
-
 # add static hostname to work around xauth bug
 # https://bugzilla.redhat.com/show_bug.cgi?id=679486
 # the hostname must be something else than 'localhost'
 # https://bugzilla.redhat.com/show_bug.cgi?id=1370222
 echo "localhost-live" > /etc/hostname
-
-EOF
 
 # HAL likes to start late.
 cat > /etc/rc.d/init.d/livesys-late << EOF

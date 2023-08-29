@@ -119,9 +119,6 @@ action "Adding live user" useradd \$USERADDARGS -c "Live System User" liveuser
 passwd -d liveuser > /dev/null
 usermod -aG wheel liveuser > /dev/null
 
-echo "Users are:"
-cat /etc/passwd
-
 # Same for root
 passwd -d root > /dev/null
 

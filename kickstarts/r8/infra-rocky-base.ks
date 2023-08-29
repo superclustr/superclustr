@@ -761,7 +761,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'dnf groupinstall -y "Development tools"' \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc,kmod \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc,kmod,hfsplus-tools \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \
@@ -793,7 +793,7 @@ if [ ! -f "/var/lib/libvirt/images/${IMAGE_NAME}.GITLAB" ]; then
       --run-command "dnf config-manager --set-enabled epel" \
       --run-command 'dnf groupinstall -y "Development tools"' \
       --run-command 'useradd -m -p "" gitlab-runner -s /bin/bash' \
-      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc,kmod \
+      --install curl,gitlab-runner,git,git-lfs,openssh-server,lorax-lmc-novirt,vim-minimal,pykickstart,lsof,openssh-clients,anaconda,livecd-tools,dracut-network,psmisc,kmod,hfsplus-tools \
       --run-command "git lfs install --skip-repo" \
       --ssh-inject gitlab-runner:file:/home/gitlab-runner/.ssh/id_rsa.pub \
       --run-command "echo 'gitlab-runner ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers" \

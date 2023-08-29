@@ -233,6 +233,86 @@ echo "localhost" > /etc/hostname
 
 EOF
 
+cat > /usr/local/bin/save-home.sh << 'EOF'
+#!/bin/bash
+
+# Script to save /home into home.img on the USB stick
+
+# Variables
+TMP_MOUNT="/mnt/temp_home"
+USB_MOUNT="/mnt/usbstick"
+IMG_SIZE="6144"  # Image size in MB, which is approximately 6GB
+
+# Try to find the USB device. We're looking for the first sd* device, which is typically the case for USB sticks.
+USB_DEVICE=$(lsblk -pno NAME,TYPE | grep 'sd.*disk' | awk '{print $1}' | head -n1)
+
+if [ -z "$USB_DEVICE" ]; then
+    echo "USB device not found."
+    exit 1
+fi
+
+# Mount the USB device if it's not already mounted
+if ! mountpoint -q $USB_DEVICE; then
+    if [ ! -d "$USB_MOUNT" ]; then
+        mkdir -p "$USB_MOUNT"
+    fi
+    mount $USB_DEVICE "$USB_MOUNT"
+fi
+
+IMG_PATH="$USB_MOUNT/home.img"
+
+# Check if the image exists, if so remove it
+if [ -f "$IMG_PATH" ]; then
+    rm -f "$IMG_PATH"
+fi
+
+# Create an empty image
+dd if=/dev/zero of="$IMG_PATH" bs=1M count=$IMG_SIZE
+
+# Create a filesystem in the image
+mkfs.ext4 "$IMG_PATH"
+
+# Create a temporary mount point
+if [ ! -d "$TMP_MOUNT" ]; then
+    mkdir "$TMP_MOUNT"
+fi
+
+# Mount the image
+mount -o loop "$IMG_PATH" "$TMP_MOUNT"
+
+# Copy /home content to the image
+rsync -avHAX --delete /home/ "$TMP_MOUNT/"
+
+# Unmount the image
+umount "$TMP_MOUNT"
+
+# Optional: Remove the temporary mount point
+rmdir "$TMP_MOUNT"
+
+# Unmount the USB stick
+umount "$USB_MOUNT"
+
+echo "Script completed. /home has been saved to $IMG_PATH on the USB stick."
+EOF
+
+cat > /etc/systemd/system/save-home.service << EOF
+[Unit]
+Description=Save /home to an image on shutdown
+DefaultDependencies=no
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/save-home.sh
+TimeoutStartSec=0
+
+[Install]
+WantedBy=shutdown.target
+EOF
+
+chmod +x /usr/local/bin/save-home.sh
+systemctl enable --force save-home.service
+
 # HAL likes to start late.
 cat > /etc/rc.d/init.d/livesys-late << EOF
 #!/bin/bash

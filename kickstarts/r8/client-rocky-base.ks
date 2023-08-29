@@ -327,7 +327,6 @@ restorecon -R /
 
 EOF
 dnf config-manager --set-enabled powertools
-systemctl enable --force sddm.service
 %end
 
 %post --erroronfail

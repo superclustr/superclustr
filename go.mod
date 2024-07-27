@@ -1,0 +1,54 @@
+module github.com/cli/cli/v2
+
+go 1.22.0
+
+toolchain go1.22.5
+
+require (
+	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/briandowns/spinner v1.18.1
+	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/charmbracelet/glamour v0.7.0
+	github.com/charmbracelet/lipgloss v0.10.1-0.20240413172830-d0be07ea6b9c
+	github.com/cli/go-gh/v2 v2.9.0
+	github.com/cli/oauth v1.0.1
+	github.com/cli/safeexec v1.0.1
+	github.com/cpuguy83/go-md2man/v2 v2.0.4
+	github.com/creack/pty v1.1.21
+	github.com/distribution/reference v0.5.0
+	github.com/gabriel-vasile/mimetype v1.4.4
+	github.com/gdamore/tcell/v2 v2.5.4
+	github.com/google/go-cmp v0.6.0
+	github.com/google/go-containerregistry v0.20.0
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/gorilla/websocket v1.5.3
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/hashicorp/go-version v1.3.0
+	github.com/henvic/httpretty v0.1.3
+	github.com/in-toto/in-toto-golang v0.9.0
+	github.com/joho/godotenv v1.5.1
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+	github.com/mattn/go-colorable v0.1.13
+	github.com/mattn/go-isatty v0.0.20
+	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
+	github.com/microsoft/dev-tunnels v0.0.25
+	github.com/muhammadmuzzammil1998/jsonc v0.0.0-20201229145248-615b0916ca38
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/rivo/tview v0.0.0-20221029100920-c4a7e501810d
+	github.com/shurcooL/githubv4 v0.0.0-20240120211514-18a1ae0e79dc
+	github.com/sigstore/protobuf-specs v0.3.2
+	github.com/sigstore/sigstore-go v0.5.1
+	github.com/spf13/cobra v1.8.1
+	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.9.0
+	github.com/zalando/go-keyring v0.2.5
+	golang.org/x/crypto v0.25.0
+	golang.org/x/sync v0.7.0
+	golang.org/x/term v0.22.0
+	golang.org/x/text v0.16.0
+	google.golang.org/grpc v1.64.1
+	google.golang.org/protobuf v1.34.2
+	gopkg.in/h2non/gock.v1 v1.1.2
+	gopkg.in/yaml.v3 v3.0.1
+)

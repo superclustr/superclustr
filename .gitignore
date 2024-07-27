@@ -1,1 +1,22 @@
-build
+/bin
+/dist
+/apps/**/npm_modules
+/CHANGELOG.md
+
+# Ansible
+*.retry
+
+# Python
+*.pyc
+
+# VS Code
+.vscode
+
+# IntelliJ
+.idea
+
+# macOS
+.DS_Store
+
+# vim
+*.swp

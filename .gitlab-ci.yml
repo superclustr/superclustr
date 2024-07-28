@@ -1,87 +1,88 @@
-stages:
-  - build
-
-variables:
-  GIT_LFS_SKIP_SMUDGE: "1" # To skip auto LFS checkout
-
-.build_template: &build_definition
-  stage: build
-  script:
-    - sudo dnf install -y kmod
-    # Determine if tag push
-    - |
-      if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then
-        export IS_TAG_PUSH=true
-      else
-        export IS_TAG_PUSH=false
-      fi
-
-    # Extract version from git tag or default to 'dev'
-    - |
-      if [[ "${IS_TAG_PUSH}" == "true" ]]; then
-        export VERSION=${CI_COMMIT_REF_NAME#v}
-      else
-        export VERSION=dev
-      fi
-
-    # Build based on matrix type
-    - ./make-image.sh -k $(pwd)/kickstarts/r8/${BUILD_TYPE}-rocky-base.ks -i ${BUILD_TYPE}-rocky-8.8-x86_64-${VERSION} -f ${BUILD_FORMAT}
-
-    # Upload artifact
-    - |
-      case "${BUILD_FORMAT}" in
-          rootfs)
-              export FILE_EXTENSION=tar.gz
-              ;;
-          iso)
-              export FILE_EXTENSION=iso
-              ;;
-          squashfs)
-              export FILE_EXTENSION=img
-              ;;
-      esac
-
-      curl --upload-file build/kickstarts/images/${BUILD_TYPE}-rocky-8.8-x86_64-${VERSION}.${FILE_EXTENSION} \
-        -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/rocky/8.8/x86_64/
-
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_TAG =~ /^v/'
-
-  variables:
-    NEXUS_USER: $NEXUS_USER
-    NEXUS_PASS: $NEXUS_PASS
-    NEXUS_DOMAIN_NAME: $NEXUS_DOMAIN_NAME
-    NEXUS_DOMAIN_SSL_DHPARAMS: $NEXUS_DOMAIN_SSL_DHPARAMS
-    NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY: $NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY
-    NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY: $NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY
-    NEXUS_HETZNER_STORAGE_BOX_URL: $NEXUS_HETZNER_STORAGE_BOX_URL
-    NEXUS_HETZNER_STORAGE_BOX_USERNAME: $NEXUS_HETZNER_STORAGE_BOX_USERNAME
-    NEXUS_HETZNER_STORAGE_BOX_PASSWORD: $NEXUS_HETZNER_STORAGE_BOX_PASSWORD
-    GITLAB_RUNNER_ROCKY_8_TOKEN: $GITLAB_RUNNER_ROCKY_8_TOKEN
-    GITLAB_RUNNER_ROCKY_9_TOKEN: $GITLAB_RUNNER_ROCKY_9_TOKEN
-    GITLAB_PXE_SYNC_DAEMON_DEPLOY_TOKEN: $GITLAB_PXE_SYNC_DAEMON_DEPLOY_TOKEN
-    GITLAB_PXE_SYNC_DAEMON_DEPLOY_USERNAME: $GITLAB_PXE_SYNC_DAEMON_DEPLOY_USERNAME
-    GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN: $GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN
-    GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME: $GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME
-
-  tags:
-    - rocky-8
-
-client:
-  <<: *build_definition
-  variables:
-    BUILD_TYPE: client
-    BUILD_FORMAT: rootfs
-
-pxe:
-  <<: *build_definition
-  variables:
-    BUILD_TYPE: pxe
-    BUILD_FORMAT: iso
-
-infra:
-  <<: *build_definition
-  variables:
-    BUILD_TYPE: infra
-    BUILD_FORMAT: iso
+#stages:
+#    - build
+#
+#variables:
+#    GIT_LFS_SKIP_SMUDGE: "1" # To skip auto LFS checkout
+#
+#.build_template: &build_definition
+#  stage: build
+#  script:
+#    - sudo dnf install -y kmod
+#    # Determine if tag push
+#    - |
+#      if [[ "${CI_COMMIT_REF_NAME}" == v* ]]; then
+#        export IS_TAG_PUSH=true
+#      else
+#        export IS_TAG_PUSH=false
+#      fi
+#
+#    # Extract version from git tag or default to 'dev'
+#    - |
+#      if [[ "${IS_TAG_PUSH}" == "true" ]]; then
+#        export VERSION=${CI_COMMIT_REF_NAME#v}
+#      else
+#        export VERSION=dev
+#      fi
+#
+#    # Build based on matrix type
+#    - ./make-image.sh -k $(pwd)/kickstarts/r8/${BUILD_TYPE}-rocky-base.ks -i ${BUILD_TYPE}-rocky-8.8-x86_64-${VERSION} -f ${BUILD_FORMAT}
+#
+#    # Upload artifact
+#    - |
+#      case "${BUILD_FORMAT}" in
+#          rootfs)
+#              export FILE_EXTENSION=tar.gz
+#              ;;
+#          iso)
+#              export FILE_EXTENSION=iso
+#              ;;
+#          squashfs)
+#              export FILE_EXTENSION=img
+#              ;;
+#      esac
+#
+#      curl --upload-file build/kickstarts/images/${BUILD_TYPE}-rocky-8.8-x86_64-${VERSION}.${FILE_EXTENSION} \
+#        -u $NEXUS_USER:$NEXUS_PASS https://nexus.superclustr.net/repository/superclustr-binaries/${BUILD_TYPE}/rocky/8.8/x86_64/
+#
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "main"'
+#    - if: '$CI_COMMIT_TAG =~ /^v/'
+#
+#  variables:
+#    NEXUS_USER: $NEXUS_USER
+#    NEXUS_PASS: $NEXUS_PASS
+#    NEXUS_DOMAIN_NAME: $NEXUS_DOMAIN_NAME
+#    NEXUS_DOMAIN_SSL_DHPARAMS: $NEXUS_DOMAIN_SSL_DHPARAMS
+#    NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY: $NEXUS_DOMAIN_SSL_CERTIFICATE_PUBLIC_KEY
+#    NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY: $NEXUS_DOMAIN_SSL_CERTIFICATE_PRIVATE_KEY
+#    NEXUS_HETZNER_STORAGE_BOX_URL: $NEXUS_HETZNER_STORAGE_BOX_URL
+#    NEXUS_HETZNER_STORAGE_BOX_USERNAME: $NEXUS_HETZNER_STORAGE_BOX_USERNAME
+#    NEXUS_HETZNER_STORAGE_BOX_PASSWORD: $NEXUS_HETZNER_STORAGE_BOX_PASSWORD
+#    GITLAB_RUNNER_ROCKY_8_TOKEN: $GITLAB_RUNNER_ROCKY_8_TOKEN
+#    GITLAB_RUNNER_ROCKY_9_TOKEN: $GITLAB_RUNNER_ROCKY_9_TOKEN
+#    GITLAB_PXE_SYNC_DAEMON_DEPLOY_TOKEN: $GITLAB_PXE_SYNC_DAEMON_DEPLOY_TOKEN
+#    GITLAB_PXE_SYNC_DAEMON_DEPLOY_USERNAME: $GITLAB_PXE_SYNC_DAEMON_DEPLOY_USERNAME
+#    GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN: $GITLAB_INITRAMFS_BUILDER_DEPLOY_TOKEN
+#    GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME: $GITLAB_INITRAMFS_BUILDER_DEPLOY_USERNAME
+#
+#  tags:
+#    - rocky-8
+#
+#client:
+#  <<: *build_definition
+#  variables:
+#    BUILD_TYPE: client
+#    BUILD_FORMAT: rootfs
+#
+#pxe:
+#  <<: *build_definition
+#  variables:
+#    BUILD_TYPE: pxe
+#    BUILD_FORMAT: iso
+#
+#infra:
+#  <<: *build_definition
+#  variables:
+#    BUILD_TYPE: infra
+#    BUILD_FORMAT: iso
+#

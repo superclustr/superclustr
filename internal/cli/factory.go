@@ -13,9 +13,9 @@ type Factory struct {
 	Prompter         prompter.Prompter
 }
 
-func NewFactory(appVersion string) *Factory {
+func New(appVersion string) *Factory {
 	io := iostreams.System()
-	
+
 	f := &Factory{
 		AppVersion:     appVersion,
 		ExecutableName: "convolv",

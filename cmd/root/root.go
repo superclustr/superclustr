@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	nodeCmd "gitlab.com/convolv/convolv/node"
+	nodeCmd "gitlab.com/convolv/convolv/cmd/node"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 )

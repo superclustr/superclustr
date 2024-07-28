@@ -11,6 +11,3 @@ import (
 
     "github.com/spf13/cobra"
 )
-
-//go:embed ansible/*
-var ansible embed.FS

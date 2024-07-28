@@ -2,11 +2,11 @@ package node
 
 import (
 	cmdAdd "gitlab.com/convolv/convolv/cmd/node/add"
-	"github.com/cli/cli/v2/pkg/cmdutil"
+	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdNode(f *cmdutil.Factory) *cobra.Command {
+func NewCmdNode(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "node <command>",
 		Short:   "View details about workflow runs",

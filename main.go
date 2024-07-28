@@ -3,18 +3,14 @@ package main
 import (
 	"os"
 	
+	"gitlab.com/convolv/convolv/internal/cli"
 	"gitlab.com/convolv/convolv/cmd/root"
 )
 
+//go:embed ansible/*
+var ansible embed.FS
+
 type exitCode int
-
-type Factory struct {
-	AppVersion     string
-	ExecutableName string
-
-	IOStreams        *iostreams.IOStreams
-	Prompter         prompter.Prompter
-}
 
 const (
 	exitOK      exitCode = 0
@@ -24,7 +20,7 @@ const (
 	exitPending exitCode = 8
 )
 
-f := Factory{
+f := &cli.Factory{
 	AppVersion:     appVersion,
 	ExecutableName: "convolv",
 
@@ -59,14 +55,14 @@ func mainRun() exitCode {
 
 	if cmd, err := rootCmd.ExecuteContextC(ctx); err != nil {
 		var pagerPipeError *iostreams.ErrClosedPagerPipe
-		var noResultsError cmdutil.NoResultsError
+		var noResultsError cli.NoResultsError
 		var extError *root.ExternalCommandExitError
 		var authError *root.AuthError
-		if err == cmdutil.SilentError {
+		if err == cli.SilentError {
 			return exitError
-		} else if err == cmdutil.PendingError {
+		} else if err == cli.PendingError {
 			return exitPending
-		} else if cmdutil.IsUserCancellation(err) {
+		} else if cli.IsUserCancellation(err) {
 			if errors.Is(err, terminal.InterruptErr) {
 				// ensure the next shell prompt will start on its own line
 				fmt.Fprint(stderr, "\n")

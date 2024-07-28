@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/cli/cli/v2/internal/text"
-	"github.com/cli/cli/v2/pkg/cmdutil"
+	"gitlab.com/convolv/convolv/internal/text"
+	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

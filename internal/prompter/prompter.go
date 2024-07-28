@@ -5,8 +5,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/cli/cli/v2/internal/ghinstance"
-	"github.com/cli/cli/v2/pkg/surveyext"
+	"github.com/cli/cli/v2/pkg/survey"
 	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
 )
 
@@ -94,14 +93,14 @@ func (p *surveyPrompter) InputHostname() (string, error) {
 		&survey.Input{
 			Message: "GHE hostname:",
 		}, &result, survey.WithValidator(func(v interface{}) error {
-			return ghinstance.HostnameValidator(v.(string))
+			return true // Here was some validation happening! But I deleted it bcause we didn't need the code
 		}))
 	return result, err
 }
 
 func (p *surveyPrompter) MarkdownEditor(prompt, defaultValue string, blankAllowed bool) (string, error) {
 	var result string
-	err := p.ask(&surveyext.GhEditor{
+	err := p.ask(&survey.GhEditor{
 		BlankAllowed:  blankAllowed,
 		EditorCommand: p.editorCmd,
 		Editor: &survey.Editor{

@@ -1,11 +1,9 @@
 package root
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
+	versionCmd "gitlab.com/convolv/convolv/cmd/version"
 	nodeCmd "gitlab.com/convolv/convolv/cmd/node"
+	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 )
@@ -18,13 +16,7 @@ func (ae *AuthError) Error() string {
 	return ae.err.Error()
 }
 
-func NewCmdRoot(version, buildDate string) (*cobra.Command, error) {
-	io := f.IOStreams
-	cfg, err := f.Config()
-	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration: %s\n", err)
-	}
-
+func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, error) {
 	cmd := &cobra.Command{
 		Use:   "gh <command> <subcommand> [flags]",
 		Short: "Convolv CLI",
@@ -62,24 +54,5 @@ func NewCmdRoot(version, buildDate string) (*cobra.Command, error) {
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
 	cmd.AddCommand(nodeCmd.NewCmdNode(f))
 
-	// Help topics
-	var referenceCmd *cobra.Command
-	for _, ht := range HelpTopics {
-		helpTopicCmd := NewCmdHelpTopic(f.IOStreams, ht)
-		cmd.AddCommand(helpTopicCmd)
-
-		// See bottom of the function for why we explicitly care about the reference cmd
-		if ht.name == "reference" {
-			referenceCmd = helpTopicCmd
-		}
-	}
-
-	// The reference command produces paged output that displays information on every other command.
-	// Therefore, we explicitly set the Long text and HelpFunc here after all other commands are registered.
-	// We experimented with producing the paged output dynamically when the HelpFunc is called but since
-	// doc generation makes use of the Long text, it is simpler to just be explicit here that this command
-	// is special.
-	referenceCmd.Long = stringifyReference(cmd)
-	referenceCmd.SetHelpFunc(longPager(f.IOStreams))
 	return cmd, nil
 }

@@ -1,13 +1,8 @@
 package cli
 
 import (
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/cli/cli/v2/internal/prompter"
-	"github.com/cli/cli/v2/internal/iostreams"
+	"gitlab.com/convolv/convolv/internal/prompter"
+	"gitlab.com/convolv/convolv/internal/iostreams"
 )
 
 type Factory struct {
@@ -18,11 +13,16 @@ type Factory struct {
 	Prompter         prompter.Prompter
 }
 
-// Executable is the path to the currently invoked binary
-func (f *Factory) Executable() string {
-	if !strings.ContainsRune(f.ExecutableName, os.PathSeparator) {
-		f.ExecutableName = executable(f.ExecutableName)
+func NewFactory(appVersion string) *Factory {
+	io := iostreams.System()
+	
+	f := &Factory{
+		AppVersion:     appVersion,
+		ExecutableName: "convolv",
 	}
 
-	return f.ExecutableName
+	f.IOStreams = io
+	f.Prompter = prompter.New("", io.In, io.Out, io.ErrOut)
+
+	return f
 }

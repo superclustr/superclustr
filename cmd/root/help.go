@@ -46,7 +46,7 @@ func rootFlagErrorFunc(cmd *cobra.Command, err error) error {
 	if err == pflag.ErrHelp {
 		return err
 	}
-	return cmdutil.FlagErrorWrap(err)
+	return cli.FlagErrorWrap(err)
 }
 
 var hasFailed bool
@@ -87,7 +87,7 @@ func isRootCmd(command *cobra.Command) bool {
 	return command != nil && !command.HasParent()
 }
 
-func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
+func rootHelpFunc(f *cli.Factory, command *cobra.Command, args []string) {
 	flags := command.Flags()
 
 	if isRootCmd(command) {
@@ -144,18 +144,6 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 			Title: strings.ToUpper(g.Title),
 			Body:  strings.Join(names, "\n"),
 		})
-	}
-
-	if isRootCmd(command) {
-		var helpTopics []string
-		if c := findCommand(command, "actions"); c != nil {
-			helpTopics = append(helpTopics, rpad(c.Name()+":", namePadding)+c.Short)
-		}
-		for _, helpTopic := range HelpTopics {
-			helpTopics = append(helpTopics, rpad(helpTopic.name+":", namePadding)+helpTopic.short)
-		}
-		sort.Strings(helpTopics)
-		helpEntries = append(helpEntries, helpEntry{"HELP TOPICS", strings.Join(helpTopics, "\n")})
 	}
 
 	flagUsages := command.LocalFlags().FlagUsages()

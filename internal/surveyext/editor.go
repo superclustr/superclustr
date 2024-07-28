@@ -1,4 +1,4 @@
-package survey
+package surveyext
 
 // This file extends survey.Editor to give it more flexible behavior. For more context, read
 // https://github.com/cli/cli/issues/70

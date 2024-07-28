@@ -2,9 +2,12 @@ package main
 
 import (
 	"os"
+	"embed"
 	
+	"gitlab.com/convolv/convolv/internal/build"
 	"gitlab.com/convolv/convolv/internal/cli"
 	"gitlab.com/convolv/convolv/cmd/root"
+	"gitlab.com/convolv/convolv/utils"
 )
 
 //go:embed ansible/*
@@ -20,20 +23,55 @@ const (
 	exitPending exitCode = 8
 )
 
-f := &cli.Factory{
-	AppVersion:     appVersion,
-	ExecutableName: "convolv",
-
-	IOStreams: ioStreams(f),
-	Prompter: newPrompter(f)
-}
-
 func main() {
 	code := mainRun()
 	os.Exit(int(code))
 }
 
 func mainRun() exitCode {
+	buildDate := build.Date
+	buildVersion := build.Version
+	hasDebug, _ := utils.IsDebugEnabled()
+
+	cmdFactory := NewFactory(buildVersion)
+	stderr := cmdFactory.IOStreams.ErrOut
+
+	ctx := context.Background()
+
+	if cfg, err := cmdFactory.Config(); err == nil {
+		var m migration.MultiAccount
+		if err := cfg.Migrate(m); err != nil {
+			fmt.Fprintln(stderr, err)
+			return exitError
+		}
+	}
+
+	updateCtx, updateCancel := context.WithCancel(ctx)
+	defer updateCancel()
+	updateMessageChan := make(chan *update.ReleaseInfo)
+	go func() {
+		rel, err := checkForUpdate(updateCtx, cmdFactory, buildVersion)
+		if err != nil && hasDebug {
+			fmt.Fprintf(stderr, "warning: checking for update failed: %v", err)
+		}
+		updateMessageChan <- rel
+	}()
+
+	if !cmdFactory.IOStreams.ColorEnabled() {
+		surveyCore.DisableColor = true
+		ansi.DisableColors(true)
+	} else {
+		// override survey's poor choice of color
+		surveyCore.TemplateFuncsWithColor["color"] = func(style string) string {
+			switch style {
+			case "white":
+				return ansi.ColorCode("default")
+			default:
+				return ansi.ColorCode(style)
+			}
+		}
+	}
+
 	rootCmd, err := root.NewCmdRoot(cmdFactory, buildVersion, buildDate)
 	if err != nil {
 		fmt.Fprintf(stderr, "failed to create root command: %s\n", err)

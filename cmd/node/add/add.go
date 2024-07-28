@@ -1,15 +1,18 @@
 package add
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-
+	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdAdd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command {
+type AddOptions struct {
+	Title   string
+}
+
+func NewCmdAdd(f *cli.Factory, runF func(*AddOptions) error) *cobra.Command {
+	opts := &AddOptions{
+		Title:	"wow",
+	}
 
 	cmd := &cobra.Command{
 		Use:   "add [<key-file>]",
@@ -17,8 +20,6 @@ func NewCmdAdd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 		Args:  cobra.MaximumNArgs(1),
 	}
 
-	typeEnums := []string{shared.AuthenticationKey, shared.SigningKey}
-	cmdutil.StringEnumFlag(cmd, &opts.Type, "type", "", shared.AuthenticationKey, typeEnums, "Type of the ssh key")
 	cmd.Flags().StringVarP(&opts.Title, "title", "t", "", "Title for the new key")
 	return cmd
 }

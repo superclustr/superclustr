@@ -13,7 +13,6 @@ func NewCmdNode(f *cli.Factory) *cobra.Command {
 		Long:    "List, view, and watch recent workflow runs from GitHub Actions.",
 		GroupID: "actions",
 	}
-	cmdutil.EnableRepoOverride(cmd, f)
 
 	cmd.AddCommand(cmdAdd.NewCmdAdd(f, nil))
 

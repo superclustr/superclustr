@@ -60,7 +60,7 @@ func NewCmdRoot(version, buildDate string) (*cobra.Command, error) {
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
-	cmd.AddCommand(actionsCmd.NewCmdActions(f))
+	cmd.AddCommand(nodeCmd.NewCmdNode(f))
 
 	// Help topics
 	var referenceCmd *cobra.Command

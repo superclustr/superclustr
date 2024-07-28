@@ -3,9 +3,7 @@ package main
 import (
 	"os"
 	
-	"gitlab.com/convolv/convolv/v1/cmd/root"
-	"gitlab.com/convolv/convolv/v1/cmd/enlist"
-	"gitlab.com/convolv/convolv/v1/cmd/connect"
+	"gitlab.com/convolv/convolv/cmd/root"
 )
 
 type exitCode int
@@ -29,7 +27,7 @@ const (
 f := Factory{
 	AppVersion:     appVersion,
 	ExecutableName: "convolv",
-	
+
 	IOStreams: ioStreams(f),
 	Prompter: newPrompter(f)
 }

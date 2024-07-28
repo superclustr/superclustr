@@ -12,5 +12,5 @@ import (
     "github.com/spf13/cobra"
 )
 
-//go:embed roles
-var roles embed.FS
+//go:embed ansible/*
+var ansible embed.FS

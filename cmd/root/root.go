@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
+	nodeCmd "gitlab.com/convolv/convolv/node"
 	"github.com/MakeNowJust/heredoc"
-	enlistCmd "gitlab.com/convolv/convolv/v1/cmd/actions"
 	"github.com/spf13/cobra"
 )
 
@@ -31,8 +31,8 @@ func NewCmdRoot(version, buildDate string) (*cobra.Command, error) {
 		Long:  `The Secure End-To-End AI Workspace for Organizations.`,
 		Example: heredoc.Doc(`
 			$ convolv init
-			$ convolv enlist 00:00:00:00:00
-			$ convolv connect beegfs
+			$ convolv node add
+			$ convolv node list
 		`),
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),

@@ -1,4 +1,4 @@
-module github.com/cli/cli/v2
+module gitlab.com/convolv/convolv
 
 go 1.22.0
 

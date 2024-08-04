@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/spf13/cobra"
+	"gitlab.com/convolv/convolv/internal/cli"
 )
 
 func NewCmdVersion(f *cli.Factory, version, buildDate string) *cobra.Command {
@@ -29,11 +29,11 @@ func Format(version, buildDate string) string {
 		dateStr = fmt.Sprintf(" (%s)", buildDate)
 	}
 
-	return fmt.Sprintf("gh version %s%s\n%s\n", version, dateStr, changelogURL(version))
+	return fmt.Sprintf("convolv version %s%s\n%s\n", version, dateStr, changelogURL(version))
 }
 
 func changelogURL(version string) string {
-	path := "https://github.com/cli/cli"
+	path := "https://gitlab.com/convolv/convolv"
 	r := regexp.MustCompile(`^v?\d+\.\d+\.\d+(-[\w.]+)?$`)
 	if !r.MatchString(version) {
 		return fmt.Sprintf("%s/releases/latest", path)

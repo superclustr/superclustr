@@ -1,19 +1,22 @@
 package cli
 
 import (
-	"gitlab.com/convolv/convolv/internal/prompter"
+	"io/fs"
+
 	"gitlab.com/convolv/convolv/internal/iostreams"
+	"gitlab.com/convolv/convolv/internal/prompter"
 )
 
 type Factory struct {
 	AppVersion     string
 	ExecutableName string
 
-	IOStreams        *iostreams.IOStreams
-	Prompter         prompter.Prompter
+	IOStreams *iostreams.IOStreams
+	Prompter  prompter.Prompter
+	Ansible   fs.FS
 }
 
-func New(appVersion string) *Factory {
+func New(appVersion string, ansible fs.FS) *Factory {
 	io := iostreams.System()
 
 	f := &Factory{
@@ -23,6 +26,7 @@ func New(appVersion string) *Factory {
 
 	f.IOStreams = io
 	f.Prompter = prompter.New("", io.In, io.Out, io.ErrOut)
+	f.Ansible = ansible
 
 	return f
 }

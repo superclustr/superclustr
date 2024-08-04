@@ -1,11 +1,13 @@
 package root
 
 import (
-	versionCmd "gitlab.com/convolv/convolv/cmd/version"
-	nodeCmd "gitlab.com/convolv/convolv/cmd/node"
-	"gitlab.com/convolv/convolv/internal/cli"
-	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
+	computeCmd "gitlab.com/convolv/convolv/cmd/compute"
+	initCmd "gitlab.com/convolv/convolv/cmd/init"
+	monitorCmd "gitlab.com/convolv/convolv/cmd/monitor"
+	storageCmd "gitlab.com/convolv/convolv/cmd/storage"
+	versionCmd "gitlab.com/convolv/convolv/cmd/version"
+	"gitlab.com/convolv/convolv/internal/cli"
 )
 
 type AuthError struct {
@@ -17,15 +19,11 @@ func (ae *AuthError) Error() string {
 }
 
 func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, error) {
+	cobra.EnableCommandSorting = false
 	cmd := &cobra.Command{
-		Use:   "gh <command> <subcommand> [flags]",
+		Use:   "convolv <command> <subcommand> [flags]",
 		Short: "Convolv CLI",
 		Long:  `The Secure End-To-End AI Workspace for Organizations.`,
-		Example: heredoc.Doc(`
-			$ convolv init
-			$ convolv node add
-			$ convolv node list
-		`),
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),
 		},
@@ -40,19 +38,31 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 	cmd.SetHelpFunc(func(c *cobra.Command, args []string) {
 		rootHelpFunc(f, c, args)
 	})
+
 	cmd.SetUsageFunc(func(c *cobra.Command) error {
 		return rootUsageFunc(f.IOStreams.ErrOut, c)
 	})
+
 	cmd.SetFlagErrorFunc(rootFlagErrorFunc)
 
 	cmd.AddGroup(&cobra.Group{
 		ID:    "all",
-		Title: "Available commands",
+		Title: "Commands",
 	})
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
-	cmd.AddCommand(nodeCmd.NewCmdNode(f))
+	cmd.AddCommand(initCmd.NewCmdInit(f))
+	cmd.AddCommand(computeCmd.NewCmdCompute(f))
+	cmd.AddCommand(monitorCmd.NewCmdMonitor(f))
+	cmd.AddCommand(storageCmd.NewCmdStorage(f))
+
+	// Add the completion command and hide it
+	completionCmd := &cobra.Command{
+		Use:    "completion",
+		Hidden: true, // Hide the completion command
+	}
+	cmd.AddCommand(completionCmd)
 
 	return cmd, nil
 }

@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	"gitlab.com/convolv/convolv/internal/text"
-	"gitlab.com/convolv/convolv/internal/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"gitlab.com/convolv/convolv/internal/cli"
+	"gitlab.com/convolv/convolv/internal/text"
 )
 
 func rootUsageFunc(w io.Writer, command *cobra.Command) error {
@@ -168,8 +168,8 @@ func rootHelpFunc(f *cli.Factory, command *cobra.Command, args []string) {
 		helpEntries = append(helpEntries, helpEntry{"ENVIRONMENT VARIABLES", command.Annotations["help:environment"]})
 	}
 	helpEntries = append(helpEntries, helpEntry{"LEARN MORE", heredoc.Docf(`
-		Use %[1]sgh <command> <subcommand> --help%[1]s for more information about a command.
-		Read the manual at https://cli.github.com/manual
+		Use %[1]sconvolv <command> <subcommand> --help%[1]s for more information about a command.
+		Read the manual at https://docs.convolv.ai
 	`, "`")})
 
 	out := f.IOStreams.Out

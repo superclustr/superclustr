@@ -11,7 +11,7 @@ build:
 
 # Run the binary
 run: build
-	./$(BINARY_NAME)
+	./$(OUT_DIR)/$(BINARY_NAME)
 
 # Test the project
 test:

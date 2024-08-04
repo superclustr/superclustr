@@ -2,22 +2,22 @@ package main
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
-	"embed"
-	
+
 	surveyCore "github.com/AlecAivazis/survey/v2/core"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/mgutz/ansi"
+	"github.com/spf13/cobra"
+	"gitlab.com/convolv/convolv/cmd/root"
 	"gitlab.com/convolv/convolv/internal/build"
 	"gitlab.com/convolv/convolv/internal/cli"
 	"gitlab.com/convolv/convolv/internal/iostreams"
-	"gitlab.com/convolv/convolv/cmd/root"
 	"gitlab.com/convolv/convolv/utils"
-	"github.com/mgutz/ansi"
-	"github.com/spf13/cobra"
 )
 
 //go:embed ansible/*
@@ -43,7 +43,7 @@ func mainRun() exitCode {
 	buildVersion := build.Version
 	hasDebug, _ := utils.IsDebugEnabled()
 
-	cmdFactory := cli.New(buildVersion)
+	cmdFactory := cli.New(buildVersion, ansible)
 	stderr := cmdFactory.IOStreams.ErrOut
 
 	ctx := context.Background()
@@ -101,12 +101,6 @@ func mainRun() exitCode {
 		}
 
 		printError(stderr, err, cmd, hasDebug)
-
-		if strings.Contains(err.Error(), "Incorrect function") {
-			fmt.Fprintln(stderr, "You appear to be running in MinTTY without pseudo terminal support.")
-			fmt.Fprintln(stderr, "To learn about workarounds for this error, run:  gh help mintty")
-			return exitError
-		}
 
 		return exitError
 	}

@@ -17,8 +17,11 @@ import (
 	"gitlab.com/convolv/convolv/internal/build"
 	"gitlab.com/convolv/convolv/internal/cli"
 	"gitlab.com/convolv/convolv/internal/iostreams"
+	"gitlab.com/convolv/convolv/internal/python"
 	"gitlab.com/convolv/convolv/utils"
 )
+
+//go:generate go run ./generate/pip
 
 //go:embed ansible/*
 var ansible embed.FS
@@ -42,8 +45,9 @@ func mainRun() exitCode {
 	buildDate := build.Date
 	buildVersion := build.Version
 	hasDebug, _ := utils.IsDebugEnabled()
+	python := python.NewPythonExec(ansible, data)
 
-	cmdFactory := cli.New(buildVersion, ansible)
+	cmdFactory := cli.New(buildVersion, ansible, python)
 	stderr := cmdFactory.IOStreams.ErrOut
 
 	ctx := context.Background()

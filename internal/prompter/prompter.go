@@ -5,11 +5,10 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"gitlab.com/convolv/convolv/internal/surveyext"
 	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
+	"gitlab.com/convolv/convolv/internal/surveyext"
 )
 
-//go:generate moq -rm -out prompter_mock.go . Prompter
 type Prompter interface {
 	// generic prompts from go-gh
 	Select(string, string, []string) (int, error)

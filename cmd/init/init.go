@@ -37,10 +37,10 @@ func runInit(f *cli.Factory) error {
 	// Define inventory on the fly
 	inventoryIni := `
 [openhpc_login]
-openhpc-login-0 ansible_host=88.99.165.60 ansible_user=centos
+openhpc-login-0 ansible_host=88.99.165.60 ansible_user=root
 
 [openhpc_compute]
-openhpc-compute-0 ansible_host=88.99.165.60 ansible_user=centos
+openhpc-compute-0 ansible_host=88.99.165.60 ansible_user=root
 
 [cluster_login:children]
 openhpc_login

@@ -3,15 +3,19 @@ BINARY_NAME=convolv
 OUT_DIR=bin
 
 # Default target
-all: build
+all: generate build
+
+# Run generate
+generate:
+	go generate ./...
 
 # Build the binary
 build:
 	go build -o $(OUT_DIR)/$(BINARY_NAME) main.go
 
-# Run the binary
-run: build
-	./$(OUT_DIR)/$(BINARY_NAME)
+# Run the binary with arguments
+run: all
+	./$(OUT_DIR)/$(BINARY_NAME) $(filter-out $@,$(MAKECMDGOALS))
 
 # Test the project
 test:
@@ -31,4 +35,8 @@ update-deps:
 	go get -u ./...
 	go mod tidy
 
-.PHONY: all build run test clean tidy update-deps
+.PHONY: all generate build run test clean tidy update-deps
+
+# Ignore run arguments as make targets
+%:
+	@:

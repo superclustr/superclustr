@@ -15,16 +15,16 @@ type PythonExec struct {
 	resourcesFsPath string
 }
 
-func NewPythonExec(ansible *fs.FS, data *fs.FS) *PythonExec {
+func NewPythonExec(ansible fs.FS, data fs.FS) *PythonExec {
 
 	tmpDir := filepath.Join(os.TempDir(), "go-ansible")
 	pythonDir := tmpDir + "-python"
 	pythonLibDir := tmpDir + "-python-lib"
 	resourcesDir := tmpDir + "-resources"
 
-	pythonLibFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(*data.Data, pythonLibDir, true)
+	pythonLibFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(data, pythonLibDir, true)
 	pythonLibFsPath := pythonLibFs.GetExtractedPath()
-	resourcesFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(*ansible, resourcesDir, true)
+	resourcesFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(ansible, resourcesDir, true)
 	resourcesFsPath := resourcesFs.GetExtractedPath()
 
 	ep, _ := python.NewEmbeddedPythonWithTmpDir(pythonDir, true)

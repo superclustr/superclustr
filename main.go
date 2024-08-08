@@ -14,6 +14,7 @@ import (
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 	"gitlab.com/convolv/convolv/cmd/root"
+	"gitlab.com/convolv/convolv/data"
 	"gitlab.com/convolv/convolv/internal/build"
 	"gitlab.com/convolv/convolv/internal/cli"
 	"gitlab.com/convolv/convolv/internal/iostreams"
@@ -45,7 +46,7 @@ func mainRun() exitCode {
 	buildDate := build.Date
 	buildVersion := build.Version
 	hasDebug, _ := utils.IsDebugEnabled()
-	python := python.NewPythonExec(ansible, data)
+	python := python.NewPythonExec(ansible, data.Data)
 
 	cmdFactory := cli.New(buildVersion, ansible, python)
 	stderr := cmdFactory.IOStreams.ErrOut

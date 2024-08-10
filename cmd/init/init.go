@@ -3,7 +3,6 @@ package init
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -82,8 +81,8 @@ openhpc_compute
 	defer os.RemoveAll(tempDir)
 
 	// Write inventory and playbook to the temporary directory
-	inventoryFile := tempDir + "/inventory.ini"
-	playbookFile := tempDir + "/playbook.yml"
+	inventoryFile := filepath.Join(f.Python.GetAnsibleFsPath(), "inventory.ini")
+	playbookFile := filepath.Join(f.Python.GetAnsibleFsPath(), "playbook.yml")
 
 	err = os.WriteFile(inventoryFile, []byte(inventoryIni), 0644)
 	if err != nil {
@@ -95,36 +94,6 @@ openhpc_compute
 		return fmt.Errorf("failed to write playbook file: %v", err)
 	}
 
-	// Extract the embedded role to the temporary directory
-	rolePath := filepath.Join(tempDir, "roles", "openhpc")
-	err = fs.WalkDir(f.Ansible, "ansible/openhpc", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		relPath, err := filepath.Rel("ansible/openhpc", path)
-		if err != nil {
-			return err
-		}
-
-		destPath := filepath.Join(rolePath, relPath)
-
-		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
-		} else {
-			data, err := fs.ReadFile(f.Ansible, path)
-			if err != nil {
-				return err
-			}
-
-			return os.WriteFile(destPath, data, 0644)
-		}
-	})
-
-	if err != nil {
-		return fmt.Errorf("failed to extract role: %v", err)
-	}
-
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: inventoryFile,
 	}
@@ -133,6 +102,9 @@ openhpc_compute
 	playbookCmd := playbook.NewAnsiblePlaybookCmd(
 		playbook.WithPlaybooks(playbookFile),
 		playbook.WithPlaybookOptions(ansiblePlaybookOptions),
+		playbook.WithBinary(
+			filepath.Join(f.Python.GetPythonLibFsPath(), "bin", "ansible-playbook"),
+		),
 	)
 
 	exec := configuration.NewAnsibleWithConfigurationSettingsExecute(
@@ -142,9 +114,10 @@ openhpc_compute
 			execute.WithTransformers(
 				transformer.Prepend("Go-ansible example with become"),
 			),
+			execute.WithExecutable(f.Python),
 		),
 		configuration.WithAnsibleForceColor(),
-		configuration.WithAnsibleRolesPath(rolePath),
+		configuration.WithAnsibleRolesPath(f.Python.GetAnsibleFsPath()),
 	)
 
 	// Execute the playbook

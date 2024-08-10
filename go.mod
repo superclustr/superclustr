@@ -4,6 +4,8 @@ go 1.22.0
 
 toolchain go1.22.5
 
+replace github.com/apenella/go-ansible/v2 => github.com/robin-rpr/go-ansible/v2 v2.0.2-fix.0
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc v1.0.0

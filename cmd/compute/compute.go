@@ -2,19 +2,19 @@ package node
 
 import (
 	"github.com/spf13/cobra"
-	cmdAdd "gitlab.com/convolv/convolv/cmd/compute/add"
+	cmdInit "gitlab.com/convolv/convolv/cmd/compute/init"
 	"gitlab.com/convolv/convolv/internal/cli"
 )
 
 func NewCmdCompute(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "compute <command>",
-		Short:   "Add, view, and remove compute nodes.",
-		Long:    "Add, view, and remove compute nodes in the cluster.",
+		Use:     "compute <action>",
+		Short:   "Initialize, manage, and update a compute service.",
+		Long:    "Initialize, manage, and update a compute service on this machine.",
 		GroupID: "all",
 	}
 
-	cmd.AddCommand(cmdAdd.NewCmdAdd(f, nil))
+	cmd.AddCommand(cmdInit.NewCmdInit(f))
 
 	return cmd
 }

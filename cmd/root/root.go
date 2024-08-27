@@ -3,7 +3,6 @@ package root
 import (
 	"github.com/spf13/cobra"
 	computeCmd "gitlab.com/convolv/convolv/cmd/compute"
-	initCmd "gitlab.com/convolv/convolv/cmd/init"
 	monitorCmd "gitlab.com/convolv/convolv/cmd/monitor"
 	storageCmd "gitlab.com/convolv/convolv/cmd/storage"
 	versionCmd "gitlab.com/convolv/convolv/cmd/version"
@@ -21,7 +20,7 @@ func (ae *AuthError) Error() string {
 func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, error) {
 	cobra.EnableCommandSorting = false
 	cmd := &cobra.Command{
-		Use:   "convolv <command> <subcommand> [flags]",
+		Use:   "convolv <service> <action> [flags]",
 		Short: "Convolv CLI",
 		Long:  `The Secure End-To-End AI Workspace for Organizations.`,
 		Annotations: map[string]string{
@@ -52,7 +51,6 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
-	cmd.AddCommand(initCmd.NewCmdInit(f))
 	cmd.AddCommand(computeCmd.NewCmdCompute(f))
 	cmd.AddCommand(monitorCmd.NewCmdMonitor(f))
 	cmd.AddCommand(storageCmd.NewCmdStorage(f))

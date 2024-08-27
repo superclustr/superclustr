@@ -17,10 +17,9 @@ import (
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "init",
-		Short:   "Initialize a new head node.",
-		Long:    "Initialize a new head node on this machine.",
-		GroupID: "all",
+		Use:   "init",
+		Short: "Initialize a compute service.",
+		Long:  "Initialize a compute service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runInit(f)
 			if err != nil {

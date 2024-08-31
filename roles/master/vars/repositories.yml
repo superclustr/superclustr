@@ -54,7 +54,7 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true
     - name: modern-erlang-noarch
       file: rabbitmq
       description: "modern-erlang-el9-noarch"
@@ -64,7 +64,7 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true
     - name: rabbitmq-el9
       file: rabbitmq
       description: "rabbitmq-el9"
@@ -74,7 +74,7 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true
 
   "8":
     - name: modern-erlang
@@ -86,7 +86,7 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true
     - name: modern-erlang-noarch
       file: rabbitmq
       description: "modern-erlang-el8-noarch"
@@ -96,7 +96,7 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true
     - name: rabbitmq-el8
       file: rabbitmq
       description: "rabbitmq-el8"
@@ -106,4 +106,4 @@ rabbitmq_repos:
       sslverify: true
       sslcacert: /etc/pki/tls/certs/ca-bundle.crt
       metadata_expire: 300
-      pkg_gpgcheck: true
+      repo_gpgcheck: true

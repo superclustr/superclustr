@@ -14,35 +14,35 @@ import (
 type PythonExec struct {
 	ep              *python.EmbeddedPython
 	pythonLibFsPath string
-	ansibleFsPath   string
+	rolesFsPath     string
 }
 
-func NewPythonExec(ansible fs.FS, data fs.FS) *PythonExec {
+func NewPythonExec(roles fs.FS, data fs.FS) *PythonExec {
 
 	tmpDir := filepath.Join(os.TempDir(), "go-ansible")
 	pythonDir := tmpDir + "-python"
 	pythonLibDir := tmpDir + "-python-lib"
-	ansibleDir := tmpDir + "-ansible"
+	rolesDir := tmpDir + "-roles"
 
 	pythonLibFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(data, pythonLibDir, true)
 	pythonLibFsPath := pythonLibFs.GetExtractedPath()
-	ansibleFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(ansible, ansibleDir, true)
-	ansibleFsPath := ansibleFs.GetExtractedPath()
+	rolesFs, _ := embed_util.NewEmbeddedFilesWithTmpDir(roles, rolesDir, true)
+	rolesFsPath := rolesFs.GetExtractedPath()
 
 	ep, _ := python.NewEmbeddedPythonWithTmpDir(pythonDir, true)
 	ep.AddPythonPath(pythonLibFs.GetExtractedPath())
-	ep.AddPythonPath(ansibleFs.GetExtractedPath())
+	ep.AddPythonPath(rolesFs.GetExtractedPath())
 
 	return &PythonExec{
 		ep:              ep,
 		pythonLibFsPath: pythonLibFsPath,
-		ansibleFsPath:   ansibleFsPath,
+		rolesFsPath:     rolesFsPath,
 	}
 }
 
-// Getter method for ansibleFsPath
-func (e *PythonExec) GetAnsibleFsPath() string {
-	return e.ansibleFsPath
+// Getter method for rolesFsPath
+func (e *PythonExec) GetRolesFsPath() string {
+	return e.rolesFsPath
 }
 
 // Getter method for pythonLibFsPath

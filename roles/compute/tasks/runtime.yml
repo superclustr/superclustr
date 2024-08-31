@@ -86,7 +86,7 @@
   delegate_to: localhost
   when: openhpc_enable.control | default(false) or not openhpc_slurm_configless
   changed_when: false # so molecule doesn't fail
-  become: no
+  become: false
 
 - name: Template basic slurm.conf
   template:
@@ -97,22 +97,20 @@
   delegate_to: localhost
   when: openhpc_enable.control | default(false) or not openhpc_slurm_configless
   changed_when: false # so molecule doesn't fail
-  become: no
+  become: false
 
 - name: Customise slurm.conf
-  community.general.ini_file:
+  lineinfile:
     path: "{{ _slurm_conf_tmpfile.path }}"
-    option: "{{ item.key }}"
-    section: ''
-    value: "{{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
-    no_extra_spaces: true
-    create: no
-    mode: 0644
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
+    create: true
+    mode: '0644'
   loop: "{{ openhpc_config | dict2items }}"
   delegate_to: localhost
   when: openhpc_enable.control | default(false) or not openhpc_slurm_configless
-  changed_when: false # so molecule doesn't fail
-  become: no
+  changed_when: false
+  become: false
 
 - name: Create slurm.conf
   copy:
@@ -157,7 +155,7 @@
   when: _slurm_conf_tmpfile.path is defined
   delegate_to: localhost
   changed_when: false # so molecule doesn't fail
-  become: no
+  become: false
 
 - name: Notify handler for slurmd restart
   debug:

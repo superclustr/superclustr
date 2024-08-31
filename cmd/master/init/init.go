@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/apenella/go-ansible/v2/pkg/execute"
@@ -53,8 +54,8 @@ func runInit(f *cli.Factory) error {
 	defer os.RemoveAll(tempDir)
 
 	// Write inventory and playbook to the temporary directory
-	inventoryFile := filepath.Join(f.Python.GetAnsibleFsPath(), "inventory.ini")
-	playbookFile := filepath.Join(f.Python.GetAnsibleFsPath(), "playbook.yml")
+	inventoryFile := filepath.Join(f.Python.GetRolesFsPath(), "inventory.ini")
+	playbookFile := filepath.Join(f.Python.GetRolesFsPath(), "playbook.yml")
 
 	err = os.WriteFile(inventoryFile, []byte(inventoryIni), 0644)
 	if err != nil {
@@ -69,6 +70,16 @@ func runInit(f *cli.Factory) error {
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: inventoryFile,
 	}
+
+	// TEST
+	cmd := exec.Command("ls", f.Python.GetRolesFsPath())
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+
+	fmt.Printf("%s\n", output)
+	// TEST
 
 	// Execute the ansible playbook using go-ansible
 	playbookCmd := playbook.NewAnsiblePlaybookCmd(
@@ -90,7 +101,7 @@ func runInit(f *cli.Factory) error {
 			execute.WithExecutable(f.Python),
 		),
 		configuration.WithAnsibleForceColor(),
-		configuration.WithAnsibleRolesPath(f.Python.GetAnsibleFsPath()),
+		configuration.WithAnsibleRolesPath(f.Python.GetRolesFsPath()),
 	)
 
 	// Execute the playbook

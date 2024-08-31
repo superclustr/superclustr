@@ -78,8 +78,8 @@ openhpc_compute
 	defer os.RemoveAll(tempDir)
 
 	// Write inventory and playbook to the temporary directory
-	inventoryFile := filepath.Join(f.Python.GetAnsibleFsPath(), "inventory.ini")
-	playbookFile := filepath.Join(f.Python.GetAnsibleFsPath(), "playbook.yml")
+	inventoryFile := filepath.Join(f.Python.GetRolesFsPath(), "inventory.ini")
+	playbookFile := filepath.Join(f.Python.GetRolesFsPath(), "playbook.yml")
 
 	err = os.WriteFile(inventoryFile, []byte(inventoryIni), 0644)
 	if err != nil {
@@ -114,7 +114,7 @@ openhpc_compute
 			execute.WithExecutable(f.Python),
 		),
 		configuration.WithAnsibleForceColor(),
-		configuration.WithAnsibleRolesPath(f.Python.GetAnsibleFsPath()),
+		configuration.WithAnsibleRolesPath(f.Python.GetRolesFsPath()),
 	)
 
 	// Execute the playbook

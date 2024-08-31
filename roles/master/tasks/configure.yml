@@ -88,14 +88,12 @@
   tags: slurm-config
 
 - name: Customise slurm.conf
-  community.general.ini_file:
+  lineinfile:
     path: "{{ _slurm_conf_tmpfile.path }}"
-    option: "{{ item.key }}"
-    section: ''
-    value: "{{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
-    no_extra_spaces: true
-    create: no
-    mode: 0644
+    regexp: '^{{ item.key }}='
+    line: "{{ item.key }}={{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
+    create: true
+    mode: '0644'
   loop: "{{ openhpc_config | dict2items }}"
   changed_when: false
   become: false

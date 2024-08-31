@@ -24,8 +24,8 @@ import (
 
 //go:generate go run ./generate/pip
 
-//go:embed ansible/*
-var ansible embed.FS
+//go:embed roles/*
+var roles embed.FS
 
 type exitCode int
 
@@ -46,9 +46,9 @@ func mainRun() exitCode {
 	buildDate := build.Date
 	buildVersion := build.Version
 	hasDebug, _ := utils.IsDebugEnabled()
-	python := python.NewPythonExec(ansible, data.Data)
+	python := python.NewPythonExec(roles, data.Data)
 
-	cmdFactory := cli.New(buildVersion, ansible, python)
+	cmdFactory := cli.New(buildVersion, roles, python)
 	stderr := cmdFactory.IOStreams.ErrOut
 
 	ctx := context.Background()

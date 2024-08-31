@@ -15,10 +15,10 @@
     mirrorlist: "{{ item.mirrorlist | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(omit) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ epel_repos }}"
+  loop: "{{ epel_repos[ansible_distribution_major_version] | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
-  tags: openhpc-repos
+  tags: epel-repos
 
 ########################
 # OpenHPC Repositories #
@@ -34,7 +34,7 @@
     mirrorlist: "{{ item.mirrorlist | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(omit) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ openhpc_repos }}"
+  loop: "{{ openhpc_repos[ansible_distribution_major_version] | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
   tags: openhpc-repos
@@ -56,8 +56,8 @@
     sslverify: "{{ item.sslverify | default(omit) }}"
     sslcacert: "{{ item.sslcacert | default(omit) }}"
     metadata_expire: "{{ item.metadata_expire | default(omit) }}"
-    pkg_gpgcheck: "{{ item.pkg_gpgcheck | default(omit) }}"
-  loop: "{{ rabbitmq_repos }}"
+    repo_gpgcheck: "{{ item.repo_gpgcheck | default(omit) }}"
+  loop: "{{ rabbitmq_repos[ansible_distribution_major_version] | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -66,13 +66,11 @@
 ###########################
 
 - name: Enable Required Additional Repository (PowerTools or CodeReady Builder)
-  community.general.ini_file:
+  lineinfile:
     path: "{{ repo_file }}"
-    section: "{{ repo_section }}"
-    option: enabled
-    value: "1"
-    create: false
-    no_extra_spaces: true
+    regexp: '^enabled='
+    line: 'enabled=1'
+    create: true
   vars:
     repo_file: >-
       {%- if ansible_distribution == 'Rocky' and ansible_distribution_major_version == '8' -%}

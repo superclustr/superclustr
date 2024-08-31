@@ -14,11 +14,11 @@ type Factory struct {
 
 	IOStreams *iostreams.IOStreams
 	Prompter  prompter.Prompter
-	Ansible   fs.FS
+	Roles     fs.FS
 	Python    *python.PythonExec
 }
 
-func New(appVersion string, ansible fs.FS, python *python.PythonExec) *Factory {
+func New(appVersion string, roles fs.FS, python *python.PythonExec) *Factory {
 	io := iostreams.System()
 
 	f := &Factory{
@@ -28,7 +28,7 @@ func New(appVersion string, ansible fs.FS, python *python.PythonExec) *Factory {
 
 	f.IOStreams = io
 	f.Prompter = prompter.New("", io.In, io.Out, io.ErrOut)
-	f.Ansible = ansible
+	f.Roles = roles
 	f.Python = python
 
 	return f

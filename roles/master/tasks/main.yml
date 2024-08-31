@@ -1,23 +1,21 @@
 ---
-
 - name: Configure Repositories
   block:
-    - include_tasks: repositories.yml
+      - include_vars: "{{ role_path }}/vars/repositories.yml"
+      - include_tasks: repositories.yml
   tags: repositories
 
 - name: Install Packages
   block:
-    - include_tasks: install.yml
+      - include_tasks: install.yml
   tags: install
 
 - name: Configure Packages
   block:
-    - include_tasks: configure.yml
+      - include_tasks: configure.yml
   tags: configure
 
 - name: Start Services
   block:
-    - include_tasks: start.yml
+      - include_tasks: start.yml
   tags: start
-
-...

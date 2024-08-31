@@ -1,0 +1,53 @@
+
+---
+# This playbook configures and starts packages in the os init system 
+
+- name: Flush handler
+  # As then subsequent "ensure" is a no-op if slurm services bounced
+  meta: flush_handlers 
+
+- name: Ensure Munge state
+  systemd:
+    name: munge
+    enabled: true
+    state: started
+
+- name: Ensure slurmd state
+  systemd:
+    name: slurmd
+    enabled: true
+    state: started
+
+- name: Ensure slurmrestd state
+  systemd:
+    name: slurmrestd
+    enabled: true
+    state: started
+
+- name: Ensure docker state
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+  tags: docker-service
+
+- name: Ensure beegfs-helperd state
+  systemd:
+    name: beegfs-helperd
+    enabled: yes
+    state: started
+  tags: beegfs-service
+
+- name: Ensure beegfs-client state
+  systemd:
+    name: beegfs-client
+    enabled: yes
+    state: started
+  tags: beegfs-service
+
+- name: Ensure conman state
+  systemd:
+    name: conman
+    enabled: yes
+    state: started
+  tags: conman-service

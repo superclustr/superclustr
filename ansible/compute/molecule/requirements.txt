@@ -1,0 +1,5 @@
+pip
+setuptools
+molecule[lint,ansible]
+molecule-plugins[podman]
+ansible>=2.9.0

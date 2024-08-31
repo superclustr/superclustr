@@ -1,15 +1,23 @@
 ---
 
-- name: Install packages
+- name: Configure Repositories
+  block:
+    - include_tasks: repositories.yml
+  tags: repositories
+
+- name: Install Packages
   block:
     - include_tasks: install.yml
-  when: openhpc_enable.runtime | default(false) | bool
   tags: install
 
-- name: Configure
+- name: Configure Packages
   block:
-    - include_tasks: runtime.yml
-  when: openhpc_enable.runtime | default(false) | bool
+    - include_tasks: configure.yml
   tags: configure
+
+- name: Start Services
+  block:
+    - include_tasks: start.yml
+  tags: start
 
 ...

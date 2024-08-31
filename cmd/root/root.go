@@ -3,6 +3,7 @@ package root
 import (
 	"github.com/spf13/cobra"
 	computeCmd "gitlab.com/convolv/convolv/cmd/compute"
+	masterCmd "gitlab.com/convolv/convolv/cmd/master"
 	monitorCmd "gitlab.com/convolv/convolv/cmd/monitor"
 	storageCmd "gitlab.com/convolv/convolv/cmd/storage"
 	versionCmd "gitlab.com/convolv/convolv/cmd/version"
@@ -51,6 +52,7 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
+	cmd.AddCommand(masterCmd.NewCmdMaster(f))
 	cmd.AddCommand(computeCmd.NewCmdCompute(f))
 	cmd.AddCommand(monitorCmd.NewCmdMonitor(f))
 	cmd.AddCommand(storageCmd.NewCmdStorage(f))

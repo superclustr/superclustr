@@ -1,0 +1,109 @@
+epel_repos:
+  "9":
+    - name: epel
+      file: epel
+      description: "Extra Packages for Enterprise Linux $releasever - $basearch"
+      metalink: "https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir"
+      gpgcheck: true
+      gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9"
+  "8":
+    - name: epel
+      file: epel
+      description: "Extra Packages for Enterprise Linux 8 - $basearch"
+      metalink: "https://mirrors.fedoraproject.org/metalink?repo=epel-8&arch=$basearch&infra=$infra&content=$contentdir"
+      gpgcheck: true
+      gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8"
+
+openhpc_repos:
+  "9":
+    - name: OpenHPC
+      file: OpenHPC
+      description: OpenHPC-3 - Base
+      baseurl: "http://repos.openhpc.community/OpenHPC/3/EL_9"
+      gpgcheck: true
+      gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v3.0.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-3
+    - name: OpenHPC-updates
+      file: OpenHPC
+      description: OpenHPC-3 - Updates
+      baseurl: "http://repos.openhpc.community/OpenHPC/3/updates/EL_9"
+      gpgcheck: true
+      gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v3.0.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-3
+  "8":
+    - name: OpenHPC
+      file: OpenHPC
+      description: OpenHPC-2 - Base
+      baseurl: "http://repos.openhpc.community/OpenHPC/2/CentOS_8"
+      gpgcheck: true
+      gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v2.6.1.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-2
+    - name: OpenHPC-updates
+      file: OpenHPC
+      description: OpenHPC-2 - Updates
+      baseurl: "http://repos.openhpc.community/OpenHPC/2/updates/CentOS_8"
+      gpgcheck: true
+      gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v2.6.1.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-2
+
+
+rabbitmq_repos:
+  "9":
+    - name: modern-erlang
+      file: rabbitmq
+      description: "modern-erlang-el9"
+      baseurl: "https://yum1.rabbitmq.com/erlang/el/9/$basearch,https://yum2.rabbitmq.com/erlang/el/9/$basearch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true
+    - name: modern-erlang-noarch
+      file: rabbitmq
+      description: "modern-erlang-el9-noarch"
+      baseurl: "https://yum1.rabbitmq.com/erlang/el/9/noarch,https://yum2.rabbitmq.com/erlang/el/9/noarch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true
+    - name: rabbitmq-el9
+      file: rabbitmq
+      description: "rabbitmq-el9"
+      baseurl: "https://yum2.rabbitmq.com/rabbitmq/el/9/$basearch,https://yum1.rabbitmq.com/rabbitmq/el/9/$basearch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true
+
+  "8":
+    - name: modern-erlang
+      file: rabbitmq
+      description: "modern-erlang-el8"
+      baseurl: "https://yum1.rabbitmq.com/erlang/el/8/$basearch,https://yum2.rabbitmq.com/erlang/el/8/$basearch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true
+    - name: modern-erlang-noarch
+      file: rabbitmq
+      description: "modern-erlang-el8-noarch"
+      baseurl: "https://yum1.rabbitmq.com/erlang/el/8/noarch,https://yum2.rabbitmq.com/erlang/el/8/noarch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true
+    - name: rabbitmq-el8
+      file: rabbitmq
+      description: "rabbitmq-el8"
+      baseurl: "https://yum2.rabbitmq.com/rabbitmq/el/8/$basearch,https://yum1.rabbitmq.com/rabbitmq/el/8/$basearch"
+      gpgcheck: true
+      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
+      sslverify: true
+      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+      metadata_expire: 300
+      pkg_gpgcheck: true

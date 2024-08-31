@@ -1,20 +1,41 @@
 ---
-# OpenHPC 2 on CentOS 8
+# Definitions of packages required for each service
 
-ohpc_slurm_packages:
-  control:
-    - "ohpc-slurm-server"
-    - "slurm-slurmctld-ohpc"
-    - "slurm-example-configs-ohpc"
-  batch:
-    - "ohpc-base-compute"
-    - "ohpc-slurm-client"
-  runtime:
-    - "slurm-ohpc"
-    - "munge"
-    - "slurm-slurmd-ohpc"
-    - "slurm-example-configs-ohpc"
-    - "{{ 'lmod-ohpc' if openhpc_module_system_install else '' }}"
-  database:
-    - "slurm-slurmdbd-ohpc"
+slurm_packages:
+  - "slurm-ohpc"
+  - "ohpc-slurm-server"
+  - "slurm-slurmctld-ohpc"
+  - "slurm-ohpc-slurmrestd"
+  - "slurm-example-configs-ohpc"
+  - "munge"
+  - "lmod-ohpc"
+  - "lua"
+  - "luarocks"
+
+docker_packages:
+  - "docker"
+  - "docker-ce"
+  - "docker-ce-cli"
+  - "containerd.io"
+
+beegfs_packages:
+  - "beegfs-client"
+  - "beegfs-helperd"
+  - "beegfs-utils"
+
+conman_packages:
+  - "conman-ohpc"
+
+genders_packages:
+  - "genders-ohpc"
+
+nhc_packages:
+  - "nhc-ohpc"
+
+rabbitmq_packages:
+  - "socat"
+  - "logrotate"
+  - "erlang"
+  - "rabbitmq-server"
+
 ...

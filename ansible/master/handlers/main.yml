@@ -4,7 +4,6 @@
   service:
     name: "munge"
     state: restarted
-  when: openhpc_slurm_service_started | bool
 
 # NOTE: we need this running before slurmctld start
 - name: Issue slurmdbd restart command
@@ -14,7 +13,6 @@
   delegate_to: "{{ openhpc_slurmdbd_host }}"
   when:
     - openhpc_slurmdbd_host is defined
-    - openhpc_slurm_service_started | bool
     - openhpc_slurmdbd_host in play_hosts
   run_once: true
   listen: Restart slurmdbd service
@@ -26,7 +24,6 @@
   run_once: true
   when:
     - openhpc_slurmdbd_host is defined
-    - openhpc_slurm_service_started | bool
     - openhpc_slurmdbd_host in play_hosts
   listen: Restart slurmdbd service
 
@@ -39,7 +36,6 @@
   delegate_to: "{{ openhpc_slurm_control_host }}"
   run_once: true
   when:
-    - openhpc_slurm_service_started | bool
     - openhpc_slurm_control_host in play_hosts
   listen: Restart slurmctld service
 
@@ -50,7 +46,6 @@
   delegate_to: "{{ openhpc_slurm_control_host }}"
   run_once: true
   when:
-    - openhpc_slurm_service_started | bool
     - openhpc_slurm_control_host in play_hosts
   listen: Restart slurmctld service
 
@@ -59,6 +54,5 @@
     name: "slurmd"
     state: restarted
   when:
-    - openhpc_slurm_service_started | bool
     - openhpc_enable.batch | default(false) | bool
     # 2nd condition required as notification happens on controller, which isn't necessarily a compute note

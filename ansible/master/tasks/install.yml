@@ -1,8 +1,11 @@
 ---
+# This playbook installs and configures repositories and necessary packages on supported distributions.
 
-- include_tasks: pre.yml
+######################
+# Setup Repositories #
+######################
 
-- name: Ensure OpenHPC repos
+- name: Configure EPEL Repositories
   ansible.builtin.yum_repository:
     name: "{{ item.name }}"
     description: "{{ item.description | default(omit) }}"
@@ -12,45 +15,175 @@
     mirrorlist: "{{ item.mirrorlist | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(omit) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ ohpc_repos }}"
+  loop: "{{ epel_repos }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: openhpc-repos
+
+- name: Configure OpenHPC Repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
+    file: "{{ item.file }}"
+    baseurl: "{{ item.baseurl | default(omit) }}"
+    metalink: "{{ item.metalink | default(omit) }}"
+    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
+    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+  loop: "{{ openhpc_repos }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: openhpc-repos
+
+- name: Configure RabbitMQ and Erlang Repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
+    file: "{{ item.file }}"
+    baseurl: "{{ item.baseurl | default(omit) }}"
+    metalink: "{{ item.metalink | default(omit) }}"
+    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
+    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    sslverify: "{{ item.sslverify | default(omit) }}"
+    sslcacert: "{{ item.sslcacert | default(omit) }}"
+    metadata_expire: "{{ item.metadata_expire | default(omit) }}"
+    pkg_gpgcheck: "{{ item.pkg_gpgcheck | default(omit) }}"
+  loop: "{{ rabbitmq_repos }}"
   loop_control:
     label: "{{ item.name }}"
 
-- name: Enable PowerTools repo
-  # NB: doesn't run command  `dnf config-manager --set-enabled PowerTools` as can't make that idempotent
+- name: Enable Required Additional Repository (PowerTools or CodeReady Builder)
   community.general.ini_file:
-    path: /etc/yum.repos.d/Rocky-PowerTools.repo
-    section: powertools
+    path: "{{ repo_file }}"
+    section: "{{ repo_section }}"
     option: enabled
     value: "1"
     create: false
     no_extra_spaces: true
-  when: ansible_distribution_major_version == '8'
+  vars:
+    repo_file: >-
+      {%- if ansible_distribution == 'Rocky' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/Rocky-PowerTools.repo
+      {%- elif ansible_distribution == 'AlmaLinux' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/AlmaLinux-PowerTools.repo
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/ol8_codeready_builder.repo
+      {%- elif ansible_distribution == 'Rocky' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/rocky.repo
+      {%- elif ansible_distribution == 'AlmaLinux' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/almalinux.repo
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/ol9_codeready_builder.repo
+      {%- endif -%}
+    repo_section: >-
+      {%- if ansible_distribution in ['Rocky', 'AlmaLinux'] and ansible_distribution_major_version == '8' -%}
+        powertools
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '8' -%}
+        ol8_codeready_builder
+      {%- elif ansible_distribution in ['Rocky', 'AlmaLinux'] and ansible_distribution_major_version == '9' -%}
+        crb
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '9' -%}
+        ol9_codeready_builder
+      {%- endif -%}
+  when: ansible_distribution in ['Rocky', 'AlmaLinux', 'OracleLinux'] and ansible_distribution_major_version in ['8', '9']
+  tags: additional-repos
 
-- name: Enable CRB repo
-  community.general.ini_file:
-    path: /etc/yum.repos.d/rocky.repo
-    section: crb
-    option: enabled
-    value: "1"
-    create: false
-    no_extra_spaces: true
-  when: ansible_distribution_major_version == '9'
+######################
+# Slurm Installation #
+######################
 
-- name: Build host-specific list of required slurm packages
-  set_fact:
-    openhpc_slurm_pkglist: "{{ openhpc_slurm_pkglist | default([]) + item.value }}"
-  loop: "{{ ohpc_slurm_packages | dict2items }}"
-  when: (openhpc_enable.get(item.key, false)) or ()
-
-- name: Install required slurm packages
+- name: Install Slurm Packages
   dnf:
-    name: "{{ openhpc_slurm_pkglist | reject('eq', '') }}"
-    install_weak_deps: false # avoids getting recommended packages
-  when: openhpc_slurm_pkglist | default(false, true)
+    name: "{{ slurm_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: slurm-install
 
-- name: Install packages from openhpc_packages variable
-  yum:
-    name: "{{ openhpc_packages }}"
+#######################
+# Docker Installation #
+#######################
+
+- name: Install Docker Packages
+  dnf:
+    name: "{{ docker_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: docker-install
+
+- name: Initialize Docker Swarm Mode
+  shell: docker swarm init
+  when: ansible_distribution in ['Rocky', 'AlmaLinux', 'OracleLinux']
+  tags: docker-init
+
+#######################
+# BeeGFS Installation #
+#######################
+
+- name: Install BeeGFS Packages
+  dnf:
+    name: "{{ beegfs_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: beegfs-install
+
+#######################
+# ConMan Installation #
+#######################
+
+- name: Install ConMan (Console Manager) packages
+  dnf:
+    name: "{{ conman_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: conman-install
+
+- name: Ensure the ConMan configuration exists but is empty
+  file:
+    path: /etc/conman.conf
+    state: touch
+    mode: '0644'
+  tags: conman-config
+
+########################
+# Genders Installation #
+########################
+
+- name: Install Genders Packages
+  dnf:
+    name: "{{ genders_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: genders-install
+
+- name: Ensure the Genders config file exists but is empty
+  file:
+    path: /etc/genders
+    state: touch
+    mode: '0644'
+  tags: genders-config
+
+####################
+# NHC Installation #
+####################
+
+- name: Install NHC (Node Health Checker) Packages
+  dnf:
+    name: "{{ nhc_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: nhc-install
+
+- name: Ensure NHC is registered as Slurm's health check program
+  blockinfile:
+    path: /etc/slurm/slurm.conf
+    block: |
+      HealthCheckProgram=/usr/sbin/nhc
+      HealthCheckInterval=300
+  tags: nhc-config
+
+#########################
+# RabbitMQ Installation #
+#########################
+
+- name: Install RabbitMQ Packages
+  dnf:
+    name: "{{ rabbitmq_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: rabbitmq-install
 
 ...

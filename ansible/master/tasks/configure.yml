@@ -1,0 +1,176 @@
+---
+# This playbook configures packages
+
+#######################
+# Slurm Configuration #
+#######################
+
+- name: Ensure Slurm's controller state directory exists
+  file:
+    path: "{{ master_slurm.state_save_location }}"
+    owner: slurm
+    group: slurm
+    mode: 0755
+    state: directory
+  tags: slurm-config
+
+- name: Generate a Munge Key
+  # This is usually a no-op as the package install actually generates a (node-unique) one, so won't usually trigger handler.
+  command: "dd if=/dev/urandom of=/etc/munge/munge.key bs=1 count=1024"
+  args:
+    creates: "/etc/munge/munge.key"
+  tags: slurm-config
+
+- name: Fix permissions on /etc to pass Munge startup checks
+  # Rocky-9-GenericCloud-Base-9.4-20240523.0.x86_64.qcow2 makes /etc g=rwx rather than g=rx (where group=root)
+  file:
+    path: /etc
+    state: directory
+    mode: g-w
+  when: ansible_distribution is 'Rocky' and ansible_distribution_major_version is '9'
+  tags: slurm-config
+
+- name: Install LuaSocket and AMQP libraries via LuaRocks
+  ansible.builtin.command: luarocks install {{ item }}
+  loop:
+    - luasocket
+    - lua-amqp
+  tags: slurm-config
+
+- name: Create the Lua script for job completion
+  ansible.builtin.copy:
+    dest: "/etc/slurm/jobcomp.lua"
+    mode: '0755'
+    content: |
+      local amqp = require("amqp")
+
+      function slurm_jobcomp_process(job_table)
+          local job_id = job_table["job_id"]
+          local job_name = job_table["job_name"]
+          local job_state = job_table["job_state"]
+          local user_id = job_table["user_id"]
+          local partition = job_table["partition"]
+          local submit_time = job_table["submit_time"]
+
+          -- Create the JSON payload to send to RabbitMQ
+          local job_payload = string.format(
+            '{"job_id": "%s", "job_name": "%s", "job_state": "%s", "user_id": "%s", "partition": "%s", "submit_time": "%s"}',
+            job_id, job_name, job_state, user_id, partition, submit_time
+          )
+
+          -- Connect to RabbitMQ
+          local conn = amqp.Connection:new({host = "localhost", port = 5672})
+          conn:connect()
+          conn:open_channel()
+
+          -- Declare the queue if it doesn't exist
+          conn:declare_queue("slurm_jobs")
+
+          -- Publish the message to the queue
+          conn:publish_message(job_payload, "slurm_jobs")
+
+          -- Close the connection
+          conn:close()
+
+          slurm.log_info("Job completion data sent to RabbitMQ: " .. job_payload)
+          return slurm.SUCCESS
+      end
+  tags: slurm-config
+
+- name: Template basic slurm.conf
+  template:
+    src: slurm.conf.j2
+    dest: "{{ _slurm_conf_tmpfile.path }}"
+    lstrip_blocks: true
+    mode: 0644
+  changed_when: false
+  become: false
+  tags: slurm-config
+
+- name: Customise slurm.conf
+  community.general.ini_file:
+    path: "{{ _slurm_conf_tmpfile.path }}"
+    option: "{{ item.key }}"
+    section: ''
+    value: "{{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
+    no_extra_spaces: true
+    create: no
+    mode: 0644
+  loop: "{{ openhpc_config | dict2items }}"
+  changed_when: false
+  become: false
+  tags: slurm-config
+
+- name: Create slurm.conf
+  copy:
+    src: "{{ _slurm_conf_tmpfile.path }}"
+    dest: /etc/slurm/slurm.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart slurmctld service
+  register: ohpc_slurm_conf
+  tags: slurm-config
+
+- name: Create gres.conf
+  template:
+    src: "{{ openhpc_gres_template }}"
+    dest: /etc/slurm/gres.conf
+    mode: "0600"
+    owner: slurm
+    group: slurm
+  notify:
+    - Restart slurmctld service
+  register: ohpc_gres_conf
+  changed_when: false
+  become: false
+  tags: slurm-config
+
+- name: Template cgroup.conf
+  # Appears to be required even with NO cgroup plugins: https://slurm.schedmd.com/cgroups.html#cgroup_design
+  template:
+    src: cgroup.conf.j2
+    dest: /etc/slurm/cgroup.conf
+    mode: "0644"
+    owner: root
+    group: root
+  changed_when: false
+  become: false
+  tags: slurm-config
+
+- name: Remove local tempfile for slurm.conf templating
+  ansible.builtin.file:
+    path: "{{ _slurm_conf_tmpfile.path }}"
+    state: absent
+  when: _slurm_conf_tmpfile.path is defined
+  changed_when: false
+  become: false
+  tags: slurm-config
+
+- name: Notify handler for slurmd restart
+  debug:
+    msg: "notifying handlers" # meta: no-op doesn't support 'when'
+  changed_when: true
+  when:
+    - openhpc_slurm_control_host in ansible_play_hosts
+    - hostvars[openhpc_slurm_control_host].ohpc_slurm_conf.changed or hostvars[openhpc_slurm_control_host].ohpc_gres_conf.changed # noqa no-handler
+  notify:
+    - Restart slurmd service
+  tags: slurm-config
+
+##########################
+# RabbitMQ Configuration #
+##########################
+
+- name: Template rabbitmq.conf
+  template:
+    src: rabbitmq.conf.j2
+    dest: /etc/rabbitmq/rabbitmq.conf
+    mode: "0600"
+    owner: root
+    group: rabbitmq
+  notify: Restart rabbitmq service
+  tags: rabbitmq-config
+
+...

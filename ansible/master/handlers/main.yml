@@ -5,54 +5,23 @@
     name: "munge"
     state: restarted
 
-# NOTE: we need this running before slurmctld start
-- name: Issue slurmdbd restart command
-  service:
-    name: "slurmdbd"
-    state: restarted
-  delegate_to: "{{ openhpc_slurmdbd_host }}"
-  when:
-    - openhpc_slurmdbd_host is defined
-    - openhpc_slurmdbd_host in play_hosts
-  run_once: true
-  listen: Restart slurmdbd service
-
-- name: Check slurmdbd actually restarted
-  wait_for:
-    port: "{{ openhpc_slurmdbd_port }}"
-  delegate_to: "{{ openhpc_slurmdbd_host }}"
-  run_once: true
-  when:
-    - openhpc_slurmdbd_host is defined
-    - openhpc_slurmdbd_host in play_hosts
-  listen: Restart slurmdbd service
-
 # NOTE: we need this running before slurmd
 # Allows you to reconfigure slurmctld from another host
 - name: Issue slurmctld restart command
   service:
     name: "slurmctld"
     state: restarted
-  delegate_to: "{{ openhpc_slurm_control_host }}"
   run_once: true
-  when:
-    - openhpc_slurm_control_host in play_hosts
   listen: Restart slurmctld service
 
 - name: Check slurmctld actually restarted
   wait_for:
     port: 6817
     delay: 10
-  delegate_to: "{{ openhpc_slurm_control_host }}"
   run_once: true
-  when:
-    - openhpc_slurm_control_host in play_hosts
   listen: Restart slurmctld service
 
 - name: Restart slurmd service
   service:
     name: "slurmd"
     state: restarted
-  when:
-    - openhpc_enable.batch | default(false) | bool
-    # 2nd condition required as notification happens on controller, which isn't necessarily a compute note

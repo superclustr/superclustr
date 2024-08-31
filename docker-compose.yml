@@ -1,0 +1,16 @@
+#
+# Docker Compose file for Local Development.
+# The use of this file is documented in the README.md file.
+#
+# NEVER USE IN PRODUCTION.
+#
+services:
+    master:
+        build: .
+        volumes:
+            - type: bind
+              source: .
+              target: /usr/src/app
+        working_dir: /usr/src/app
+        entrypoint: >
+            /bin/sh -c "./bin/convolv master init && tail -f /dev/null"

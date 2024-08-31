@@ -33,41 +33,16 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory) error {
 	// Define inventory on the fly
-	inventoryIni := `
-[openhpc_login]
-openhpc-login-0 ansible_host=88.99.165.60 ansible_user=root
-
-[openhpc_compute]
-openhpc-compute-0 ansible_host=88.99.165.60 ansible_user=root
-
-[cluster_login:children]
-openhpc_login
-
-[cluster_control:children]
-openhpc_login
-
-[cluster_batch:children]
-openhpc_compute
-`
+	inventoryIni := ``
 
 	// Define playbook on the fly
 	playbookYaml := `
 ---
-- hosts:
-  - cluster_login
-  - cluster_control
-  - cluster_batch
+- hosts: localhost
   become: yes
   roles:
-    - role: openhpc
-      openhpc_enable:
-        control: "{{ inventory_hostname in groups['cluster_control'] }}"
-        batch: "{{ inventory_hostname in groups['cluster_batch'] }}"
-        runtime: true
-      openhpc_slurm_control_host: "{{ groups['cluster_control'] | first }}"
-      openhpc_slurm_partitions:
-        - name: "compute"
-      openhpc_cluster_name: openhpc
+    - role: master
+      master_cluster_name: convolv
 `
 
 	// Create a temporary directory to store the inventory and playbook
@@ -111,6 +86,7 @@ openhpc_compute
 			execute.WithTransformers(
 				transformer.Prepend("Go-ansible example with become"),
 			),
+			execute.WithEnvVars(map[string]string{"PYTHONPATH": f.Python.GetPythonLibFsPath()}),
 			execute.WithExecutable(f.Python),
 		),
 		configuration.WithAnsibleForceColor(),

@@ -154,18 +154,4 @@
     - Restart slurmd service
   tags: slurm-config
 
-##########################
-# RabbitMQ Configuration #
-##########################
-
-- name: Template rabbitmq.conf
-  template:
-    src: rabbitmq.conf.j2
-    dest: /etc/rabbitmq/rabbitmq.conf
-    mode: "0600"
-    owner: root
-    group: rabbitmq
-  notify: Restart rabbitmq service
-  tags: rabbitmq-config
-
 ...

@@ -39,27 +39,22 @@
     label: "{{ item.name }}"
   tags: openhpc-repos
 
-##################################
-# RabbitMQ / Erlang Repositories #
-##################################
+#######################
+# Docker Repositories #
+#######################
 
-- name: Configure RabbitMQ and Erlang Repositories
+- name: Configure Docker CE Repository
   ansible.builtin.yum_repository:
     name: "{{ item.name }}"
     description: "{{ item.description | default(omit) }}"
     file: "{{ item.file }}"
     baseurl: "{{ item.baseurl | default(omit) }}"
-    metalink: "{{ item.metalink | default(omit) }}"
-    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(omit) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
-    sslverify: "{{ item.sslverify | default(omit) }}"
-    sslcacert: "{{ item.sslcacert | default(omit) }}"
-    metadata_expire: "{{ item.metadata_expire | default(omit) }}"
-    repo_gpgcheck: "{{ item.repo_gpgcheck | default(omit) }}"
-  loop: "{{ rabbitmq_repos[ansible_distribution_major_version] | default([]) }}"
+  loop: "{{ docker_repos[ansible_distribution_major_version] | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
+  tags: docker-repos
 
 ###########################
 # Additional Repositories #

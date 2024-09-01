@@ -42,68 +42,18 @@ openhpc_repos:
       gpgcheck: true
       gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v2.6.1.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-2
 
-
-rabbitmq_repos:
+docker_repos:
   "9":
-    - name: modern-erlang
-      file: rabbitmq
-      description: "modern-erlang-el9"
-      baseurl: "https://yum1.rabbitmq.com/erlang/el/9/$basearch,https://yum2.rabbitmq.com/erlang/el/9/$basearch"
+    - name: docker-ce-stable
+      file: docker-ce.repo
+      description: "Docker CE Stable - $releasever - $basearch"
+      baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
       gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
-    - name: modern-erlang-noarch
-      file: rabbitmq
-      description: "modern-erlang-el9-noarch"
-      baseurl: "https://yum1.rabbitmq.com/erlang/el/9/noarch,https://yum2.rabbitmq.com/erlang/el/9/noarch"
-      gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
-    - name: rabbitmq-el9
-      file: rabbitmq
-      description: "rabbitmq-el9"
-      baseurl: "https://yum2.rabbitmq.com/rabbitmq/el/9/$basearch,https://yum1.rabbitmq.com/rabbitmq/el/9/$basearch"
-      gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
-
+      gpgkey: "https://download.docker.com/linux/centos/gpg"
   "8":
-    - name: modern-erlang
-      file: rabbitmq
-      description: "modern-erlang-el8"
-      baseurl: "https://yum1.rabbitmq.com/erlang/el/8/$basearch,https://yum2.rabbitmq.com/erlang/el/8/$basearch"
+    - name: docker-ce-stable
+      file: docker-ce.repo
+      description: "Docker CE Stable - $releasever - $basearch"
+      baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
       gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
-    - name: modern-erlang-noarch
-      file: rabbitmq
-      description: "modern-erlang-el8-noarch"
-      baseurl: "https://yum1.rabbitmq.com/erlang/el/8/noarch,https://yum2.rabbitmq.com/erlang/el/8/noarch"
-      gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-erlang.E495BB49CC4BBE5B.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
-    - name: rabbitmq-el8
-      file: rabbitmq
-      description: "rabbitmq-el8"
-      baseurl: "https://yum2.rabbitmq.com/rabbitmq/el/8/$basearch,https://yum1.rabbitmq.com/rabbitmq/el/8/$basearch"
-      gpgcheck: true
-      gpgkey: "https://github.com/rabbitmq/signing-keys/releases/download/3.0/cloudsmith.rabbitmq-server.9F4587F226208342.key,https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc"
-      sslverify: true
-      sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-      metadata_expire: 300
-      repo_gpgcheck: true
+      gpgkey: "https://download.docker.com/linux/centos/gpg"

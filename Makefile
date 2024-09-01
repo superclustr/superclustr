@@ -18,8 +18,8 @@ generate:
 build:
 	$(DOCKER_RUN) go build -o $(OUT_DIR)/$(BINARY_NAME) main.go
 
-# Run the binary with arguments
-run:
+# Try the binary with arguments
+try:
 	$(DOCKER_RUN) ./$(OUT_DIR)/$(BINARY_NAME) $(filter-out $@,$(MAKECMDGOALS))
 
 # Test the project

@@ -80,40 +80,20 @@
 - name: Template basic slurm.conf
   template:
     src: slurm.conf.j2
-    dest: "{{ _slurm_conf_tmpfile.path }}"
-    lstrip_blocks: true
-    mode: 0644
-  changed_when: false
-  become: false
-  tags: slurm-config
-
-- name: Customise slurm.conf
-  lineinfile:
-    path: "{{ _slurm_conf_tmpfile.path }}"
-    regexp: '^{{ item.key }}='
-    line: "{{ item.key }}={{ (item.value | join(',')) if (item.value is sequence and item.value is not string) else item.value }}"
-    create: true
-    mode: '0644'
-  loop: "{{ openhpc_config | dict2items }}"
-  changed_when: false
-  become: false
-  tags: slurm-config
-
-- name: Create slurm.conf
-  copy:
-    src: "{{ _slurm_conf_tmpfile.path }}"
     dest: /etc/slurm/slurm.conf
+    lstrip_blocks: true
     owner: root
     group: root
     mode: 0644
   notify:
     - Restart slurmctld service
-  register: ohpc_slurm_conf
+  changed_when: false
+  become: false
   tags: slurm-config
 
 - name: Create gres.conf
   template:
-    src: "{{ openhpc_gres_template }}"
+    src: "gres.conf.j2"
     dest: /etc/slurm/gres.conf
     mode: "0600"
     owner: slurm

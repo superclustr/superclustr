@@ -5,16 +5,6 @@
 # Slurm Installation #
 ######################
 
-- name: Log enabled Yum repositories
-  ansible.builtin.command: cat /etc/yum.repos.d/rocky.repo
-  register: repo_list
-  tags: debug
-
-- name: Show enabled Yum repositories
-  ansible.builtin.debug:
-    msg: "{{ repo_list.stdout_lines }}"
-  tags: debug
-
 - name: Install Slurm Packages
   dnf:
     name: "{{ slurm_packages | reject('eq', '') }}"

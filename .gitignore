@@ -1,7 +1,8 @@
 /bin
-/dist
-/apps/**/npm_modules
-/CHANGELOG.md
+/data
+
+# Vagrant
+.vagrant/
 
 # Ansible
 *.retry

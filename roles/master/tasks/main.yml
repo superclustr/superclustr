@@ -19,3 +19,8 @@
   block:
       - include_tasks: start.yml
   tags: start
+
+- name: Deploy Applications
+  block:
+      - include_tasks: deploy.yml
+  tags: deploy

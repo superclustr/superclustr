@@ -13,7 +13,6 @@ slurm_packages:
     - "luarocks"
 
 docker_packages:
-    - "docker"
     - "docker-ce"
     - "docker-ce-cli"
     - "containerd.io"

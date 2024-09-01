@@ -9,7 +9,7 @@ epel_repos:
   "8":
     - name: epel
       file: epel
-      description: "Extra Packages for Enterprise Linux 8 - $basearch"
+      description: "Extra Packages for Enterprise Linux $releasever - $basearch"
       metalink: "https://mirrors.fedoraproject.org/metalink?repo=epel-8&arch=$basearch&infra=$infra&content=$contentdir"
       gpgcheck: true
       gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8"
@@ -57,3 +57,19 @@ docker_repos:
       baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
       gpgcheck: true
       gpgkey: "https://download.docker.com/linux/centos/gpg"
+
+beegfs_repos:
+  "9":
+    - name: beegfs
+      file: beegfs-rhel9.repo
+      description: "BeeGFS - $releasever - $basearch"
+      baseurl: "https://www.beegfs.io/release/latest-stable/dists/rhel9"
+      gpgcheck: true
+      gpgkey: "https://www.beegfs.io/release/latest-stable/gpg/GPG-KEY-beegfs"
+  "8":
+    - name: beegfs
+      file: beegfs-rhel8.repo
+      description: "BeeGFS - $releasever - $basearch"
+      baseurl: "https://www.beegfs.io/release/latest-stable/dists/rhel8"
+      gpgcheck: true
+      gpgkey: "https://www.beegfs.io/release/latest-stable/gpg/GPG-KEY-beegfs"

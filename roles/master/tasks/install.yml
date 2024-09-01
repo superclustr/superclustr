@@ -15,31 +15,11 @@
 # Docker Installation #
 #######################
 
-- name: Ensure runc is not installed.
-  package:
-    name: runc
-    state: absent
-
-- name: Ensure container-selinux is installed.
-  package:
-    name: container-selinux
-    state: present
-
-- name: Ensure containerd.io is installed.
-  package:
-    name: containerd.io
-    state: present
-
 - name: Install Docker Packages
   dnf:
     name: "{{ docker_packages | reject('eq', '') }}"
     install_weak_deps: false
   tags: docker-install
-
-- name: Initialize Docker Swarm Mode
-  shell: docker swarm init
-  when: ansible_distribution in ['Rocky', 'AlmaLinux', 'OracleLinux']
-  tags: docker-config
 
 #######################
 # BeeGFS Installation #

@@ -5,6 +5,16 @@
 # Slurm Installation #
 ######################
 
+- name: Log enabled Yum repositories
+  ansible.builtin.command: cat /etc/yum.repos.d/rocky.repo
+  register: repo_list
+  tags: debug
+
+- name: Show enabled Yum repositories
+  ansible.builtin.debug:
+    msg: "{{ repo_list.stdout_lines }}"
+  tags: debug
+
 - name: Install Slurm Packages
   dnf:
     name: "{{ slurm_packages | reject('eq', '') }}"
@@ -74,13 +84,5 @@
     name: "{{ nhc_packages | reject('eq', '') }}"
     install_weak_deps: false
   tags: nhc-install
-
-- name: Ensure NHC is registered as Slurm's health check program
-  blockinfile:
-    path: /etc/slurm/slurm.conf
-    block: |
-      HealthCheckProgram=/usr/sbin/nhc
-      HealthCheckInterval=300
-  tags: nhc-config
 
 ...

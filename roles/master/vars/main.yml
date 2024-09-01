@@ -11,6 +11,7 @@ slurm_packages:
     - "lmod-ohpc"
     - "lua"
     - "luarocks"
+    - "lua-devel"
 
 docker_packages:
     - "docker-ce"

@@ -78,11 +78,10 @@
 ###########################
 
 - name: Enable Required Additional Repository (PowerTools or CodeReady Builder)
-  lineinfile:
+  replace:
     path: "{{ repo_file }}"
-    regexp: '^enabled='
-    line: 'enabled=1'
-    create: true
+    regexp: '(\[{{ repo_section }}\][^\[]*?)enabled=0'
+    replace: '\1enabled=1'
   vars:
     repo_file: >-
       {%- if ansible_distribution == 'Rocky' and ansible_distribution_major_version == '8' -%}

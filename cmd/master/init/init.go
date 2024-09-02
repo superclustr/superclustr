@@ -19,8 +19,8 @@ import (
 func NewCmdInit(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize a compute service.",
-		Long:  "Initialize a compute service on this machine.",
+		Short: "Initialize a master service.",
+		Long:  "Initialize a master service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runInit(f)
 			if err != nil {
@@ -95,7 +95,7 @@ func runInit(f *cli.Factory) error {
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
 			execute.WithTransformers(
-				transformer.Prepend("Go-ansible example with become"),
+				transformer.Prepend("initializing"),
 			),
 			execute.WithEnvVars(map[string]string{"PYTHONPATH": f.Python.GetPythonLibFsPath()}),
 			execute.WithExecutable(f.Python),

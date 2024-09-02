@@ -6,7 +6,7 @@
 ###########################
 
 - name: Deploy Docker Swarm
-  shell: docker swarm init
+  shell: docker swarm init --advertise-addr {{ ansible_default_ipv4.address }}
   when: ansible_distribution in ['Rocky', 'AlmaLinux', 'OracleLinux']
   tags: docker-deploy
 

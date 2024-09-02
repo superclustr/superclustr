@@ -4,6 +4,7 @@ Vagrant.configure("2") do |config|
 
   # Set box based on architecture
   config.vm.box = "bento/rockylinux-9.3"
+  config.vm.box_version = "202404.23.0"
 
   # VMware Fusion provider configuration
   config.vm.provider "vmware_desktop" do |vmware|

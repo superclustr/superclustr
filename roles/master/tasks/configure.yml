@@ -117,21 +117,4 @@
   become: false
   tags: slurm-config
 
-- name: Remove local tempfile for slurm.conf templating
-  ansible.builtin.file:
-    path: "{{ _slurm_conf_tmpfile.path }}"
-    state: absent
-  when: _slurm_conf_tmpfile.path is defined
-  changed_when: false
-  become: false
-  tags: slurm-config
-
-- name: Notify handler for slurmd restart
-  debug:
-    msg: "notifying handlers" # meta: no-op doesn't support 'when'
-  changed_when: true
-  notify:
-    - Restart slurmd service
-  tags: slurm-config
-
 ...

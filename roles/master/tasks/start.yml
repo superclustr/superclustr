@@ -3,7 +3,7 @@
 # This playbook configures and starts packages in the os init system 
 
 - name: Flush handler
-  # As then subsequent "ensure" is a no-op if slurm services bounced
+  # As the subsequent "ensure" tasks are all no-op to check if any services have bounced
   meta: flush_handlers 
 
 - name: Ensure Munge state
@@ -12,9 +12,9 @@
     enabled: true
     state: started
 
-- name: Ensure slurmd state
+- name: Ensure slurmctld state
   systemd:
-    name: slurmd
+    name: slurmctld
     enabled: true
     state: started
 

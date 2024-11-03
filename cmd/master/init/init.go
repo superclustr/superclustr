@@ -41,6 +41,7 @@ func runInit(f *cli.Factory) error {
 ---
 - hosts: localhost
   become: yes
+  gather_facts: true
   roles:
     - role: master
       master_cluster_name: convolv

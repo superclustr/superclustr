@@ -1,5 +1,5 @@
 ---
-# This playbook deploys all applications
+# This playbook performs last necessary deployment actions
 
 ###########################
 # Docker Swarm Deployment #

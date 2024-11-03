@@ -13,10 +13,8 @@ slurm_packages:
     - "luarocks"
     - "lua-devel"
 
-docker_packages:
-    - "docker-ce"
-    - "docker-ce-cli"
-    - "containerd.io"
+kubernetes_packages:
+    - "curl"
 
 beegfs_packages:
     - "beegfs-client"

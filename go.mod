@@ -1,4 +1,4 @@
-module gitlab.com/convolv/convolv
+module gitlab.com/superclustr/cli
 
 go 1.22.0
 

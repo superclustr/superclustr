@@ -43,7 +43,7 @@
     name: beegfs-client
     enabled: yes
     state: started
-  ignore_errors: true # Broken, disabled as cannot build kernel module without kernel-devel
+  ignore_errors: true # FIXME: Broken, disabled as cannot build kernel module without kernel-devel
   tags: beegfs-service
 
 - name: Ensure conman state
@@ -51,5 +51,5 @@
     name: conman
     enabled: yes
     state: started
-  ignore_errors: true # Broken, disabled as ConMan needs additional configuration before it can be used ans we are not sure what to use if for yet
+  ignore_errors: true # FIXME: Broken, disabled as ConMan needs additional configuration before it can be used ans we are not sure what to use if for yet
   tags: conman-service

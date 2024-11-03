@@ -5,27 +5,141 @@
 # Slurm Installation #
 ######################
 
-- name: Install Slurm Packages
+- name: Install Slurm
   dnf:
     name: "{{ slurm_packages | reject('eq', '') }}"
     install_weak_deps: false
   tags: slurm-install
 
-#######################
-# Docker Installation #
-#######################
+###########################
+# Kubernetes Installation #
+###########################
 
-- name: Install Docker Packages
-  dnf:
-    name: "{{ docker_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: docker-install
+- name: Install Kubernetes (k3s)
+  block:
+    - name: Download k3s installation script
+      get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+
+    - name: Install k3s server
+      environment:
+        INSTALL_K3S_EXEC: >-
+          server
+          --tls-san 10.0.1.100
+          --tls-san 203.0.113.10
+          --tls-san k8s.superclustr.net
+          --flannel-backend none
+          --disable-network-policy
+      shell: /tmp/k3s-install.sh
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s to be ready
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        state: present
+        delay: 5
+        timeout: 300
+
+    - name: Copy kubeconfig locally
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ./k3s-kubeconfig
+        flat: yes
+  tags: kubernetes-install
+
+- name: Install Cilium
+  module_defaults:
+    kubernetes.core.helm:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s:
+      kubeconfig: './k3s-kubeconfig'
+    kubernetes.core.k8s_info:
+      kubeconfig: './k3s-kubeconfig'
+  block:
+    - name: Install Cilium via helm chart
+      delegate_to: 'localhost'
+      kubernetes.core.helm:
+        chart_repo_url: 'https://helm.cilium.io/'
+        release_name: 'cilium'
+        chart_ref: 'cilium'
+        release_namespace: 'kube-system'
+        values:
+          ipam:
+            operator:
+              clusterPoolIPv4PodCIDRList: "10.42.0.0/16"
+          operator:
+            replicas: 1
+
+    - name: Wait until all pods are running
+      delegate_to: localhost
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: kube-system
+      register: pod_list
+      until: pod_list | json_query("resources[*].status.phase") | unique | sort == ["Running"] or
+             pod_list | json_query("resources[*].status.phase") | unique | sort == ["Running", "Succeeded"]
+      retries: 24
+      delay: 10
+
+    - name: Wait until all pods are ready
+      delegate_to: localhost
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: kube-system
+        field_selectors:
+          - status.phase=Running
+      register: pod_list_ready
+      until: pod_list_ready | json_query("resources[*].status.containerStatuses[*].ready") | unique | sort == [[true]] or
+             pod_list_ready | json_query("resources[*].status.containerStatuses[*].ready") | unique | sort == [[true], [true, true]]
+      retries: 12
+      delay: 10
+  tags: kubernetes-install
+
+- name: Install ArgoCD
+  block:
+    - name: Add ArgoCD Helm repo
+      kubernetes.core.helm_repository:
+        name: argo
+        repo_url: https://argoproj.github.io/argo-helm
+
+    - name: Install ArgoCD
+      kubernetes.core.helm:
+        name: argocd
+        chart_ref: argo/argo-cd
+        release_namespace: argocd
+        create_namespace: true
+  tags: kubernetes-install
+
+- name: Install MetalLB
+  block:
+    - name: Install MetalLB via Helm chart
+      delegate_to: 'localhost'
+      kubernetes.core.helm:
+        chart_repo_url: 'https://metallb.github.io/metallb'
+        release_name: 'metallb'
+        chart_ref: 'metallb'
+        release_namespace: 'metallb-system'
+        create_namespace: true
+        values:
+          configInline:
+            config:
+              address-pools:
+                - name: default
+                  protocol: layer2
+                  addresses:
+                    - "192.168.1.240-192.168.1.250"
+  tags: kubernetes-install
 
 #######################
 # BeeGFS Installation #
 #######################
 
-- name: Install BeeGFS Packages
+- name: Install BeeGFS
   dnf:
     name: "{{ beegfs_packages | reject('eq', '') }}"
     install_weak_deps: false
@@ -35,7 +149,7 @@
 # ConMan Installation #
 #######################
 
-- name: Install ConMan (Console Manager) packages
+- name: Install ConMan (Console Manager)
   dnf:
     name: "{{ conman_packages | reject('eq', '') }}"
     install_weak_deps: false
@@ -52,7 +166,7 @@
 # Genders Installation #
 ########################
 
-- name: Install Genders Packages
+- name: Install Genders
   dnf:
     name: "{{ genders_packages | reject('eq', '') }}"
     install_weak_deps: false
@@ -69,10 +183,8 @@
 # NHC Installation #
 ####################
 
-- name: Install NHC (Node Health Checker) Packages
+- name: Install NHC (Node Health Checker)
   dnf:
     name: "{{ nhc_packages | reject('eq', '') }}"
     install_weak_deps: false
   tags: nhc-install
-
-...

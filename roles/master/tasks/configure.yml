@@ -117,4 +117,40 @@
   become: false
   tags: slurm-config
 
-...
+############################
+# Kubernetes Configuration #
+############################
+
+- name: Create ArgoCD Application Set
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ApplicationSet
+      metadata:
+        name: all-apps
+        namespace: argocd
+      spec:
+        generators:
+          - list:
+              elements:
+                - name: bgpdata
+                  repoURL: https://github.com/bgpdata/bgpdata.git
+                - name: cernide
+                  repoURL: https://github.com/cernide/cernide.git
+        template:
+          metadata:
+            name: '{{name}}'
+          spec:
+            project: default
+            source:
+              repoURL: '{{repoURL}}'
+              targetRevision: HEAD
+              path: charts
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: '{{name}}'
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+  tags: kubernetes-config

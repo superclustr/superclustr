@@ -6,7 +6,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
-	"gitlab.com/convolv/convolv/internal/surveyext"
+	"github.com/superclustr/superclustr/internal/surveyext"
 )
 
 type Prompter interface {

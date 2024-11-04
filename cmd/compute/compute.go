@@ -2,8 +2,8 @@ package node
 
 import (
 	"github.com/spf13/cobra"
-	cmdInit "gitlab.com/convolv/convolv/cmd/compute/init"
-	"gitlab.com/convolv/convolv/internal/cli"
+	cmdInit "github.com/superclustr/superclustr/cmd/compute/init"
+	"github.com/superclustr/superclustr/internal/cli"
 )
 
 func NewCmdCompute(f *cli.Factory) *cobra.Command {

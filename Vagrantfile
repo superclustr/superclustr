@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
     master.vm.network "forwarded_port", guest: 80, host: 80
 
     master.vm.provision "shell", run: "always", inline: <<-SHELL
-      /vagrant/bin/convolv master init
+      /vagrant/bin/super master init
     SHELL
   end
 
@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
     worker.vm.network "private_network", type: "dhcp"
 
     worker.vm.provision "shell", run: "always", inline: <<-SHELL
-      /vagrant/bin/convolv worker init
+      /vagrant/bin/super worker init
     SHELL
   end
 

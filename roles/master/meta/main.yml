@@ -1,4 +1,0 @@
----
-dependencies:
-    - name: kubernetes.core
-      version: latest

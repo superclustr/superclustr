@@ -13,7 +13,7 @@ import (
 	"github.com/apenella/go-ansible/v2/pkg/execute/result/transformer"
 	"github.com/apenella/go-ansible/v2/pkg/playbook"
 	"github.com/spf13/cobra"
-	"gitlab.com/convolv/convolv/internal/cli"
+	"github.com/superclustr/superclustr/internal/cli"
 )
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
@@ -44,7 +44,7 @@ func runInit(f *cli.Factory) error {
   gather_facts: true
   roles:
     - role: master
-      master_cluster_name: convolv
+      master_cluster_name: superclustr
 `
 
 	// Create a temporary directory to store the inventory and playbook

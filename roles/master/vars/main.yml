@@ -15,6 +15,7 @@ slurm_packages:
 
 kubernetes_packages:
     - "curl"
+    - "git"
 
 beegfs_packages:
     - "beegfs-client"

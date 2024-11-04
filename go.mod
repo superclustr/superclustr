@@ -1,4 +1,4 @@
-module gitlab.com/superclustr/cli
+module github.com/superclustr/superclustr
 
 go 1.22.0
 

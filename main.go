@@ -13,13 +13,13 @@ import (
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
-	"gitlab.com/convolv/convolv/cmd/root"
-	"gitlab.com/convolv/convolv/data"
-	"gitlab.com/convolv/convolv/internal/build"
-	"gitlab.com/convolv/convolv/internal/cli"
-	"gitlab.com/convolv/convolv/internal/iostreams"
-	"gitlab.com/convolv/convolv/internal/python"
-	"gitlab.com/convolv/convolv/utils"
+	"github.com/superclustr/superclustr/cmd/root"
+	"github.com/superclustr/superclustr/data"
+	"github.com/superclustr/superclustr/internal/build"
+	"github.com/superclustr/superclustr/internal/cli"
+	"github.com/superclustr/superclustr/internal/iostreams"
+	"github.com/superclustr/superclustr/internal/python"
+	"github.com/superclustr/superclustr/utils"
 )
 
 //go:generate go run ./generate/pip

@@ -1,5 +1,5 @@
 # Variables
-BINARY_NAME=convolv
+BINARY_NAME=super
 OUT_DIR=bin
 DOCKER_IMAGE=golang:1.22
 DOCKER_WORKDIR=/usr/src/app

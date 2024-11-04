@@ -12,7 +12,7 @@ import (
 	"github.com/apenella/go-ansible/v2/pkg/execute/result/transformer"
 	"github.com/apenella/go-ansible/v2/pkg/playbook"
 	"github.com/spf13/cobra"
-	"gitlab.com/convolv/convolv/internal/cli"
+	"github.com/superclustr/superclustr/internal/cli"
 )
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {

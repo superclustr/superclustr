@@ -2,12 +2,12 @@ package root
 
 import (
 	"github.com/spf13/cobra"
-	computeCmd "gitlab.com/convolv/convolv/cmd/compute"
-	masterCmd "gitlab.com/convolv/convolv/cmd/master"
-	monitorCmd "gitlab.com/convolv/convolv/cmd/monitor"
-	storageCmd "gitlab.com/convolv/convolv/cmd/storage"
-	versionCmd "gitlab.com/convolv/convolv/cmd/version"
-	"gitlab.com/convolv/convolv/internal/cli"
+	computeCmd "github.com/superclustr/superclustr/cmd/compute"
+	masterCmd "github.com/superclustr/superclustr/cmd/master"
+	monitorCmd "github.com/superclustr/superclustr/cmd/monitor"
+	storageCmd "github.com/superclustr/superclustr/cmd/storage"
+	versionCmd "github.com/superclustr/superclustr/cmd/version"
+	"github.com/superclustr/superclustr/internal/cli"
 )
 
 type AuthError struct {
@@ -21,16 +21,16 @@ func (ae *AuthError) Error() string {
 func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, error) {
 	cobra.EnableCommandSorting = false
 	cmd := &cobra.Command{
-		Use:   "convolv <service> <action> [flags]",
-		Short: "Convolv CLI",
-		Long:  `The Secure End-To-End AI Workspace for Organizations.`,
+		Use:   "super <service> <action> [flags]",
+		Short: "SUPERCLUSTR",
+		Long:  `Computing Cluster for Research Applications.`,
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),
 		},
 	}
 
 	cmd.PersistentFlags().Bool("help", false, "Show help for command")
-	cmd.PersistentFlags().Bool("version", false, "Show convolv version")
+	cmd.PersistentFlags().Bool("version", false, "Show version")
 
 	cmd.SilenceErrors = true
 	cmd.SilenceUsage = true

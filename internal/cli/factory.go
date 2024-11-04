@@ -3,9 +3,9 @@ package cli
 import (
 	"io/fs"
 
-	"gitlab.com/convolv/convolv/internal/iostreams"
-	"gitlab.com/convolv/convolv/internal/prompter"
-	"gitlab.com/convolv/convolv/internal/python"
+	"github.com/superclustr/superclustr/internal/iostreams"
+	"github.com/superclustr/superclustr/internal/prompter"
+	"github.com/superclustr/superclustr/internal/python"
 )
 
 type Factory struct {
@@ -23,7 +23,7 @@ func New(appVersion string, roles fs.FS, python *python.PythonExec) *Factory {
 
 	f := &Factory{
 		AppVersion:     appVersion,
-		ExecutableName: "convolv",
+		ExecutableName: "super",
 	}
 
 	f.IOStreams = io

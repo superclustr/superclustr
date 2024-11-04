@@ -121,9 +121,9 @@
 # Kubernetes Configuration #
 ############################
 
-- name: Create ArgoCD Application Set
-  kubernetes.core.k8s:
-    definition:
+- name: Create ArgoCD ApplicationSet
+  copy:
+    content: |
       apiVersion: argoproj.io/v1alpha1
       kind: ApplicationSet
       metadata:
@@ -139,18 +139,23 @@
                   repoURL: https://github.com/cernide/cernide.git
         template:
           metadata:
-            name: '{{name}}'
+            name: '{% raw %}{{name}}{% endraw %}'
           spec:
             project: default
             source:
-              repoURL: '{{repoURL}}'
+              repoURL: '{% raw %}{{repoURL}}{% endraw %}'
               targetRevision: HEAD
               path: charts
             destination:
               server: https://kubernetes.default.svc
-              namespace: '{{name}}'
+              namespace: '{% raw %}{{name}}{% endraw %}'
             syncPolicy:
               automated:
                 prune: true
                 selfHeal: true
+    dest: /tmp/applicationset.yaml
+  tags: kubernetes-config
+
+- name: Apply ArgoCD ApplicationSet
+  command: kubectl apply -f /tmp/applicationset.yaml
   tags: kubernetes-config

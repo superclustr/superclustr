@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/convolv/convolv/internal/cli"
+	"github.com/superclustr/superclustr/internal/cli"
 )
 
 func NewCmdStorage(f *cli.Factory) *cobra.Command {

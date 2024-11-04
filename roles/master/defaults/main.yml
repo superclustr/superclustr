@@ -1,4 +1,5 @@
 ---
 master_slurm:
+    cluster_name: superclustr
     state_save_location: /var/spool/slurm # Absolute path for Slurm controller state (`slurm.conf` parameter StateSaveLocation)
     job_comp_loc: /var/log/slurm_jobacct.log # Absolute path for Slurm job completion logfile (`slurm.conf` parameter JobCompLoc)

@@ -44,7 +44,8 @@ func runInit(f *cli.Factory) error {
   gather_facts: true
   roles:
     - role: master
-      master_cluster_name: superclustr
+      master_slurm:
+        cluster_name: superclustr
 `
 
 	// Create a temporary directory to store the inventory and playbook

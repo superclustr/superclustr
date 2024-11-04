@@ -41,13 +41,13 @@ Vagrant.configure("2") do |config|
   end
 
   # Worker VM
-  config.vm.define "worker" do |worker|
-    worker.vm.hostname = "worker"
-    worker.vm.network "private_network", type: "dhcp"
-
-    worker.vm.provision "shell", run: "always", inline: <<-SHELL
-      /vagrant/bin/super worker init
-    SHELL
-  end
+  #config.vm.define "worker" do |worker|
+  #  worker.vm.hostname = "worker"
+  #  worker.vm.network "private_network", type: "dhcp"
+  #
+  #  worker.vm.provision "shell", run: "always", inline: <<-SHELL
+  #    /vagrant/bin/super worker init
+  #  SHELL
+  #end
 
 end

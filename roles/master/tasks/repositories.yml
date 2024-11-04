@@ -40,23 +40,6 @@
   tags: openhpc-repos
 
 #######################
-# Docker Repositories #
-#######################
-
-- name: Configure Docker CE Repository
-  ansible.builtin.yum_repository:
-    name: "{{ item.name }}"
-    description: "{{ item.description | default(omit) }}"
-    file: "{{ item.file }}"
-    baseurl: "{{ item.baseurl | default(omit) }}"
-    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
-    gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ docker_repos[ansible_distribution_major_version] | default([]) }}"
-  loop_control:
-    label: "{{ item.name }}"
-  tags: docker-repos
-
-#######################
 # BeeGFS Repositories #
 #######################
 

@@ -117,9 +117,9 @@
   become: false
   tags: slurm-config
 
-############################
-# Kubernetes Configuration #
-############################
+########################
+# ArgoCD Configuration #
+########################
 
 - name: Create ArgoCD ApplicationSet
   copy:
@@ -154,8 +154,23 @@
                 prune: true
                 selfHeal: true
     dest: /tmp/applicationset.yaml
-  tags: kubernetes-config
+  tags: argocd-config
 
 - name: Apply ArgoCD ApplicationSet
   command: kubectl apply -f /tmp/applicationset.yaml
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: argocd-config
+
+############################
+# Kubernetes Configuration #
+############################
+
+- name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
+  file:
+    path: /etc/rancher/k3s/k3s.yaml
+    mode: '0600'
+    state: file
+  become: true
   tags: kubernetes-config

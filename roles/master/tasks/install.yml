@@ -33,12 +33,9 @@
       environment:
         INSTALL_K3S_EXEC: >-
           server
-          --tls-san localhost
-          --tls-san 127.0.0.1
-          --tls-san 203.0.113.10
-          --tls-san k8s.superclustr.net
           --flannel-backend none
           --disable-network-policy
+          --write-kubeconfig-mode "0644"
       shell: /tmp/k3s-install.sh
       args:
         creates: /usr/local/bin/k3s
@@ -51,19 +48,28 @@
         timeout: 300
   tags: kubernetes-install
 
+#####################
+# Helm Installation #
+#####################
+
 - name: Install Helm
   shell: |
     export PATH=$PATH:/usr/local/bin
     curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   args:
     creates: /usr/local/bin/helm
-  tags: kubernetes-install
+  tags: helm-install
+
+#######################
+# Cilium Installation #
+#######################
 
 - name: Install Cilium
   block:
     - name: Add Cilium helm repo
       command: helm repo add cilium https://helm.cilium.io/
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Install Cilium
@@ -73,45 +79,52 @@
         --set ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16" 
         --set operator.replicas=1
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: cilium-install
 
-    - name: Wait until all pods are running
-      delegate_to: localhost
-      shell: "kubectl get pods -n kube-system -o json"
-      register: pod_list
-      until: pod_list.stdout | from_json | json_query('items[*].status.phase') | unique | sort == ["Running"] or
-             pod_list.stdout | from_json | json_query('items[*].status.phase') | unique | sort == ["Running", "Succeeded"]
-      retries: 24
-      delay: 10
-  tags: kubernetes-install
+#######################
+# ArgoCD Installation #
+#######################
 
 - name: Install ArgoCD
   block:
     - name: Add ArgoCD helm repo
       command: helm repo add argo https://argoproj.github.io/argo-helm
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Create argocd namespace
       command: kubectl create namespace argocd
-      ignore_errors: true
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Install ArgoCD
       command: helm install argocd argo/argo-cd --namespace argocd
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  tags: kubernetes-install
+  tags: argocd-install
+
+########################
+# MetalLB Installation #
+########################
 
 - name: Install MetalLB
   block:
     - name: Add MetalLB helm repo
       command: helm repo add metallb https://metallb.github.io/metallb
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Create metallb-system namespace
       command: kubectl create namespace metallb-system
-      ignore_errors: true
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Create MetalLB config
       copy:
@@ -135,11 +148,15 @@
         helm install metallb metallb/metallb 
         --namespace metallb-system
       environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
     - name: Apply MetalLB config
       command: kubectl apply -f /tmp/metallb-config.yaml
-  tags: kubernetes-install
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: metallb-install
 
 #######################
 # BeeGFS Installation #

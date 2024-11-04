@@ -42,22 +42,6 @@ openhpc_repos:
       gpgcheck: true
       gpgkey: https://raw.githubusercontent.com/openhpc/ohpc/v2.6.1.GA/components/admin/ohpc-release/SOURCES/RPM-GPG-KEY-OpenHPC-2
 
-docker_repos:
-  "9":
-    - name: docker-ce-stable
-      file: docker-ce.repo
-      description: "Docker CE Stable - $releasever - $basearch"
-      baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
-      gpgcheck: true
-      gpgkey: "https://download.docker.com/linux/centos/gpg"
-  "8":
-    - name: docker-ce-stable
-      file: docker-ce.repo
-      description: "Docker CE Stable - $releasever - $basearch"
-      baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
-      gpgcheck: true
-      gpgkey: "https://download.docker.com/linux/centos/gpg"
-
 beegfs_repos:
   "9":
     - name: beegfs

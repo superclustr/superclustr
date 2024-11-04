@@ -24,12 +24,11 @@
     enabled: true
     state: started
 
-- name: Ensure docker state
+- name: Ensure k3s state
   systemd:
-    name: docker
-    enabled: yes
+    name: k3s
+    enabled: true
     state: started
-  tags: docker-service
 
 - name: Ensure beegfs-helperd state
   systemd:

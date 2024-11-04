@@ -9,7 +9,7 @@
     changed_when: false
   - name: Assert slurm running ok
     assert:                        # PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-      that: "sinfo.stdout_lines == ['compute*,up,60-00:00:00,2,idle,testohpc-compute-[0-1]']"
+      that: "sinfo.stdout_lines == ['worker*,up,60-00:00:00,2,idle,testohpc-worker-[0-1]']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"
   - name: Run a slurm job
     command:
@@ -27,6 +27,6 @@
     retries: 5
     delay: 1
   - assert:
-      that: "(jobid + '|0|wrap|compute|2|testohpc-compute-[0-1]|COMPLETED') in sacct.stdout"
+      that: "(jobid + '|0|wrap|worker|2|testohpc-worker-[0-1]|COMPLETED') in sacct.stdout"
       fail_msg: "Didn't find expected output for {{ jobid }} in sacct output: {{ sacct.stdout }}"
   

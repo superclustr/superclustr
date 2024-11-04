@@ -15,7 +15,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
-  - name: testohpc-compute-0
+  - name: testohpc-worker-0
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups:
@@ -28,7 +28,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
-  - name: testohpc-compute-1
+  - name: testohpc-worker-1
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups:
@@ -41,7 +41,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
-  - name: testohpc-compute-2
+  - name: testohpc-worker-2
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups: # NB this is NOT in the "testohpc_compute" so that it isn't added to slurm.conf initially

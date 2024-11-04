@@ -2,11 +2,11 @@ package root
 
 import (
 	"github.com/spf13/cobra"
-	computeCmd "github.com/superclustr/superclustr/cmd/compute"
 	masterCmd "github.com/superclustr/superclustr/cmd/master"
 	monitorCmd "github.com/superclustr/superclustr/cmd/monitor"
 	storageCmd "github.com/superclustr/superclustr/cmd/storage"
 	versionCmd "github.com/superclustr/superclustr/cmd/version"
+	computeCmd "github.com/superclustr/superclustr/cmd/worker"
 	"github.com/superclustr/superclustr/internal/cli"
 )
 

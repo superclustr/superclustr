@@ -8,11 +8,11 @@
     register: sinfo
     changed_when: false
   - assert:                        # PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-      that: "sinfo.stdout_lines == ['compute_orig*,up,60-00:00:00,2,idle,testohpc-compute-[0-1]']"
+      that: "sinfo.stdout_lines == ['compute_orig*,up,60-00:00:00,2,idle,testohpc-worker-[0-1]']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"
       success_msg: "OK - 2x nodes idle"
 
-- name: Rerun with smaller compute group
+- name: Rerun with smaller worker group
   hosts:
     - testohpc_login
     - testohpc_compute_new
@@ -39,6 +39,6 @@
     register: sinfo
     changed_when: false
   - assert:                        # PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-      that: "sinfo.stdout_lines == ['compute_new*,up,60-00:00:00,1,idle,testohpc-compute-0']"
+      that: "sinfo.stdout_lines == ['compute_new*,up,60-00:00:00,1,idle,testohpc-worker-0']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"
       success_msg: "OK - 1x nodes idle"

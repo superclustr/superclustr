@@ -14,7 +14,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
-  - name: compute-a
+  - name: worker-a
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups:

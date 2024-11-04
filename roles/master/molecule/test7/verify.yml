@@ -1,6 +1,6 @@
 ---
 
-# NB this isn't a very good test but with only a compute node there's not much which can be checked!
+# NB this isn't a very good test but with only a worker node there's not much which can be checked!
 - name: Check slurmd configuration
   hosts: all
   tasks:

@@ -7,7 +7,7 @@
     register: sinfo
     changed_when: false
   - assert:                        # PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-      that: "sinfo.stdout_lines == ['compute*,up,60-00:00:00,2,idle,testohpc-compute-[0-1]']"
+      that: "sinfo.stdout_lines == ['worker*,up,60-00:00:00,2,idle,testohpc-worker-[0-1]']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"
       success_msg: "OK - 2x nodes idle"
 
@@ -30,7 +30,7 @@
           runtime: true
         openhpc_slurm_control_host: "{{ groups['testohpc_login'] | first }}"
         openhpc_slurm_partitions:
-          - name: "compute"
+          - name: "worker"
         openhpc_cluster_name: testohpc
         openhpc_slurm_configless: true
 
@@ -42,6 +42,6 @@
     register: sinfo
     changed_when: false
   - assert:                        # PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-      that: "sinfo.stdout_lines == ['compute*,up,60-00:00:00,3,idle,testohpc-compute-[0-2]']"
+      that: "sinfo.stdout_lines == ['worker*,up,60-00:00:00,3,idle,testohpc-worker-[0-2]']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"
       success_msg: "OK - 3x nodes idle"

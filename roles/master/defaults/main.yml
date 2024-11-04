@@ -1,15 +1,4 @@
 ---
-openhpc_resume_timeout: 300
-openhpc_retry_delay: 10
-openhpc_job_maxtime: "60-0" # quote this to avoid ansible converting some formats to seconds, which is interpreted as minutes by Slurm
-openhpc_slurm_configless: "{{ 'enable_configless' in openhpc_config.get('SlurmctldParameters', []) }}"
-
 master_slurm:
     state_save_location: /var/spool/slurm # Absolute path for Slurm controller state (`slurm.conf` parameter StateSaveLocation)
     job_comp_loc: /var/log/slurm_jobacct.log # Absolute path for Slurm job completion logfile (`slurm.conf` parameter JobCompLoc)
-
-openhpc_munge_key:
-openhpc_login_only_nodes: ""
-
-# Auto detection
-openhpc_ram_multiplier: 0.95

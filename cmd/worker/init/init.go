@@ -18,8 +18,8 @@ import (
 func NewCmdInit(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize a compute service.",
-		Long:  "Initialize a compute service on this machine.",
+		Short: "Initialize a worker service.",
+		Long:  "Initialize a worker service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runInit(f)
 			if err != nil {
@@ -38,7 +38,7 @@ func runInit(f *cli.Factory) error {
 openhpc-login-0 ansible_host=88.99.165.60 ansible_user=root
 
 [openhpc_compute]
-openhpc-compute-0 ansible_host=88.99.165.60 ansible_user=root
+openhpc-worker-0 ansible_host=88.99.165.60 ansible_user=root
 
 [cluster_login:children]
 openhpc_login
@@ -66,7 +66,7 @@ openhpc_compute
         runtime: true
       openhpc_slurm_control_host: "{{ groups['cluster_control'] | first }}"
       openhpc_slurm_partitions:
-        - name: "compute"
+        - name: "worker"
       openhpc_cluster_name: openhpc
 `
 

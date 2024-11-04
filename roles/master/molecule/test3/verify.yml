@@ -4,10 +4,10 @@
   hosts: testohpc_login
   vars:
     expected_sinfo: |
-      testohpc-grp1-0      1     compute*  idle
-      testohpc-grp1-1      1     compute*  idle
-      testohpc-grp2-0      1     compute* idle
-      testohpc-grp2-1      1     compute* idle
+      testohpc-grp1-0      1     worker*  idle
+      testohpc-grp1-1      1     worker*  idle
+      testohpc-grp2-0      1     worker* idle
+      testohpc-grp2-1      1     worker* idle
   tasks:
   - name: Get slurm partition info
     command: sinfo -h sinfo --Node -S "#P,+N" # node-oriented output, sort by partition in order defined in slurm.conf then increasing node name

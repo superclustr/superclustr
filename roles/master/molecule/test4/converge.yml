@@ -13,7 +13,7 @@
     openhpc_slurmdbd_mysql_username: slurm
     openhpc_slurm_control_host: "{{ groups['testohpc_login'] | first }}"
     openhpc_slurm_partitions:
-      - name: "compute"
+      - name: "worker"
     openhpc_cluster_name: testohpc
   tasks:
     - name: "Include ansible-role-openhpc"

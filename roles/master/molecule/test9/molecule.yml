@@ -41,7 +41,7 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
   
-  - name: testohpc-compute-0
+  - name: testohpc-worker-0
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups:
@@ -53,7 +53,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     network: net1
-  - name: testohpc-compute-1
+  - name: testohpc-worker-1
     image: ${MOLECULE_IMAGE}
     pre_build_image: true
     groups:
@@ -68,6 +68,6 @@ platforms:
 provisioner:
   name: ansible
   ansible_args:
-    - --limit=testohpc-control,testohpc-compute-0
+    - --limit=testohpc-control,testohpc-worker-0
 verifier:
   name: ansible

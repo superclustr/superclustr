@@ -8,7 +8,7 @@
       runtime: true
     openhpc_slurm_control_host: "{{ groups['testohpc_login'] | first }}"
     openhpc_slurm_partitions:
-      - name: "compute"
+      - name: "worker"
         extra_nodes:
           # Need to specify IPs for the non-existent State=DOWN nodes, because otherwise even in this state slurmctld will exclude a node with no lookup information from the config.
           # We use invalid IPs here (i.e. starting 0.) to flag the fact the nodes shouldn't exist.

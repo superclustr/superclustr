@@ -22,6 +22,7 @@ import re
 # Pattern to match a hostname with numerical ending
 pattern = re.compile("^(.*\D(?=\d))(\d+)$")
 
+
 def _get_hostvar(context, var_name, inventory_hostname=None):
     if inventory_hostname is None:
         namespace = context
@@ -32,23 +33,24 @@ def _get_hostvar(context, var_name, inventory_hostname=None):
         namespace = context["hostvars"][inventory_hostname]
     return namespace.get(var_name)
 
+
 def hostlist_expression(hosts):
     """ Group hostnames using Slurm's hostlist expression format.
 
         E.g. with an inventory containing:
 
-            [compute]
+            [worker]
             dev-foo-00 ansible_host=localhost
             dev-foo-3  ansible_host=localhost
             my-random-host
             dev-foo-04 ansible_host=localhost
             dev-foo-05 ansible_host=localhost
-            dev-compute-000 ansible_host=localhost
-            dev-compute-001 ansible_host=localhost
+            dev-worker-000 ansible_host=localhost
+            dev-worker-001 ansible_host=localhost
 
-        Then "{{ groups[compute] | hostlist_expression }}" will return:
-            
-            ['dev-foo-[00,04-05,3]', 'dev-compute-[000-001]', 'my-random-host']
+        Then "{{ groups[worker] | hostlist_expression }}" will return:
+
+            ['dev-foo-[00,04-05,3]', 'dev-worker-[000-001]', 'my-random-host']
 
         NB: This does not guranteed to return parts in the same order as `scontrol hostlist`, but its output should return the same hosts when passed to `scontrol hostnames`.
     """
@@ -65,6 +67,7 @@ def hostlist_expression(hosts):
             unmatchable.append(v)
     return ['{}[{}]'.format(k, _group_numbers(v)) for k, v in results.items()] + unmatchable
 
+
 def _group_numbers(numbers):
     units = []
     ints = [int(n) for n in numbers]
@@ -80,16 +83,19 @@ def _group_numbers(numbers):
         prev = v
     return ','.join(['{}-{}'.format(u[0], u[-1]) if len(u) > 1 else str(u[0]) for u in units])
 
+
 def error(condition, msg):
     """ Raise an error if condition is not True """
-    
+
     if not condition:
         raise errors.AnsibleFilterError(msg)
+
 
 def dict2parameters(d):
     """ Convert a dict into a str in 'k1=v1 k2=v2 ...' format """
     parts = ['%s=%s' % (k, v) for k, v in d.items()]
     return ' '.join(parts)
+
 
 class FilterModule(object):
 

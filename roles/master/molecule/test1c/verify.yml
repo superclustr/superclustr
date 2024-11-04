@@ -7,5 +7,5 @@
     register: sinfo
   - name: 
     assert:
-      that: "sinfo.stdout_lines == ['compute*,up,60-00:00:00,2,idle,compute10,compute-a']"
+      that: "sinfo.stdout_lines == ['worker*,up,60-00:00:00,2,idle,compute10,worker-a']"
       fail_msg: "FAILED - actual value: {{ sinfo.stdout_lines }}"

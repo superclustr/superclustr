@@ -1,6 +1,15 @@
 ---
 # This file contains handlers
 
+###################
+# Network Handler #
+###################
+
+- name: Restart network service
+  service:
+      name: "network"
+      state: restarted
+
 #################
 # Munge Handler #
 #################

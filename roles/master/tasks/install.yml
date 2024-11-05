@@ -126,33 +126,10 @@
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
-    - name: Create MetalLB config
-      copy:
-        content: |
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            namespace: metallb-system
-            name: config
-          data:
-            config: |
-              address-pools:
-              - name: default
-                protocol: layer2
-                addresses:
-                - 192.168.1.240-192.168.1.250
-        dest: /tmp/metallb-config.yaml
-
     - name: Install MetalLB
       command: >-
         helm install metallb metallb/metallb 
         --namespace metallb-system
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-
-    - name: Apply MetalLB config
-      command: kubectl apply -f /tmp/metallb-config.yaml
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"

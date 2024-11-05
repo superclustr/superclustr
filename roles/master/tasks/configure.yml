@@ -1,5 +1,36 @@
 ---
-# This playbook configures packages
+# This playbook configures the services
+
+#########################
+# Network Configuration #
+#########################
+
+- name: Configure network interface
+  copy:
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}"
+    content: |
+      DEVICE={{ ansible_default_ipv4.interface }}
+      BOOTPROTO={{ master_network.ip_address | ternary('dhcp', 'static') }}
+      ONBOOT=yes
+      TYPE=Ethernet
+      IPV6INIT=yes
+      {% if master_network.ip_address != 'dhcp' %}
+      # IPv4 Configuration
+      IPADDR={{ master_network.ip_address }}
+      NETMASK={{ master_network.ip_netmask }}
+      GATEWAY={{ master_network.ip_gateway }}
+      DNS1=8.8.8.8
+
+      # IPv6 Configuration
+      IPV6ADDR={{ master_network.ip_v6_address }}
+      IPV6_DEFAULTGW={{ master_network.ip_v6_gateway }}
+      IPV6_AUTOCONF=no
+      {% else %}
+      IPV6_AUTOCONF=yes
+      {% endif %}
+  notify:
+    - Restart network service
+  tags: network-config
 
 #######################
 # Slurm Configuration #
@@ -154,6 +185,7 @@
                 prune: true
                 selfHeal: true
     dest: /tmp/applicationset.yaml
+    mode: '0644'
   tags: argocd-config
 
 - name: Apply ArgoCD ApplicationSet
@@ -161,7 +193,45 @@
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
     PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  register: argocd_result
+  changed_when: argocd_result.stdout is search("created|configured|updated")
   tags: argocd-config
+
+#########################
+# MetalLB Configuration #
+#########################
+
+- name: Create MetalLB config
+  copy:
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: metallb-system
+        name: config
+      data:
+        config: |
+          address-pools:
+          - name: ipv4-pool
+            protocol: layer2
+            addresses:
+            - {{ master_network.ip_pool }}
+          - name: ipv6-pool
+            protocol: layer2
+            addresses:
+            - {{ master_network.ip_pool_ipv6 }}
+    dest: /tmp/metallb-config.yaml
+    mode: '0644'
+  tags: metallb-config
+
+- name: Apply MetalLB config
+  command: kubectl apply -f /tmp/metallb-config.yaml
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  register: metallb_result
+  changed_when: metallb_result.stdout is search("created|configured|updated")
+  tags: metallb-config
 
 ############################
 # Kubernetes Configuration #

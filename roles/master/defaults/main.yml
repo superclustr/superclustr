@@ -1,4 +1,12 @@
 ---
+master_network:
+    ip_pool: 192.168.1.240-192.168.1.250 # LoadBalancer IP pool range
+    ip_address: dhcp # Static IP address or 'dhcp' for dynamic assignment
+    ip_netmask: 255.255.255.128 # IP netmask
+    ip_gateway: 192.168.1.1 # Gateway IP address
+    ip_v6_pool: 2001:678:7ec:70::1/64 # LoadBalancer IPv6 pool range
+    ip_v6_address: dhcp # Static IPv6 address or 'dhcp' for dynamic assignment
+
 master_slurm:
     cluster_name: superclustr
     state_save_location: /var/spool/slurm # Absolute path for Slurm controller state (`slurm.conf` parameter StateSaveLocation)

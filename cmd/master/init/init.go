@@ -17,34 +17,73 @@ import (
 )
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
+	var ipPool string
+	var ipAddr string
+	var ipNetmask string
+	var ipGateway string
+	var ipV6Pool string
+	var ipV6Addr string
+	var ipV6Gateway string
+
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize a master service.",
 		Long:  "Initialize a master service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f)
+			err := runInit(f, ipPool, ipAddr, ipNetmask, ipGateway, ipV6Pool, ipV6Addr, ipV6Gateway)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
 		},
 	}
 
+	// Define flags for network configuration
+	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
+	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
+	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
+	cmd.Flags().StringVar(&ipGateway, "ip-gateway", "", "Gateway IP address (required if ip-address is static)")
+	cmd.Flags().StringVar(&ipV6Pool, "ip-v6-pool", "", "LoadBalancer IPv6 pool range (e.g., '2001:678:7ec:70::1/64')")
+	cmd.Flags().StringVar(&ipV6Addr, "ip-v6-address", "", "Static IPv6 address or 'dhcp' for dynamic assignment")
+	cmd.Flags().StringVar(&ipV6Gateway, "ip-v6-gateway", "", "IPv6 Gateway IP address (required if ip-v6-address is static)")
+
 	return cmd
 }
 
-func runInit(f *cli.Factory) error {
+func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
+	// Validate inputs
+	if ipPool == "" || ipV6Pool == "" {
+		return fmt.Errorf("LoadBalancer pool range is required")
+	}
+	if ipAddr == "" || ipV6Addr == "" {
+		return fmt.Errorf("Machine IP address or 'dhcp' is required")
+	}
+	if ipNetmask == "" && ipAddr != "dhcp" {
+		return fmt.Errorf("Netmask is required, since ip-address is static")
+	}
+	if ipGateway == "" || ipV6Gateway == "" && (ipAddr != "dhcp" || ipV6Addr != "dhcp") {
+		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
+	}
+
 	// Define inventory on the fly
 	inventoryIni := ``
 
 	// Define playbook on the fly
-	playbookYaml := `
+	playbookYaml := fmt.Sprintf(`
 ---
 - hosts: localhost
   become: yes
   gather_facts: true
   roles:
     - role: master
-`
+	  master_network:
+		ip_pool: %s
+		ip_address: %s
+		ip_gateway: %s
+		ip_netmask: %s
+		ip_v6_pool: %s
+		ip_v6_address: %s
+		ip_v6_gateway: %s
+`, ipPool, ipAddr, ipGateway, ipNetmask, ipV6Pool, ipV6Addr, ipV6Gateway)
 
 	// Create a temporary directory to store the inventory and playbook
 	tempDir, err := os.MkdirTemp("", "ansible")

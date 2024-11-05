@@ -10,7 +10,7 @@
       - include_tasks: install.yml
   tags: install
 
-- name: Configure Packages
+- name: Configure Services
   block:
       - include_tasks: configure.yml
   tags: configure

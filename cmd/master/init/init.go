@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/apenella/go-ansible/v2/pkg/execute"
@@ -51,6 +50,13 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
+	log.Printf("ipPool: %s", ipPool)
+	log.Printf("ipAddr: %s", ipAddr)
+	log.Printf("ipNetmask: %s", ipNetmask)
+	log.Printf("ipGateway: %s", ipGateway)
+	log.Printf("ipV6Pool: %s", ipV6Pool)
+	log.Printf("ipV6Addr: %s", ipV6Addr)
+	log.Printf("ipV6Gateway: %s", ipV6Gateway)
 	if ipPool == "" || ipV6Pool == "" {
 		return fmt.Errorf("LoadBalancer pool range is required")
 	}
@@ -60,7 +66,7 @@ func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipG
 	if ipNetmask == "" && ipAddr != "dhcp" {
 		return fmt.Errorf("Netmask is required, since ip-address is static")
 	}
-	if ipGateway == "" || ipV6Gateway == "" && (ipAddr != "dhcp" || ipV6Addr != "dhcp") {
+	if (ipGateway == "" || ipV6Gateway == "") && (ipAddr != "dhcp" || ipV6Addr != "dhcp") {
 		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
 	}
 
@@ -109,16 +115,6 @@ func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipG
 	ansiblePlaybookOptions := &playbook.AnsiblePlaybookOptions{
 		Inventory: inventoryFile,
 	}
-
-	// TEST
-	cmd := exec.Command("ls", f.Python.GetRolesFsPath())
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-	}
-
-	fmt.Printf("%s\n", output)
-	// TEST
 
 	// Execute the ansible playbook using go-ansible
 	playbookCmd := playbook.NewAnsiblePlaybookCmd(

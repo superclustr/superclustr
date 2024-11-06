@@ -7,6 +7,9 @@ master_network:
     ip_v6_pool: 2001:678:7ec:70::1/64 # LoadBalancer IPv6 pool range
     ip_v6_address: dhcp # Static IPv6 address or 'dhcp' for dynamic assignment
 
+master_kubernetes:
+    email: hostmaster@superclustr.net
+
 master_slurm:
     cluster_name: superclustr
     state_save_location: /var/spool/slurm # Absolute path for Slurm controller state (`slurm.conf` parameter StateSaveLocation)

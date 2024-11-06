@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
     master.vm.network "forwarded_port", guest: 80, host: 80
 
     master.vm.provision "shell", run: "always", inline: <<-SHELL
-      /vagrant/bin/super master init
+      /vagrant/bin/super master init --ip-pool 192.168.1.240/25 --ip-address dhcp --ip-v6-pool 2001:678:7ec:70::1/64 --ip-v6-address dhcp
     SHELL
   end
 

@@ -1,4 +1,9 @@
 ---
+- name: Configure Network
+  block:
+      - include_tasks: network.yml
+  tags: network
+
 - name: Configure Repositories
   block:
       - include_vars: "{{ role_path }}/vars/repositories.yml"

@@ -1,37 +1,6 @@
 ---
 # This playbook configures the services
 
-#########################
-# Network Configuration #
-#########################
-
-- name: Configure network interface
-  copy:
-    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}"
-    content: |
-      DEVICE={{ ansible_default_ipv4.interface }}
-      BOOTPROTO={{ master_network.ip_address | ternary('dhcp', 'static') }}
-      ONBOOT=yes
-      TYPE=Ethernet
-      IPV6INIT=yes
-      {% if master_network.ip_address != 'dhcp' %}
-      # IPv4 Configuration
-      IPADDR={{ master_network.ip_address }}
-      NETMASK={{ master_network.ip_netmask }}
-      GATEWAY={{ master_network.ip_gateway }}
-      DNS1=8.8.8.8
-
-      # IPv6 Configuration
-      IPV6ADDR={{ master_network.ip_v6_address }}
-      IPV6_DEFAULTGW={{ master_network.ip_v6_gateway }}
-      IPV6_AUTOCONF=no
-      {% else %}
-      IPV6_AUTOCONF=yes
-      {% endif %}
-  notify:
-    - Restart network service
-  tags: network-config
-
 #######################
 # Slurm Configuration #
 #######################
@@ -219,7 +188,7 @@
           - name: ipv6-pool
             protocol: layer2
             addresses:
-            - {{ master_network.ip_pool_ipv6 }}
+            - {{ master_network.ip_v6_pool }}
     dest: /tmp/metallb-config.yaml
     mode: '0644'
   tags: metallb-config

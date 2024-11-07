@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/apenella/go-ansible/v2/pkg/execute"
 	"github.com/apenella/go-ansible/v2/pkg/execute/configuration"
 	"github.com/apenella/go-ansible/v2/pkg/execute/result/transformer"
@@ -50,13 +52,6 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
-	log.Printf("ipPool: %s", ipPool)
-	log.Printf("ipAddr: %s", ipAddr)
-	log.Printf("ipNetmask: %s", ipNetmask)
-	log.Printf("ipGateway: %s", ipGateway)
-	log.Printf("ipV6Pool: %s", ipV6Pool)
-	log.Printf("ipV6Addr: %s", ipV6Addr)
-	log.Printf("ipV6Gateway: %s", ipV6Gateway)
 	if ipPool == "" || ipV6Pool == "" {
 		return fmt.Errorf("LoadBalancer pool range is required")
 	}
@@ -70,26 +65,44 @@ func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipG
 		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
 	}
 
+	// Helper function to filter empty values
+	filterEmpty := func(m map[string]string) map[string]string {
+		result := make(map[string]string)
+		for k, v := range m {
+			if v != "" {
+				result[k] = v
+			}
+		}
+		return result
+	}
+
+	// Build playbook structure
+	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
+		"hosts":        "localhost",
+		"become":       true,
+		"gather_facts": true,
+		"roles": []map[string]interface{}{{
+			"role": "master",
+			"master_network": filterEmpty(map[string]string{
+				"ip_pool":       ipPool,
+				"ip_address":    ipAddr,
+				"ip_gateway":    ipGateway,
+				"ip_netmask":    ipNetmask,
+				"ip_v6_pool":    ipV6Pool,
+				"ip_v6_address": ipV6Addr,
+				"ip_v6_gateway": ipV6Gateway,
+			}),
+		}},
+	}})
+	if err != nil {
+		return fmt.Errorf("failed to generate playbook YAML: %v", err)
+	}
+
 	// Define inventory on the fly
 	inventoryIni := ``
 
 	// Define playbook on the fly
-	playbookYaml := fmt.Sprintf(`
----
-- hosts: localhost
-  become: yes
-  gather_facts: true
-  roles:
-    - role: master
-	  master_network:
-		ip_pool: %s
-		ip_address: %s
-		ip_gateway: %s
-		ip_netmask: %s
-		ip_v6_pool: %s
-		ip_v6_address: %s
-		ip_v6_gateway: %s
-`, ipPool, ipAddr, ipGateway, ipNetmask, ipV6Pool, ipV6Addr, ipV6Gateway)
+	playbookYaml := string(yamlData)
 
 	// Create a temporary directory to store the inventory and playbook
 	tempDir, err := os.MkdirTemp("", "ansible")

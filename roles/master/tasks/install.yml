@@ -146,6 +146,13 @@
     PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
   tags: certmanager-install
 
+- name: Create cert-manager namespace
+  command: kubectl create namespace cert-manager
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: certmanager-install
+
 - name: Install Cert-Manager
   command: helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.14.1 --set installCRDs=true
   environment:

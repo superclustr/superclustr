@@ -35,8 +35,21 @@ Vagrant.configure("2") do |config|
     # Forward port 80 on the guest to port 80 on the host
     master.vm.network "forwarded_port", guest: 80, host: 80
 
+    # Forward port 6443 on the guest to port 6443 on the host
+    master.vm.network "forwarded_port", guest: 6443, host: 6443, auto_correct: true
+
+    # Sync kubeconfig from the VM to the host project directory
+    master.vm.synced_folder ".", "/vagrant"
+
     master.vm.provision "shell", run: "always", inline: <<-SHELL
+      # Initialize the master
       /vagrant/bin/super master init --ip-pool 192.168.1.240/25 --ip-address dhcp --ip-v6-pool 2001:678:7ec:70::1/64 --ip-v6-address dhcp
+
+      # Copy the kubeconfig to the host project directory
+      cp /etc/rancher/k3s/k3s.yaml /vagrant/k3s.yaml
+
+      # Replace localhost with 127.0.0.1 in the kubeconfig
+      sed -i 's/127.0.0.1/localhost/g' /vagrant/k3s.yaml
     SHELL
   end
 

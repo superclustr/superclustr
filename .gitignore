@@ -4,6 +4,9 @@
 # Vagrant
 .vagrant/
 
+# K3s
+k3s.yaml
+
 # Ansible
 *.retry
 

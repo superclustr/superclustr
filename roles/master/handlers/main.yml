@@ -1,6 +1,16 @@
 ---
 # This file contains handlers
 
+####################
+# Firewall Handler #
+####################
+
+- name: Restart firewalld service
+  systemd:
+      name: firewalld
+      state: restarted
+  tags: firewalld-service
+
 #################
 # Munge Handler #
 #################

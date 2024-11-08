@@ -1,6 +1,60 @@
 ---
 # This playbook configures the services
 
+###########################
+# Tailscale Configuration #
+###########################
+
+- name: Configure Tailscale in profile for sudoers
+  lineinfile:
+    path: /etc/profile
+    state: present
+    line: |
+      if [ "$(id -u)" -eq 0 ] || sudo -v &>/dev/null; then
+        if ! tailscale status &>/dev/null; then
+          echo "######################################################################"
+          echo "#  Tailscale SSH enables secure external access to the system via    #"
+          echo "#  the Tailscale network. All other SSH connections are disabled.    #"
+          echo "#  For more info: https://tailscale.com/kb/1193/tailscale-ssh        #"
+          echo "######################################################################"
+          sudo tailscale up --ssh
+        fi
+      fi
+  tags: tailscale-config
+
+##########################
+# Firewall Configuration #
+##########################
+
+- name: Start firewalld service
+  systemd:
+    name: firewalld
+    state: started
+  tags: firewalld-config
+
+- name: Set default zone to "public" only if necessary
+  command: firewall-cmd --set-default-zone=public
+  ignore_errors: true
+  tags: firewalld-config
+
+- name: Allow HTTP for external access
+  command: firewall-cmd --permanent --zone=public --add-port=80/tcp
+  tags: firewalld-config
+
+- name: Allow HTTPS for external access
+  command: firewall-cmd --permanent --zone=public --add-port=443/tcp
+  tags: firewalld-config
+
+- name: Block all incoming traffic by default, allowing established connections out
+  command: firewall-cmd --permanent --zone=public --set-target=DROP
+  tags: firewalld-config
+
+- name: Allow established and related connections for outgoing traffic
+  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="0.0.0.0/0" service name="ssh" accept'
+  notify:
+    - Restart firewalld service
+  tags: firewalld-config
+
 #######################
 # Slurm Configuration #
 #######################
@@ -135,8 +189,10 @@
               elements:
                 - name: bgpdata
                   repoURL: https://github.com/bgpdata/bgpdata.git
+                  chartPath: charts/bgpdata
                 - name: cernide
                   repoURL: https://github.com/cernide/cernide.git
+                  chartPath: charts/polyaxon
         template:
           metadata:
             name: '{% raw %}{{name}}{% endraw %}'
@@ -145,7 +201,7 @@
             source:
               repoURL: '{% raw %}{{repoURL}}{% endraw %}'
               targetRevision: HEAD
-              path: charts
+              path: '{% raw %}{{chartPath}}{% endraw %}'  # Updated to use chartPath variable
             destination:
               server: https://kubernetes.default.svc
               namespace: '{% raw %}{{name}}{% endraw %}'
@@ -230,6 +286,20 @@
 ############################
 # Kubernetes Configuration #
 ############################
+
+- name: Create bgpdata namespace
+  command: kubectl create namespace bgpdata
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: argocd-config
+
+- name: Create cernide namespace
+  command: kubectl create namespace cernide
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  tags: argocd-config
 
 - name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
   file:

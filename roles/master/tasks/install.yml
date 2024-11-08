@@ -1,6 +1,27 @@
 ---
 # This playbook installs all necessary packages
 
+##########################
+# Tailscale Installation #
+##########################
+
+- name: Install Tailscale
+  shell: |
+    curl -fsSL https://tailscale.com/install.sh | sh
+  args:
+    creates: /usr/sbin/tailscale
+  tags: tailscale-install
+
+#########################
+# Firewall Installation #
+#########################
+
+- name: Install Firewalld packages
+  dnf:
+    name: firewalld
+    state: present
+  tags: firewalld-install
+
 ######################
 # Slurm Installation #
 ######################

@@ -46,7 +46,6 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&ipV6Pool, "ip-v6-pool", "", "LoadBalancer IPv6 pool range (e.g., '2001:678:7ec:70::1/64')")
 	cmd.Flags().StringVar(&ipV6Addr, "ip-v6-address", "", "Static IPv6 address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipV6Gateway, "ip-v6-gateway", "", "IPv6 Gateway IP address (required if ip-v6-address is static)")
-
 	return cmd
 }
 

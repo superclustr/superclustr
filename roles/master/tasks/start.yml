@@ -6,29 +6,40 @@
   # As the subsequent "ensure" tasks are all no-op to check if any services have bounced
   meta: flush_handlers 
 
+- name: Ensure firewalld state
+  systemd:
+    name: firewalld
+    enabled: true
+    state: started
+  tags: firewalld-service
+
 - name: Ensure Munge state
   systemd:
     name: munge
     enabled: true
     state: started
+  tags: munge-service
 
 - name: Ensure slurmctld state
   systemd:
     name: slurmctld
     enabled: true
     state: started
+  tags: slurm-service
 
 - name: Ensure slurmrestd state
   systemd:
     name: slurmrestd
     enabled: true
     state: started
+  tags: slurm-service
 
 - name: Ensure k3s state
   systemd:
     name: k3s
     enabled: true
     state: started
+  tags: kubernetes-service
 
 - name: Ensure beegfs-helperd state
   systemd:

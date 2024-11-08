@@ -49,6 +49,18 @@
   command: firewall-cmd --permanent --zone=public --set-target=DROP
   tags: firewalld-config
 
+- name: Allow Kubernetes API access from local/private IP ranges
+  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port port="6443" protocol="tcp" accept'
+  tags: firewalld-config
+
+- name: Allow Kubernetes API access from 172.16.0.0/12 subnet
+  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="172.16.0.0/12" port port="6443" protocol="tcp" accept'
+  tags: firewalld-config
+
+- name: Allow Kubernetes API access from 192.168.0.0/16 subnet
+  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port port="6443" protocol="tcp" accept'
+  tags: firewalld-config
+
 - name: Allow established and related connections for outgoing traffic
   command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="0.0.0.0/0" service name="ssh" accept'
   notify:

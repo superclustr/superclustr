@@ -213,7 +213,10 @@
             source:
               repoURL: '{% raw %}{{repoURL}}{% endraw %}'
               targetRevision: HEAD
-              path: '{% raw %}{{chartPath}}{% endraw %}'  # Updated to use chartPath variable
+              path: '{% raw %}{{chartPath}}{% endraw %}'
+              helm:
+                valueFiles:
+                  - values-ci.yaml
             destination:
               server: https://kubernetes.default.svc
               namespace: '{% raw %}{{name}}{% endraw %}'
@@ -221,6 +224,8 @@
               automated:
                 prune: true
                 selfHeal: true
+              syncOptions:
+                - CreateNamespace=true
     dest: /tmp/applicationset.yaml
     mode: '0644'
   tags: argocd-config
@@ -298,20 +303,6 @@
 ############################
 # Kubernetes Configuration #
 ############################
-
-- name: Create bgpdata namespace
-  command: kubectl create namespace bgpdata
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  tags: argocd-config
-
-- name: Create cernide namespace
-  command: kubectl create namespace cernide
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  tags: argocd-config
 
 - name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
   file:

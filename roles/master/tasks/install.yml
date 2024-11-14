@@ -165,6 +165,7 @@
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
     PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  failed_when: false
   tags: certmanager-install
 
 - name: Create cert-manager namespace

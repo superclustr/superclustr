@@ -17,8 +17,8 @@ Vagrant.configure("2") do |config|
       end
 
       # Set the hardware limits
-      vmware.memory = 2048
-      vmware.cpus = 2
+      vmware.memory = 24576 # 24GB
+      vmware.cpus = 10 # 10 cores
 
       # Set the SCSI controller type
       vmware.vmx["scsi0.virtualDev"] = "pvscsi"

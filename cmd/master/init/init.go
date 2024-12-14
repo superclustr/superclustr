@@ -51,7 +51,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	return cmd
 }
 
-func runInit(f *cli.Factory, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
+func runInit(f *cli.Factory, device string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
 	if device == "" {
 		return fmt.Errorf("Network Device is required")

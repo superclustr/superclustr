@@ -2,6 +2,7 @@
 # Network
 # https://docs.rockylinux.org/guides/
 master_network:
+    device: eth0
     ip_pool: 192.168.1.240-192.168.1.250 # LoadBalancer IP pool range
     ip_address: dhcp # Static IP address or 'dhcp' for dynamic assignment
     ip_netmask: 255.255.255.128 # IP netmask

@@ -41,12 +41,8 @@
   command: firewall-cmd --permanent --zone=public --set-target=DROP
   tags: firewalld-config
 
-- name: Create a tailscale zone for Tailscale
-  command: firewall-cmd --permanent --new-zone=tailscale
-  tags: firewalld-config
-
-- name: Allow tailscale zone to accept traffic from Tailscale
-  command: firewall-cmd --zone=tailscale --add-interface=tailscale0 --permanent
+- name: Allow trusted zone to accept traffic from Tailscale
+  command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
   tags: firewalld-config
 
 - name: Create a cilium zone for Cilium to do DNS resolution

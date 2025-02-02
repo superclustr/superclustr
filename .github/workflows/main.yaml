@@ -66,12 +66,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: super
-          path: /tmp/super
+          path: /tmp/artifacts
 
       - name: Copy to versioned and latest
         run: |
-          cp /tmp/super super-v.${{ env.tag }}
-          cp /tmp/super super
+          cp /tmp/artifacts/super super-v.${{ env.tag }}
+          cp /tmp/artifacts/super super
 
       - name: Commit and Push Changes
         run: |

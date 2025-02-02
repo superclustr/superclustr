@@ -1,4 +1,4 @@
-<img title="SUPERCLUSTR" src="logo.svg" height="64" align="left" />
+<img title="SUPERCLUSTR" src="logo.svg" height="70" align="left" />
 
 <br />
 <br />

@@ -52,12 +52,6 @@ jobs:
         id: get_tag
         run: echo "tag=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
-      - name: Download Binary Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: super
-          path: super-v.${{ env.tag }}
-
       - name: Set up Git user
         run: |
           git config user.name "github-actions[bot]"
@@ -68,9 +62,16 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages || git checkout --orphan gh-pages
 
-      - name: Copy to latest
+      - name: Download Binary Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: super
+          path: /tmp/super
+
+      - name: Copy to versioned and latest
         run: |
-          cp super-v.${{ env.tag }} super
+          cp /tmp/super super-v.${{ env.tag }}
+          cp /tmp/super super
 
       - name: Commit and Push Changes
         run: |

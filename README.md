@@ -20,8 +20,26 @@ To enroll in the cluster, you can use the following command.
 It will download the latest version of the Superclustr CLI and provision your node.
 
 ```bash
-curl -sSL https://archive.superclustr.net/super | bash
+curl -sSL https://archive.superclustr.net/super | bash -s master init \
+    --ip-pool 192.168.1.240/25 \
+    --ip-address dhcp \
+    --ip-v6-pool 2001:678:7ec:70::1/64 \
+    --ip-v6-address dhcp
 ```
+
+## Network Configuration
+
+Here’s the information laid out for our current network configuration.
+This is relevant to you if you want to join the cluster or if you want to connect to the cluster from outside.
+
+| **Type**       | **Allocation**              | **Purpose**                       | **Range**                         | **CIDR**                     |
+|-----------------|-----------------------------|------------------------------------|------------------------------------|------------------------------|
+| **IPv4**       | `89.37.98.1`                | Gateway                           | `89.37.98.1`                      | -                           |
+|                | `89.37.98.2 - 89.37.98.5`   | Static IPs for machines           | `89.37.98.2, .3, .4, .5`          | -                           |
+|                | `89.37.98.6 - 89.37.98.37`  | MetalLB Address Pool              | `89.37.98.6 - 89.37.98.37`         | `89.37.98.6/27`             |
+| **IPv6**       | `2001:678:7ec:70::1`        | Gateway                           | `2001:678:7ec:70::1`              | -                           |
+|                | `2001:678:7ec:70::2 - ::5`  | Static IPs for machines           | `::2, ::3, ::4, ::5`              | -                           |
+|                | `2001:678:7ec:70::100 - ::1ff` | MetalLB Address Pool              | `::100 - ::1ff`                   | `2001:678:7ec:70::100/120` |
 
 ## Getting Started
 

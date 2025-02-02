@@ -48,14 +48,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Get the Tag Version
+        id: get_tag
+        run: echo "tag=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
       - name: Download Binary Artifact
         uses: actions/download-artifact@v4
         with:
           name: super
-
-      - name: Get the Tag Version
-        id: get_tag
-        run: echo "tag=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          path: super-v.${{ env.tag }}
 
       - name: Set up Git user
         run: |
@@ -67,14 +68,12 @@ jobs:
           git fetch origin gh-pages
           git checkout gh-pages || git checkout --orphan gh-pages
 
-      - name: Copy Binary and Rename Versioned File
+      - name: Copy to latest
         run: |
-          mkdir -p public
-          cp super public/super-v.${{ env.tag }}
-          cp super public/super
+          cp super-v.${{ env.tag }} super
 
       - name: Commit and Push Changes
         run: |
-          git add public/
+          git add super-v.${{ env.tag }} super
           git commit -m "Deploy super-v.${{ env.tag }} to GitHub Pages"
           git push origin gh-pages

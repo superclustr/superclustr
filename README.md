@@ -20,12 +20,26 @@ To enroll in the cluster, you can use the following command.
 It will download the latest version of the Superclustr CLI and provision your node.
 
 ```bash
+# Via DHCP
 curl -sSL https://archive.superclustr.net/super | bash -s master init \
-    --ip-pool 192.168.1.240/25 \
+    --ip-pool 89.37.98.6/27 \
     --ip-address dhcp \
-    --ip-v6-pool 2001:678:7ec:70::1/64 \
+    --ip-v6-pool 2001:678:7ec:70::100/120 \
     --ip-v6-address dhcp
+
+# Or, using a Static IP
+curl -sSL https://archive.superclustr.net/super | bash -s master init \
+    --ip-gateway 89.37.98.1 \
+    --ip-address 89.37.98.2 \
+    --ip-netmask 255.255.255.128 \
+    --ip-pool 89.37.98.6/27 \
+    --ip-v6-gateway 2001:678:7ec:70::1 \
+    --ip-v6-address 2001:678:7ec:70::2 \
+    --ip-v6-pool 2001:678:7ec:70::100/120 \
+    --device ens2f0
 ```
+
+You can also find a full example in the [Vagrantfile](Vagrantfile).
 
 ## Network Configuration
 

@@ -37,32 +37,32 @@
   ignore_errors: true
   tags: firewalld-config
 
-- name: Allow HTTP for external access
-  command: firewall-cmd --permanent --zone=public --add-port=80/tcp
-  tags: firewalld-config
-
-- name: Allow HTTPS for external access
-  command: firewall-cmd --permanent --zone=public --add-port=443/tcp
-  tags: firewalld-config
-
 - name: Block all incoming traffic by default, allowing established connections out
   command: firewall-cmd --permanent --zone=public --set-target=DROP
   tags: firewalld-config
 
-- name: Allow Kubernetes API access from local/private IP ranges
-  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="10.0.0.0/8" port port="6443" protocol="tcp" accept'
+- name: Create a tailscale zone for Tailscale
+  command: firewall-cmd --permanent --new-zone=tailscale
   tags: firewalld-config
 
-- name: Allow Kubernetes API access from 172.16.0.0/12 subnet
-  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="172.16.0.0/12" port port="6443" protocol="tcp" accept'
+- name: Allow tailscale zone to accept traffic from Tailscale
+  command: firewall-cmd --zone=tailscale --add-interface=tailscale0 --permanent
   tags: firewalld-config
 
-- name: Allow Kubernetes API access from 192.168.0.0/16 subnet
-  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="192.168.0.0/16" port port="6443" protocol="tcp" accept'
+- name: Create a cilium zone for Cilium to do DNS resolution
+  command: firewall-cmd --permanent --new-zone=cilium
   tags: firewalld-config
 
-- name: Allow established and related connections for outgoing traffic
-  command: firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="0.0.0.0/0" service name="ssh" accept'
+- name: Allow cilium zone to accept traffic from Cilium
+  command: firewall-cmd --zone=cilium --add-interface=cilium_host --permanent
+  tags: firewalld-config
+
+- name: Allow cilium zone to masquerade
+  command: firewall-cmd --zone=cilium --add-masquerade --permanent
+  tags: firewalld-config
+
+- name: Allow cilium zone to accept DNS
+  command: firewall-cmd --zone=cilium --add-service=dns --permanent
   notify:
     - Restart firewalld service
   tags: firewalld-config
@@ -202,6 +202,9 @@
                 - name: bgpdata
                   repoURL: https://github.com/bgpdata/bgpdata.git
                   chartPath: charts/bgpdata
+                - name: ris-kafka
+                  repoURL: https://github.com/robin-rpr/ris-kafka.git
+                  chartPath: charts/ris-kafka
                 - name: cernide
                   repoURL: https://github.com/cernide/cernide.git
                   chartPath: charts/polyaxon

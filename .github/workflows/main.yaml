@@ -4,13 +4,12 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - '*'  # This triggers both builds and tag deployments
 
 jobs:
   build:
-    name: Build
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +27,47 @@ jobs:
         run: |
           make build
 
-      - name: Upload Binary Artifact
-        uses: actions/upload-artifact@v3
+      - name: Test Binary
+        run: |
+          make test
+
+  deploy:
+    name: Deploy to GitHub Pages on Tag
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')  # Only run when a tag is pushed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download Binary Artifact
+        uses: actions/download-artifact@v3
         with:
           name: super
-          path: bin/super
+
+      - name: Get the Tag Version
+        id: get_tag
+        run: echo "tag=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+      - name: Copy Binary and Rename Versioned File
+        run: |
+          mkdir -p binaries
+          cp super binaries/super-v.${{ env.tag }}
+          cp super binaries/super  # Always replace with the latest version
+
+      - name: Commit and Push Changes
+        run: |
+          git add binaries/
+          git commit -m "Deploy super-v.${{ env.tag }} to GitHub Pages"
+          git push origin gh-pages

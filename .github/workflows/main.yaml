@@ -27,16 +27,16 @@ jobs:
         run: |
           make build
 
+      # TODO: Fix tests and enable this
+      #- name: Test Binary
+      #  run: |
+      #    make test
+
       - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: super
           path: super
-
-      # TODO: Fix tests and enable this
-      #- name: Test Binary
-      #  run: |
-      #    make test
 
   deploy:
     name: Deploy to GitHub Pages on Tag

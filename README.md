@@ -25,7 +25,8 @@ curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-pool 89.37.98.6/27 \
     --ip-address dhcp \
     --ip-v6-pool 2001:678:7ec:70::100/120 \
-    --ip-v6-address dhcp
+    --ip-v6-address dhcp \
+    --device ens2f0
 
 # Or, using a Static IP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \

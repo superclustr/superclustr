@@ -27,6 +27,12 @@ jobs:
         run: |
           make build
 
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: super
+          path: super
+
       # TODO: Fix tests and enable this
       #- name: Test Binary
       #  run: |
@@ -63,12 +69,12 @@ jobs:
 
       - name: Copy Binary and Rename Versioned File
         run: |
-          mkdir -p binaries
-          cp super binaries/super-v.${{ env.tag }}
-          cp super binaries/super
+          mkdir -p public
+          cp super public/super-v.${{ env.tag }}
+          cp super public/super
 
       - name: Commit and Push Changes
         run: |
-          git add binaries/
+          git add public/
           git commit -m "Deploy super-v.${{ env.tag }} to GitHub Pages"
           git push origin gh-pages

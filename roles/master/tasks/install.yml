@@ -87,11 +87,21 @@
 
 - name: Install Cilium
   block:
+    - name: Check if Cilium is already installed
+      command: helm list -n kube-system | grep cilium
+      register: cilium_check
+      ignore_errors: true
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
     - name: Add Cilium helm repo
       command: helm repo add cilium https://helm.cilium.io/
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: cilium_check.rc != 0
 
     - name: Install Cilium
       command: >-
@@ -102,6 +112,7 @@
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: cilium_check.rc != 0
   tags: cilium-install
 
 #######################
@@ -110,8 +121,27 @@
 
 - name: Install ArgoCD
   block:
+    - name: Check if ArgoCD is already installed
+      command: helm list -n argocd | grep argocd
+      register: argocd_check
+      ignore_errors: true
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
     - name: Add ArgoCD helm repo
       command: helm repo add argo https://argoproj.github.io/argo-helm
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: argocd_check.rc != 0
+
+    - name: Check if argocd namespace exists
+      command: kubectl get namespace argocd
+      register: namespace_check
+      ignore_errors: true
+      changed_when: false
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
@@ -121,12 +151,14 @@
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: namespace_check.rc != 0
 
     - name: Install ArgoCD
       command: helm install argocd argo/argo-cd --namespace argocd
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: argocd_check.rc != 0
   tags: argocd-install
 
 ########################
@@ -135,8 +167,27 @@
 
 - name: Install MetalLB
   block:
+    - name: Check if MetalLB is already installed
+      command: helm list -n metallb-system | grep metallb
+      register: metallb_check
+      ignore_errors: true
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
     - name: Add MetalLB helm repo
       command: helm repo add metallb https://metallb.github.io/metallb
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: metallb_check.rc != 0
+
+    - name: Check if metallb-system namespace exists
+      command: kubectl get namespace metallb-system
+      register: namespace_check
+      ignore_errors: true
+      changed_when: false
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
@@ -146,6 +197,7 @@
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: namespace_check.rc != 0
 
     - name: Install MetalLB
       command: >-
@@ -154,34 +206,57 @@
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: metallb_check.rc != 0
   tags: metallb-install
 
 #############################
 # Cert-Manager Installation #
 #############################
 
-- name: Add Jetstack Helm repo
-  command: helm repo add jetstack https://charts.jetstack.io
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  failed_when: false
-  tags: certmanager-install
-
-- name: Create cert-manager namespace
-  command: kubectl create namespace cert-manager
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  tags: certmanager-install
-
 - name: Install Cert-Manager
-  command: helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.14.1 --set installCRDs=true
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  args:
-    creates: /etc/rancher/k3s/cert-manager-installed
+  block:
+    - name: Check if Cert-Manager is already installed
+      command: helm list -n cert-manager | grep cert-manager
+      register: certmanager_check
+      ignore_errors: true
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
+    - name: Add Jetstack Helm repo
+      command: helm repo add jetstack https://charts.jetstack.io
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: certmanager_check.rc != 0
+
+    - name: Check if cert-manager namespace exists
+      command: kubectl get namespace cert-manager
+      register: namespace_check
+      ignore_errors: true
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
+    - name: Create cert-manager namespace
+      command: kubectl create namespace cert-manager
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: namespace_check.rc != 0
+
+    - name: Install Cert-Manager
+      command: >-
+        helm install cert-manager jetstack/cert-manager 
+        --namespace cert-manager 
+        --version v1.14.1 
+        --set installCRDs=true
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      when: certmanager_check.rc != 0
   tags: certmanager-install
 
 #######################

@@ -2,8 +2,6 @@
 - name: Configure Network
   block:
       - include_tasks: network.yml
-  when: (master_network.ip_address is defined and master_network.ip_address is not none) or 
-        (master_network.ip_v6_address is defined and master_network.ip_v6_address is not none)
   tags: network
 
 - name: Configure Repositories

@@ -37,7 +37,12 @@
   tags: interface-network
 
 - name: Apply network changes
-  command: nmcli connection reload
+  shell: |
+    nmcli connection reload
+    ip link set {{ master_network.device }} down
+    sleep 5
+    ip link set {{ master_network.device }} up
+    systemctl restart NetworkManager  # Optional, but can help ensure clean state
   when: 
     - network_config.changed
     - "'failed' not in network_config"

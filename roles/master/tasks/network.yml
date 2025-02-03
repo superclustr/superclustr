@@ -22,6 +22,7 @@
       NETMASK={{ master_network.ip_netmask }}
       GATEWAY={{ master_network.ip_gateway }}
       DNS1=8.8.8.8
+      DNS2=8.8.4.4
 
       # IPv6 Configuration
       IPV6ADDR={{ master_network.ip_v6_address }}

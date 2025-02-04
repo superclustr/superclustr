@@ -98,7 +98,9 @@
         helm install cilium cilium/cilium 
         --namespace kube-system 
         --set ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16" 
-        --set operator.replicas=1
+        --set operator.replicas=1 
+        --set hubble.enabled=false 
+        --set clustermesh.enabled=false
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
@@ -160,28 +162,28 @@
 # Cert-Manager Installation #
 #############################
 
-- name: Add Jetstack Helm repo
-  command: helm repo add jetstack https://charts.jetstack.io
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  failed_when: false
-  tags: certmanager-install
-
-- name: Create cert-manager namespace
-  command: kubectl create namespace cert-manager
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  tags: certmanager-install
-
 - name: Install Cert-Manager
-  command: helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.14.1 --set installCRDs=true
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  args:
-    creates: /etc/rancher/k3s/cert-manager-installed
+  block:
+    - name: Add Jetstack Helm repo
+      command: helm repo add jetstack https://charts.jetstack.io
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      failed_when: false
+
+    - name: Create cert-manager namespace
+      command: kubectl create namespace cert-manager
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
+    - name: Install Cert-Manager
+      command: helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.14.1 --set installCRDs=true
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      args:
+        creates: /etc/rancher/k3s/cert-manager-installed
   tags: certmanager-install
 
 #######################

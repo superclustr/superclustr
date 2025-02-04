@@ -32,86 +32,33 @@
     state: started
   tags: firewalld-config
 
-- name: Check current default zone
-  command: firewall-cmd --get-default-zone
-  register: default_zone
-  changed_when: false
-  tags: firewalld-config
-
 - name: Set default zone to "public" only if necessary
   command: firewall-cmd --set-default-zone=public
-  when: default_zone.stdout != "public"
-  tags: firewalld-config
-
-- name: Check current public zone target
-  command: firewall-cmd --permanent --zone=public --get-target
-  register: public_target
-  changed_when: false
+  ignore_errors: true
   tags: firewalld-config
 
 - name: Block all incoming traffic by default, allowing established connections out
   command: firewall-cmd --permanent --zone=public --set-target=DROP
-  when: public_target.stdout != "DROP"
-  tags: firewalld-config
-
-- name: Check if tailscale0 is in trusted zone
-  shell: firewall-cmd --zone=trusted --list-interfaces | grep -q tailscale0
-  register: tailscale_check
-  failed_when: false
-  changed_when: false
   tags: firewalld-config
 
 - name: Allow trusted zone to accept traffic from Tailscale
   command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
-  when: tailscale_check.rc != 0
-  tags: firewalld-config
-
-- name: Check if cilium zone exists
-  shell: firewall-cmd --get-zones | grep -q cilium
-  register: cilium_zone_check
-  failed_when: false
-  changed_when: false
   tags: firewalld-config
 
 - name: Create a cilium zone for Cilium to do DNS resolution
   command: firewall-cmd --permanent --new-zone=cilium
-  when: cilium_zone_check.rc != 0
-  tags: firewalld-config
-
-- name: Check if cilium_host is in cilium zone
-  shell: firewall-cmd --zone=cilium --list-interfaces | grep -q cilium_host
-  register: cilium_interface_check
-  failed_when: false
-  changed_when: false
   tags: firewalld-config
 
 - name: Allow cilium zone to accept traffic from Cilium
   command: firewall-cmd --zone=cilium --add-interface=cilium_host --permanent
-  when: cilium_interface_check.rc != 0
-  tags: firewalld-config
-
-- name: Check if masquerade is enabled in cilium zone
-  shell: firewall-cmd --zone=cilium --query-masquerade
-  register: masquerade_check
-  failed_when: false
-  changed_when: false
   tags: firewalld-config
 
 - name: Allow cilium zone to masquerade
   command: firewall-cmd --zone=cilium --add-masquerade --permanent
-  when: masquerade_check.rc != 0
-  tags: firewalld-config
-
-- name: Check if DNS service is allowed in cilium zone
-  shell: firewall-cmd --zone=cilium --list-services | grep -q dns
-  register: dns_check
-  failed_when: false
-  changed_when: false
   tags: firewalld-config
 
 - name: Allow cilium zone to accept DNS
   command: firewall-cmd --zone=cilium --add-service=dns --permanent
-  when: dns_check.rc != 0
   notify:
     - Restart firewalld service
   tags: firewalld-config
@@ -316,8 +263,6 @@
             - {{ master_network.ip_v6_pool }}
     dest: /tmp/metallb-config.yaml
     mode: '0644'
-  when: (master_network.ip_pool is defined and master_network.ip_pool is not none) or 
-        (master_network.ip_v6_pool is defined and master_network.ip_v6_pool is not none)
   tags: metallb-config
 
 - name: Apply MetalLB config

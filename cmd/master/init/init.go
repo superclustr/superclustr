@@ -148,7 +148,7 @@ func runInit(f *cli.Factory, device string, ipPool string, ipAddr string, ipNetm
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
 			execute.WithTransformers(
-				transformer.Prepend("initializing"),
+				transformer.Prepend("master"),
 			),
 			execute.WithEnvVars(map[string]string{"PYTHONPATH": f.Python.GetPythonLibFsPath()}),
 			execute.WithExecutable(f.Python),

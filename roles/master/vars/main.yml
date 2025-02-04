@@ -1,33 +1,7 @@
 ---
 # Definitions of packages required for each service
 
-slurm_packages:
-    - "slurm-ohpc"
-    - "ohpc-slurm-server"
-    - "slurm-slurmctld-ohpc"
-    - "slurm-ohpc-slurmrestd"
-    - "slurm-example-configs-ohpc"
-    - "munge"
-    - "lmod-ohpc"
-    - "lua"
-    - "luarocks"
-    - "lua-devel"
-
 kubernetes_packages:
     - "curl"
     - "git"
     - "tar"
-
-beegfs_packages:
-    - "beegfs-client"
-    - "beegfs-helperd"
-    - "beegfs-utils"
-
-conman_packages:
-    - "conman-ohpc"
-
-genders_packages:
-    - "genders-ohpc"
-
-nhc_packages:
-    - "nhc-ohpc"

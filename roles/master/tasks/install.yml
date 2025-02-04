@@ -22,16 +22,6 @@
     state: present
   tags: firewalld-install
 
-######################
-# Slurm Installation #
-######################
-
-- name: Install Slurm packages
-  dnf:
-    name: "{{ slurm_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: slurm-install
-
 ###########################
 # Kubernetes Installation #
 ###########################
@@ -185,57 +175,3 @@
       args:
         creates: /etc/rancher/k3s/cert-manager-installed
   tags: certmanager-install
-
-#######################
-# BeeGFS Installation #
-#######################
-
-- name: Install BeeGFS packages
-  dnf:
-    name: "{{ beegfs_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: beegfs-install
-
-#######################
-# ConMan Installation #
-#######################
-
-- name: Install ConMan (Console Manager) packages
-  dnf:
-    name: "{{ conman_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: conman-install
-
-- name: Ensure the ConMan configuration exists but is empty
-  file:
-    path: /etc/conman.conf
-    state: touch
-    mode: '0644'
-  tags: conman-config
-
-########################
-# Genders Installation #
-########################
-
-- name: Install Genders packages
-  dnf:
-    name: "{{ genders_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: genders-install
-
-- name: Ensure the Genders config file exists but is empty
-  file:
-    path: /etc/genders
-    state: touch
-    mode: '0644'
-  tags: genders-config
-
-####################
-# NHC Installation #
-####################
-
-- name: Install NHC (Node Health Checker) packages
-  dnf:
-    name: "{{ nhc_packages | reject('eq', '') }}"
-    install_weak_deps: false
-  tags: nhc-install

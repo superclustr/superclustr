@@ -19,53 +19,9 @@
     state: started
   tags: firewalld-service
 
-- name: Ensure Munge state
-  systemd:
-    name: munge
-    enabled: true
-    state: started
-  tags: munge-service
-
-- name: Ensure slurmctld state
-  systemd:
-    name: slurmctld
-    enabled: true
-    state: started
-  tags: slurm-service
-
-- name: Ensure slurmrestd state
-  systemd:
-    name: slurmrestd
-    enabled: true
-    state: started
-  tags: slurm-service
-
 - name: Ensure k3s state
   systemd:
     name: k3s
     enabled: true
     state: started
   tags: kubernetes-service
-
-- name: Ensure beegfs-helperd state
-  systemd:
-    name: beegfs-helperd
-    enabled: yes
-    state: started
-  tags: beegfs-service
-
-- name: Ensure beegfs-client state
-  systemd:
-    name: beegfs-client
-    enabled: yes
-    state: started
-  ignore_errors: true # FIXME: Broken, disabled as cannot build kernel module without kernel-devel
-  tags: beegfs-service
-
-- name: Ensure conman state
-  systemd:
-    name: conman
-    enabled: yes
-    state: started
-  ignore_errors: true # FIXME: Broken, disabled as ConMan needs additional configuration before it can be used ans we are not sure what to use if for yet
-  tags: conman-service

@@ -20,42 +20,6 @@
     label: "{{ item.name }}"
   tags: epel-repos
 
-########################
-# OpenHPC Repositories #
-########################
-
-- name: Configure OpenHPC Repositories
-  ansible.builtin.yum_repository:
-    name: "{{ item.name }}"
-    description: "{{ item.description | default(omit) }}"
-    file: "{{ item.file }}"
-    baseurl: "{{ item.baseurl | default(omit) }}"
-    metalink: "{{ item.metalink | default(omit) }}"
-    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
-    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
-    gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ openhpc_repos[ansible_distribution_major_version] | default([]) }}"
-  loop_control:
-    label: "{{ item.name }}"
-  tags: openhpc-repos
-
-#######################
-# BeeGFS Repositories #
-#######################
-
-- name: Configure BeeGFS Repository
-  ansible.builtin.yum_repository:
-    name: "{{ item.name }}"
-    description: "{{ item.description | default(omit) }}"
-    file: "{{ item.file }}"
-    baseurl: "{{ item.baseurl | default(omit) }}"
-    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
-    gpgkey: "{{ item.gpgkey | default(omit) }}"
-  loop: "{{ beegfs_repos[ansible_distribution_major_version] | default([]) }}"
-  loop_control:
-    label: "{{ item.name }}"
-  tags: beegfs-repos
-
 ###########################
 # Additional Repositories #
 ###########################

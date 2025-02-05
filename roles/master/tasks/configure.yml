@@ -51,8 +51,10 @@
 
 - name: Allow trusted zone to accept traffic from Tailscale
   command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
-  notify:
-    - Restart firewalld service
+  tags: firewalld-config
+
+- name: Reload firewalld configuration
+  command: firewall-cmd --reload
   tags: firewalld-config
 
 ########################

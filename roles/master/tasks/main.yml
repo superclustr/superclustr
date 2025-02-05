@@ -1,4 +1,8 @@
 ---
+- name: Ansible
+  command: mkdir -p /var/lib/ansible/
+  tags: ansible
+
 - name: Configure Network
   block:
       - include_tasks: network.yml

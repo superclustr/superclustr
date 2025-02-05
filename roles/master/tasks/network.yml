@@ -32,18 +32,10 @@
       IPV6_AUTOCONF=yes
       {% endif %}
       #ANSIBLE-END
-  register: network_config
-  when: ansible_service_mgr == 'systemd'
   tags: interface-network
 
 - name: Apply network changes
   shell: |
     nmcli device reapply {{ master_network.device }}
-    ip link set {{ master_network.device }} down
-    sleep 5
-    ip link set {{ master_network.device }} up
-    systemctl restart NetworkManager  # Optional, but can help ensure clean state
-  when: 
-    - network_config.changed
-    - "'failed' not in network_config"
-  changed_when: false
+    systemctl restart NetworkManager
+  tags: interface-network

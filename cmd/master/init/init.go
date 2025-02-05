@@ -19,6 +19,7 @@ import (
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
 	var device string
+	var hostname string
 	var ipPool string
 	var ipAddr string
 	var ipNetmask string
@@ -32,7 +33,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 		Short: "Initialize a master service.",
 		Long:  "Initialize a master service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f, device, ipPool, ipAddr, ipNetmask, ipGateway, ipV6Pool, ipV6Addr, ipV6Gateway)
+			err := runInit(f, device, hostname, ipPool, ipAddr, ipNetmask, ipGateway, ipV6Pool, ipV6Addr, ipV6Gateway)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
@@ -41,6 +42,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 	// Define flags for network configuration
 	cmd.Flags().StringVar(&device, "device", "", "Network Interface Device Name (e.g. 'eth0')")
+	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node01.ams.superclustr.net')")
 	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
@@ -51,10 +53,13 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	return cmd
 }
 
-func runInit(f *cli.Factory, device string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
+func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
 	if device == "" {
 		return fmt.Errorf("Network Device is required")
+	}
+	if hostname == "" {
+		return fmt.Errorf("Hostname is required")
 	}
 	if ipPool == "" || ipV6Pool == "" {
 		return fmt.Errorf("LoadBalancer pool range is required")
@@ -89,6 +94,7 @@ func runInit(f *cli.Factory, device string, ipPool string, ipAddr string, ipNetm
 			"role": "master",
 			"master_network": filterEmpty(map[string]string{
 				"device": 		 device,
+				"hostname": 	 hostname,
 				"ip_pool":       ipPool,
 				"ip_address":    ipAddr,
 				"ip_gateway":    ipGateway,

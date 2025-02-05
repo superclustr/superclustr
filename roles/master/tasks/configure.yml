@@ -103,12 +103,12 @@
                 selfHeal: true
               syncOptions:
                 - CreateNamespace=true
-    dest: /tmp/applicationset.yaml
+    dest: /tmp/argocd-applicationset.yaml
     mode: '0644'
   tags: argocd-config
 
 - name: Apply ArgoCD ApplicationSet
-  command: kubectl apply -f /tmp/applicationset.yaml
+  command: kubectl apply -f /tmp/argocd-applicationset.yaml
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
     PATH: "{{ ansible_env.PATH }}:/usr/local/bin"

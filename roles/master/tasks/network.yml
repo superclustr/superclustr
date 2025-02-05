@@ -41,3 +41,12 @@
     nmcli device reapply {{ master_network.device }}
     systemctl restart NetworkManager
   tags: interface-network
+
+###########################
+# Hostname Configuration #
+###########################
+
+- name: Apply hostname
+  hostname:
+    name: {{ master_network.hostname }}
+  tags: hostname-network

@@ -32,6 +32,8 @@
       IPV6_AUTOCONF=yes
       {% endif %}
       #ANSIBLE-END
+  args:
+    creates: /etc/sysconfig/network-scripts/ifcfg-{{ master_network.device }}
   tags: interface-network
 
 - name: Apply network changes

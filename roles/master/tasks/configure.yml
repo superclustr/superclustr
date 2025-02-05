@@ -37,28 +37,20 @@
   ignore_errors: true
   tags: firewalld-config
 
+- name: Add 10.42.0.0/16 to trusted zone
+  command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+  tags: firewalld-config
+
+- name: Remove SSH from public zone
+  command: firewall-cmd --zone=public --remove-service=ssh --permanent
+  tags: firewalld-config
+
 - name: Block all incoming traffic by default, allowing established connections out
-  command: firewall-cmd --permanent --zone=public --set-target=DROP
+  command: firewall-cmd --zone=public --set-target=DROP --permanent
   tags: firewalld-config
 
 - name: Allow trusted zone to accept traffic from Tailscale
   command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
-  tags: firewalld-config
-
-- name: Create a cilium zone for Cilium to do DNS resolution
-  command: firewall-cmd --permanent --new-zone=cilium
-  tags: firewalld-config
-
-- name: Allow cilium zone to accept traffic from Cilium
-  command: firewall-cmd --zone=cilium --add-interface=cilium_host --permanent
-  tags: firewalld-config
-
-- name: Allow cilium zone to masquerade
-  command: firewall-cmd --zone=cilium --add-masquerade --permanent
-  tags: firewalld-config
-
-- name: Allow cilium zone to accept DNS
-  command: firewall-cmd --zone=cilium --add-service=dns --permanent
   notify:
     - Restart firewalld service
   tags: firewalld-config

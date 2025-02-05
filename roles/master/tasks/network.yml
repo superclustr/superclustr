@@ -38,7 +38,7 @@
 
 - name: Apply network changes
   shell: |
-    nmcli connection reload
+    nmcli device reapply {{ master_network.device }}
     ip link set {{ master_network.device }} down
     sleep 5
     ip link set {{ master_network.device }} up

@@ -105,8 +105,6 @@
                 - CreateNamespace=true
     dest: /tmp/applicationset.yaml
     mode: '0644'
-  args:
-    creates: /tmp/applicationset.yaml
   tags: argocd-config
 
 - name: Apply ArgoCD ApplicationSet
@@ -143,8 +141,6 @@
             - {{ master_network.ip_v6_pool }}
     dest: /tmp/metallb-config.yaml
     mode: '0644'
-  args:
-    creates: /tmp/metallb-config.yaml
   tags: metallb-config
 
 - name: Apply MetalLB config
@@ -179,8 +175,6 @@
           - http01:
               ingress:
                 class: traefik
-  args:
-    creates: /tmp/letsencrypt-cluster-issuer.yaml
   tags: certmanager-config
 
 ############################

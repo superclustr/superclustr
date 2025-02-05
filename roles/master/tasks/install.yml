@@ -39,8 +39,6 @@
         url: https://get.k3s.io
         dest: /tmp/k3s-install.sh
         mode: '0755'
-      args:
-        creates: /tmp/k3s-install.sh
 
     - name: Install k3s server
       environment:

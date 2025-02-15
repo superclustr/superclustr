@@ -97,7 +97,7 @@
               path: '{% raw %}{{chartPath}}{% endraw %}'
               helm:
                 valueFiles:
-                  - values-ci.yaml
+                  - values.yaml
             destination:
               server: https://kubernetes.default.svc
               namespace: '{% raw %}{{name}}{% endraw %}'

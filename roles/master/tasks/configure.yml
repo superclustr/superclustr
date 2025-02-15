@@ -41,6 +41,10 @@
   command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
   tags: firewalld-config
 
+- name: Add 10.43.0.0/16 to trusted zone
+  command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+  tags: firewalld-config
+
 - name: Remove SSH from public zone
   command: firewall-cmd --zone=public --remove-service=ssh --permanent
   tags: firewalld-config

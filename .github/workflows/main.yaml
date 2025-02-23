@@ -32,17 +32,10 @@ jobs:
       #  run: |
       #    make test
 
-      - name: Upload Tagged Binary Artifact
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
           name: super
-          path: bin/super
-
-      - name: Upload Nightly Binary Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: super-nightly
           path: bin/super
 
   deploy:
@@ -86,7 +79,7 @@ jobs:
 
       - name: Deploy Nightly Binary
         run: |
-          cp /tmp/artifacts/super-nightly super-nightly
+          cp /tmp/artifacts/super super-nightly
 
       - name: Commit and Push Changes
         run: |

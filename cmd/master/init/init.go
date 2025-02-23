@@ -55,9 +55,6 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
-	if hostname == "" {
-		return fmt.Errorf("Hostname is required")
-	}
 	if device == "" && (ipAddr != "" || ipV6Addr != "") {
 		return fmt.Errorf("Network device definition is required")
 	}

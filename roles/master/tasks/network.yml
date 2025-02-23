@@ -43,14 +43,14 @@
       IPV6INIT=no
       {% endif %}
       #ANSIBLE-END
-  when: master_network.device is not none
+  when: master_network.device != ""
   tags: interface-network
 
 - name: Apply network changes
   shell: |
     nmcli device reapply {{ master_network.device }}
     systemctl restart NetworkManager
-  when: master_network.device is not none
+  when: master_network.device != ""
   tags: interface-network
 
 ###########################
@@ -60,5 +60,5 @@
 - name: Apply hostname
   hostname:
     name: "{{ master_network.hostname }}"
-  when: master_network.hostname is not none
+  when: master_network.hostname != ""
   tags: hostname-network

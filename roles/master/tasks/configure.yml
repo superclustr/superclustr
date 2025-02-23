@@ -165,7 +165,7 @@
             namespace: metallb-system
           spec:
             addresses:
-            - {{ master_network.ip_v6_pool }}  # Your IPv6 range
+            - {{ master_network.ip_v6_pool }}
           ---
           {% endif %}
           apiVersion: metallb.io/v1beta1

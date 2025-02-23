@@ -65,17 +65,6 @@ func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAd
 		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
 	}
 
-	// Helper function to filter empty values
-	filterEmpty := func(m map[string]string) map[string]string {
-		result := make(map[string]string)
-		for k, v := range m {
-			if v != "" {
-				result[k] = v
-			}
-		}
-		return result
-	}
-
 	// Build playbook structure
 	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
 		"hosts":        "localhost",
@@ -83,7 +72,7 @@ func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAd
 		"gather_facts": true,
 		"roles": []map[string]interface{}{{
 			"role": "master",
-			"master_network": filterEmpty(map[string]string{
+			"master_network": map[string]interface{}{
 				"device": 		 device,
 				"hostname": 	 hostname,
 				"ip_pool":       ipPool,
@@ -93,7 +82,7 @@ func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAd
 				"ip_v6_pool":    ipV6Pool,
 				"ip_v6_address": ipV6Addr,
 				"ip_v6_gateway": ipV6Gateway,
-			}),
+			},
 		}},
 	}})
 	if err != nil {

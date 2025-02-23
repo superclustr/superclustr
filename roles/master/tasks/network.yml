@@ -54,6 +54,7 @@
   shell: |
     nmcli device reapply {{ master_network.device }}
     systemctl restart NetworkManager
+  when: master_network.device is not none
   tags: interface-network
 
 ###########################

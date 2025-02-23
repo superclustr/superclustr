@@ -23,7 +23,8 @@ It will download the latest version of the Superclustr CLI and provision your no
 # Via DHCP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-address dhcp \
-    --ip-v6-pool 2001:678:7ec:70::1000/112 \
+    --ip-v6-address dhcp \
+    --ip-v6-pool 2001:678:7ec:70::1080/113 \
     --hostname node01.ams.superclustr.net \
     --device ens2f0
 
@@ -32,7 +33,9 @@ curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-gateway 89.37.98.1 \
     --ip-address 89.37.98.70 \
     --ip-netmask 255.255.255.128 \
-    --ip-v6-pool 2001:678:7ec:70::1000/112 \
+    --ip-v6-gateway 2001:678:7ec:70::1 \
+    --ip-v6-address 2001:678:7ec:70::1001 \
+    --ip-v6-pool 2001:678:7ec:70::1080/113 \
     --hostname node01.ams.superclustr.net \
     --device ens2f0
 ```
@@ -44,14 +47,14 @@ You can also find a full example in the [Vagrantfile](Vagrantfile).
 Here’s the information laid out for our current network configuration.
 This is relevant to you if you want to join the cluster or if you want to connect to the cluster from outside.
 
-| **Type**       | **Allocation**              | **Purpose**                       | **Range**                         | **CIDR**                     |
-|-----------------|-----------------------------|------------------------------------|------------------------------------|------------------------------|
-| **IPv4**       | `89.37.98.1`                | Gateway                           | `89.37.98.1`                      | -                           |
-|                | `89.37.98.70 - 89.37.98.74`   | Static IPs for machines           | `89.37.98.70, .71, .72, .73, .74`          | -                           |
-|                | `-/-`  | MetalLB Address Pool              | `-/-`         | `-/-`             |
-| **IPv6**       | `2001:678:7ec:70::1`        | Gateway                           | `2001:678:7ec:70::1`              | -                           |
-|                | `-/-`  | Static IPs for machines           | `-/-`              | -                           |
-|              | `2001:678:7ec:70::1000 - ::1fff` | MetalLB Address Pool              | `::1000 - ::1fff`               | `2001:678:7ec:70::1000/112`  |
+| **Type**       | **Allocation**                   | **Purpose**               | **Range**                         | **CIDR**                    |
+|----------------|----------------------------------|---------------------------|-----------------------------------|-----------------------------|
+| **IPv4**       | `89.37.98.1`                     | Gateway                   | `89.37.98.1`                      | -                           |
+|                | `89.37.98.70 - 89.37.98.74`      | Static IPs for machines   | `89.37.98.70, .71, .72, .73, .74` | -                           |
+|                | -                                | MetalLB Address Pool      | -                                 | -                           |
+| **IPv6**       | `2001:678:7ec:70::1`             | Gateway                   | `2001:678:7ec:70::1`              | -                           |
+|                | `2001:678:7ec:70::1000 - ::107F` | Static IPs for machines   | `2001:678:7ec:70::1000 - ::107F`  | `2001:678:7ec:70::1000/113` |
+|                | `2001:678:7ec:70::1080 - ::10FF` | MetalLB Address Pool      | `2001:678:7ec:70::1080 - ::1fff`  | `2001:678:7ec:70::1080/113` |
 
 ## Getting Started
 

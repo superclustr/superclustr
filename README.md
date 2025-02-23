@@ -16,13 +16,12 @@ from the RIPE NCC with the purpose of providing a community operated platform fo
 
 ## Enrollment
 
-To enroll in the cluster, you can use the following command.
-It will download the latest version of the Superclustr CLI and provision your node.
+To enroll your machine into the cluster, please see the examples below.
+This will use the latest version of Superclustr to provision your node.
 
 ```bash
 # Via DHCP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
-    --ip-address dhcp \
     --ip-v6-address dhcp \
     --ip-v6-pool 2001:678:7ec:70::1080/113 \
     --hostname node01.ams.superclustr.net \
@@ -30,15 +29,15 @@ curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
 
 # Or, using a Static IP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
-    --ip-gateway 89.37.98.1 \
-    --ip-address 89.37.98.70 \
-    --ip-netmask 255.255.255.128 \
     --ip-v6-gateway 2001:678:7ec:70::1 \
     --ip-v6-address 2001:678:7ec:70::1001 \
     --ip-v6-pool 2001:678:7ec:70::1080/113 \
     --hostname node01.ams.superclustr.net \
     --device ens2f0
 ```
+
+> [!NOTE]  
+> We are currently only operating within IPv6 space, therefore all documentation uses this specific protocol version.
 
 You can also find a full example in the [Vagrantfile](Vagrantfile).
 
@@ -50,10 +49,10 @@ This is relevant to you if you want to join the cluster or if you want to connec
 | **Type**       | **Allocation**                   | **Purpose**               | **Range**                         | **CIDR**                    |
 |----------------|----------------------------------|---------------------------|-----------------------------------|-----------------------------|
 | **IPv4**       | `89.37.98.1`                     | Gateway                   | `89.37.98.1`                      | -                           |
-|                | `89.37.98.70 - 89.37.98.74`      | Static IPs for machines   | `89.37.98.70, .71, .72, .73, .74` | -                           |
+|                | -                                | Static IPs for machines   | -                                 | -                           |
 |                | -                                | MetalLB Address Pool      | -                                 | -                           |
 | **IPv6**       | `2001:678:7ec:70::1`             | Gateway                   | `2001:678:7ec:70::1`              | -                           |
-|                | `2001:678:7ec:70::1000 - ::107F` | Static IPs for machines   | `2001:678:7ec:70::1000 - ::107F`  | `2001:678:7ec:70::1000/113` |
+|                | `2001:678:7ec:70::1001 - ::107F` | Static IPs for machines   | `2001:678:7ec:70::1001 - ::107F`  | `2001:678:7ec:70::1001/113` |
 |                | `2001:678:7ec:70::1080 - ::10FF` | MetalLB Address Pool      | `2001:678:7ec:70::1080 - ::1fff`  | `2001:678:7ec:70::1080/113` |
 
 ## Getting Started

@@ -63,6 +63,6 @@
 
 - name: Apply hostname
   hostname:
-    name: "{{ master_network.hostname }}""
+    name: "{{ master_network.hostname }}"
   when: master_network.hostname is not none
   tags: hostname-network

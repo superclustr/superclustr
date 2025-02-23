@@ -127,6 +127,7 @@
 - name: Create MetalLB config
   copy:
     content: |
+      {% if master_network.ip_pool is not none %}
       apiVersion: metallb.io/v1beta1
       kind: IPAddressPool
       metadata:
@@ -136,6 +137,8 @@
         addresses:
         - {{ master_network.ip_pool }}  # Your IPv4 range
       ---
+      {% endif %}
+      {% if master_network.ip_v6_pool is not none %}
       apiVersion: metallb.io/v1beta1
       kind: IPAddressPool
       metadata:
@@ -145,6 +148,7 @@
         addresses:
         - {{ master_network.ip_v6_pool }}  # Your IPv6 range
       ---
+      {% endif %}
       apiVersion: metallb.io/v1beta1
       kind: L2Advertisement
       metadata:
@@ -152,8 +156,12 @@
         namespace: metallb-system
       spec:
         ipAddressPools:
+        {% if master_network.ip_pool is not none %}
         - ipv4-pool
+        {% endif %}
+        {% if master_network.ip_v6_pool is not none %}
         - ipv6-pool
+        {% endif %}
     dest: /tmp/metallb-config.yaml
     mode: '0644'
   tags: metallb-config

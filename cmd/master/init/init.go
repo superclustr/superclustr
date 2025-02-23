@@ -61,16 +61,16 @@ func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAd
 	if hostname == "" {
 		return fmt.Errorf("Hostname is required")
 	}
-	if ipPool == "" || ipV6Pool == "" {
+	if ipPool == "" && ipV6Pool == "" {
 		return fmt.Errorf("LoadBalancer pool range is required")
 	}
-	if ipAddr == "" || ipV6Addr == "" {
-		return fmt.Errorf("Machine IP address or 'dhcp' is required")
+	if ipAddr == "" && ipV6Addr == "" {
+		return fmt.Errorf("Machine IPv4/IPv6 address or 'dhcp' is required")
 	}
 	if ipNetmask == "" && ipAddr != "dhcp" {
 		return fmt.Errorf("Netmask is required, since ip-address is static")
 	}
-	if (ipGateway == "" || ipV6Gateway == "") && (ipAddr != "dhcp" || ipV6Addr != "dhcp") {
+	if (ipGateway == "" && ipV6Gateway == "") && (ipAddr != "dhcp" && ipV6Addr != "dhcp") {
 		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
 	}
 

@@ -5,209 +5,219 @@
 # Tailscale Configuration #
 ###########################
 
-- name: Configure Tailscale in profile for sudoers
-  lineinfile:
-    path: /etc/profile
-    state: present
-    line: |
-      if [ "$(id -u)" -eq 0 ] || sudo -v &>/dev/null; then
-        if ! tailscale status &>/dev/null; then
-          echo "######################################################################"
-          echo "#  Tailscale SSH enables secure external access to the system via    #"
-          echo "#  the Tailscale network. All other SSH connections are disabled.    #"
-          echo "#  For more info: https://tailscale.com/kb/1193/tailscale-ssh        #"
-          echo "######################################################################"
-          sudo tailscale up --ssh
-        fi
-      fi
+- name: Configure Tailscale
+  block:
+    - name: Update profile for sudoers
+      lineinfile:
+        path: /etc/profile
+        state: present
+        line: |
+          if [ "$(id -u)" -eq 0 ] || sudo -v &>/dev/null; then
+            if ! tailscale status &>/dev/null; then
+              echo "######################################################################"
+              echo "#  Tailscale SSH enables secure external access to the system via    #"
+              echo "#  the Tailscale network. All other SSH connections are disabled.    #"
+              echo "#  For more info: https://tailscale.com/kb/1193/tailscale-ssh        #"
+              echo "######################################################################"
+              sudo tailscale up --ssh
+            fi
+          fi
   tags: tailscale-config
 
 ##########################
 # Firewall Configuration #
 ##########################
 
-- name: Start firewalld service
-  systemd:
-    name: firewalld
-    state: started
+- name: Configure Firewall
+  block:
+    - name: Start firewalld service
+      systemd:
+        name: firewalld
+        state: started
+
+    - name: Set default zone to "public" only if necessary
+      command: firewall-cmd --set-default-zone=public
+      ignore_errors: true
+
+    - name: Add 10.42.0.0/16 to trusted zone
+      command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+
+    - name: Add 10.43.0.0/16 to trusted zone
+      command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+
+    - name: Remove SSH from public zone
+      command: firewall-cmd --zone=public --remove-service=ssh --permanent
+
+    - name: Block all incoming traffic by default, allowing established connections out
+      command: firewall-cmd --zone=public --set-target=DROP --permanent
+
+    - name: Allow trusted zone to accept traffic from Tailscale
+      command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
+
+    - name: Reload firewalld configuration
+      command: |
+        firewall-cmd --reload
+        touch /var/lib/ansible/firewall_configured
+  args:
+    creates: /var/lib/ansible/firewall_configured
   tags: firewalld-config
 
-- name: Set default zone to "public" only if necessary
-  command: firewall-cmd --set-default-zone=public
-  ignore_errors: true
-  tags: firewalld-config
-
-- name: Add 10.42.0.0/16 to trusted zone
-  command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
-  tags: firewalld-config
-
-- name: Add 10.43.0.0/16 to trusted zone
-  command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
-  tags: firewalld-config
-
-- name: Remove SSH from public zone
-  command: firewall-cmd --zone=public --remove-service=ssh --permanent
-  tags: firewalld-config
-
-- name: Block all incoming traffic by default, allowing established connections out
-  command: firewall-cmd --zone=public --set-target=DROP --permanent
-  tags: firewalld-config
-
-- name: Allow trusted zone to accept traffic from Tailscale
-  command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
-  tags: firewalld-config
-
-- name: Reload firewalld configuration
-  command: firewall-cmd --reload
-  tags: firewalld-config
 
 ########################
 # ArgoCD Configuration #
 ########################
 
-- name: Create ArgoCD ApplicationSet
-  copy:
-    content: |
-      apiVersion: argoproj.io/v1alpha1
-      kind: ApplicationSet
-      metadata:
-        name: all-apps
-        namespace: argocd
-      spec:
-        generators:
-          - list:
-              elements:
-                - name: bgpdata
-                  repoURL: https://github.com/bgpdata/bgpdata.git
-                  chartPath: charts/bgpdata
-                - name: ris-kafka
-                  repoURL: https://github.com/robin-rpr/ris-kafka.git
-                  chartPath: charts/ris-kafka
-                - name: cernide
-                  repoURL: https://github.com/cernide/cernide.git
-                  chartPath: charts/polyaxon
-        template:
+- name: Configure ArgoCD
+  block:
+    - name: Create ArgoCD ApplicationSet
+      copy:
+        content: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: ApplicationSet
           metadata:
-            name: '{% raw %}{{name}}{% endraw %}'
+            name: all-apps
+            namespace: argocd
           spec:
-            project: default
-            source:
-              repoURL: '{% raw %}{{repoURL}}{% endraw %}'
-              targetRevision: HEAD
-              path: '{% raw %}{{chartPath}}{% endraw %}'
-              helm:
-                valueFiles:
-                  - values.yaml
-            destination:
-              server: https://kubernetes.default.svc
-              namespace: '{% raw %}{{name}}{% endraw %}'
-            syncPolicy:
-              automated:
-                prune: true
-                selfHeal: true
-              syncOptions:
-                - CreateNamespace=true
-    dest: /tmp/argocd-applicationset.yaml
-    mode: '0644'
+            generators:
+              - list:
+                  elements:
+                    - name: bgpdata
+                      repoURL: https://github.com/bgpdata/bgpdata.git
+                      chartPath: charts/bgpdata
+                    - name: ris-kafka
+                      repoURL: https://github.com/robin-rpr/ris-kafka.git
+                      chartPath: charts/ris-kafka
+                    - name: cernide
+                      repoURL: https://github.com/cernide/cernide.git
+                      chartPath: charts/polyaxon
+            template:
+              metadata:
+                name: '{% raw %}{{name}}{% endraw %}'
+              spec:
+                project: default
+                source:
+                  repoURL: '{% raw %}{{repoURL}}{% endraw %}'
+                  targetRevision: HEAD
+                  path: '{% raw %}{{chartPath}}{% endraw %}'
+                  helm:
+                    valueFiles:
+                      - values.yaml
+                destination:
+                  server: https://kubernetes.default.svc
+                  namespace: '{% raw %}{{name}}{% endraw %}'
+                syncPolicy:
+                  automated:
+                    prune: true
+                    selfHeal: true
+                  syncOptions:
+                    - CreateNamespace=true
+        dest: /tmp/argocd-applicationset.yaml
+        mode: '0644'
+    - name: Apply ArgoCD ApplicationSet
+      command: kubectl apply -f /tmp/argocd-applicationset.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      register: argocd_result
+      changed_when: argocd_result.stdout is search("created|configured|updated")
+      tags: argocd-config
   tags: argocd-config
 
-- name: Apply ArgoCD ApplicationSet
-  command: kubectl apply -f /tmp/argocd-applicationset.yaml
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  register: argocd_result
-  changed_when: argocd_result.stdout is search("created|configured|updated")
-  tags: argocd-config
+
 
 #########################
 # MetalLB Configuration #
 #########################
 
-- name: Create MetalLB config
-  copy:
-    content: |
-      {% if master_network.ip_pool is not none %}
-      apiVersion: metallb.io/v1beta1
-      kind: IPAddressPool
-      metadata:
-        name: ipv4-pool
-        namespace: metallb-system
-      spec:
-        addresses:
-        - {{ master_network.ip_pool }}  # Your IPv4 range
-      ---
-      {% endif %}
-      {% if master_network.ip_v6_pool is not none %}
-      apiVersion: metallb.io/v1beta1
-      kind: IPAddressPool
-      metadata:
-        name: ipv6-pool
-        namespace: metallb-system
-      spec:
-        addresses:
-        - {{ master_network.ip_v6_pool }}  # Your IPv6 range
-      ---
-      {% endif %}
-      apiVersion: metallb.io/v1beta1
-      kind: L2Advertisement
-      metadata:
-        name: l2-advert
-        namespace: metallb-system
-      spec:
-        ipAddressPools:
-        {% if master_network.ip_pool is not none %}
-        - ipv4-pool
-        {% endif %}
-        {% if master_network.ip_v6_pool is not none %}
-        - ipv6-pool
-        {% endif %}
-    dest: /tmp/metallb-config.yaml
-    mode: '0644'
-  tags: metallb-config
+- name: Configure MetalLB
+  block:
+    - name: Create MetalLB config
+      copy:
+        content: |
+          {% if master_network.ip_pool is not none %}
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: ipv4-pool
+            namespace: metallb-system
+          spec:
+            addresses:
+            - {{ master_network.ip_pool }}  # Your IPv4 range
+          ---
+          {% endif %}
+          {% if master_network.ip_v6_pool is not none %}
+          apiVersion: metallb.io/v1beta1
+          kind: IPAddressPool
+          metadata:
+            name: ipv6-pool
+            namespace: metallb-system
+          spec:
+            addresses:
+            - {{ master_network.ip_v6_pool }}  # Your IPv6 range
+          ---
+          {% endif %}
+          apiVersion: metallb.io/v1beta1
+          kind: L2Advertisement
+          metadata:
+            name: l2-advert
+            namespace: metallb-system
+          spec:
+            ipAddressPools:
+            {% if master_network.ip_pool is not none %}
+            - ipv4-pool
+            {% endif %}
+            {% if master_network.ip_v6_pool is not none %}
+            - ipv6-pool
+            {% endif %}
+        dest: /tmp/metallb-config.yaml
+        mode: '0644'
 
-- name: Apply MetalLB config
-  command: kubectl apply -f /tmp/metallb-config.yaml
-  environment:
-    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-  register: metallb_result
-  changed_when: metallb_result.stdout is search("created|configured|updated")
+    - name: Apply MetalLB config
+      command: kubectl apply -f /tmp/metallb-config.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      register: metallb_result
+      changed_when: metallb_result.stdout is search("created|configured|updated")
   tags: metallb-config
 
 ##############################
 # Cert-Manager Configuration #
 ##############################
 
-- name: Apply Let's Encrypt ClusterIssuer
-  copy:
-    dest: /tmp/letsencrypt-cluster-issuer.yaml
-    content: |
-      apiVersion: cert-manager.io/v1
-      kind: ClusterIssuer
-      metadata:
-        name: letsencrypt-prod
-        namespace: cert-manager
-      spec:
-        acme:
-          server: https://acme-v02.api.letsencrypt.org/directory
-          email: {{ master_kubernetes.email }}
-          privateKeySecretRef:
+- name: Configure Cert-Manager
+  block:
+    - name: Apply Let's Encrypt ClusterIssuer
+      copy:
+        dest: /tmp/letsencrypt-cluster-issuer.yaml
+        content: |
+          apiVersion: cert-manager.io/v1
+          kind: ClusterIssuer
+          metadata:
             name: letsencrypt-prod
-          solvers:
-          - http01:
-              ingress:
-                class: traefik
+            namespace: cert-manager
+          spec:
+            acme:
+              server: https://acme-v02.api.letsencrypt.org/directory
+              email: {{ master_kubernetes.email }}
+              privateKeySecretRef:
+                name: letsencrypt-prod
+              solvers:
+              - http01:
+                  ingress:
+                    class: traefik
   tags: certmanager-config
 
 ############################
 # Kubernetes Configuration #
 ############################
 
-- name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
-  file:
-    path: /etc/rancher/k3s/k3s.yaml
-    mode: '0600'
-    state: file
-  become: true
+- name: Configure Kubernetes
+  block:
+    - name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
+      file:
+        path: /etc/rancher/k3s/k3s.yaml
+        mode: '0600'
+        state: file
+      become: true
   tags: kubernetes-config

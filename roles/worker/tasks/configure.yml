@@ -1,0 +1,89 @@
+---
+# This playbook configures the services
+
+###########################
+# Tailscale Configuration #
+###########################
+
+- name: Configure Tailscale
+  block:
+    - name: Update profile for sudoers
+      lineinfile:
+        path: /etc/profile
+        state: present
+        line: |
+          if [ "$(id -u)" -eq 0 ] || sudo -v &>/dev/null; then
+            if ! tailscale status &>/dev/null; then
+              echo "######################################################################"
+              echo "#  Tailscale SSH enables secure external access to the system via    #"
+              echo "#  the Tailscale network. All other SSH connections are disabled.    #"
+              echo "#  For more info: https://tailscale.com/kb/1193/tailscale-ssh        #"
+              echo "######################################################################"
+              sudo tailscale up --ssh
+            fi
+          fi
+  tags: tailscale-config
+
+##########################
+# Firewall Configuration #
+##########################
+
+- name: Configure Firewall
+  block:
+    - name: Start firewalld service
+      systemd:
+        name: firewalld
+        state: started
+
+    - name: Set default zone to "public" only if necessary
+      command: firewall-cmd --set-default-zone=public
+      ignore_errors: true
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Add 10.42.0.0/16 to trusted zone
+      command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Add 10.43.0.0/16 to trusted zone
+      command: firewall-cmd --zone=trusted --add-source=10.43.0.0/16 --permanent
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Remove SSH from public zone
+      command: firewall-cmd --zone=public --remove-service=ssh --permanent
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Block all incoming traffic by default, allowing established connections out
+      command: firewall-cmd --zone=public --set-target=DROP --permanent
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Allow trusted zone to accept traffic from Tailscale
+      command: firewall-cmd --zone=trusted --add-interface=tailscale0 --permanent
+      args:
+        creates: /var/lib/ansible/firewall_configured
+
+    - name: Reload firewalld configuration
+      command: |
+        firewall-cmd --reload
+        touch /var/lib/ansible/firewall_configured
+      args:
+        creates: /var/lib/ansible/firewall_configured
+  tags: firewalld-config
+
+############################
+# Kubernetes Configuration #
+############################
+
+- name: Configure Kubernetes
+  block:
+    - name: Ensure /etc/rancher/k3s/k3s.yaml has 600 permissions
+      file:
+        path: /etc/rancher/k3s/k3s.yaml
+        mode: '0600'
+        state: file
+      become: true
+  tags: kubernetes-config

@@ -1,0 +1,15 @@
+epel_repos:
+  "9":
+    - name: epel
+      file: epel
+      description: "Extra Packages for Enterprise Linux $releasever - $basearch"
+      metalink: "https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir"
+      gpgcheck: true
+      gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9"
+  "8":
+    - name: epel
+      file: epel
+      description: "Extra Packages for Enterprise Linux $releasever - $basearch"
+      metalink: "https://mirrors.fedoraproject.org/metalink?repo=epel-$releasever&arch=$basearch&infra=$infra&content=$contentdir"
+      gpgcheck: true
+      gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8"

@@ -1,0 +1,7 @@
+---
+# Definitions of packages required for each service
+
+kubernetes_packages:
+    - "curl"
+    - "git"
+    - "tar"

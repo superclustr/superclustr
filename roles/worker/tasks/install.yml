@@ -1,0 +1,58 @@
+---
+# This playbook installs all necessary packages
+
+##########################
+# Tailscale Installation #
+##########################
+
+- name: Install Tailscale
+  shell: |
+    curl -fsSL https://tailscale.com/install.sh | sh
+  args:
+    creates: /usr/bin/tailscale
+  tags: tailscale-install
+
+#########################
+# Firewall Installation #
+#########################
+
+- name: Install Firewalld packages
+  dnf:
+    name: firewalld
+    state: present
+  tags: firewalld-install
+
+###########################
+# Kubernetes Installation #
+###########################
+
+- name: Install Kubernetes packages
+  dnf:
+    name: "{{ kubernetes_packages | reject('eq', '') }}"
+    install_weak_deps: false
+  tags: kubernetes-install
+
+- name: Install Kubernetes (k3s)
+  block:
+    - name: Download k3s installation script
+      get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+
+    - name: Install k3s agent
+      environment:
+        INSTALL_K3S_EXEC: agent
+        K3S_URL: "{{ worker_kubernetes.url }}"
+        K3S_TOKEN: "{{ worker_kubernetes.token }}"
+      shell: /tmp/k3s-install.sh
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s to be ready
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        state: present
+        delay: 5
+        timeout: 300
+  tags: kubernetes-install

@@ -1,0 +1,27 @@
+
+---
+# This playbook configures and starts packages in the os init system 
+
+- name: Flush handler
+  # As the subsequent "ensure" tasks are all no-op to check if any services have bounced
+  meta: flush_handlers
+
+- name: Ensure Tailscale state
+  systemd:
+    name: tailscaled
+    enabled: true
+  tags: tailscale-service
+
+- name: Ensure firewalld state
+  systemd:
+    name: firewalld
+    enabled: true
+    state: started
+  tags: firewalld-service
+
+- name: Ensure k3s state
+  systemd:
+    name: k3s
+    enabled: true
+    state: started
+  tags: kubernetes-service

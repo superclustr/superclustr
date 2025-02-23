@@ -47,7 +47,7 @@
         creates: /var/lib/ansible/firewall_configured
 
     - name: Add 10.43.0.0/16 to trusted zone
-      command: firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+      command: firewall-cmd --zone=trusted --add-source=10.43.0.0/16 --permanent
       args:
         creates: /var/lib/ansible/firewall_configured
 
@@ -73,7 +73,6 @@
       args:
         creates: /var/lib/ansible/firewall_configured
   tags: firewalld-config
-
 
 ########################
 # ArgoCD Configuration #
@@ -134,8 +133,6 @@
       changed_when: argocd_result.stdout is search("created|configured|updated")
       tags: argocd-config
   tags: argocd-config
-
-
 
 #########################
 # MetalLB Configuration #

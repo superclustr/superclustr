@@ -3,10 +3,9 @@ package root
 import (
 	"github.com/spf13/cobra"
 	masterCmd "github.com/superclustr/superclustr/cmd/master"
-	monitorCmd "github.com/superclustr/superclustr/cmd/monitor"
 	storageCmd "github.com/superclustr/superclustr/cmd/storage"
 	versionCmd "github.com/superclustr/superclustr/cmd/version"
-	computeCmd "github.com/superclustr/superclustr/cmd/worker"
+	workerCmd "github.com/superclustr/superclustr/cmd/worker"
 	"github.com/superclustr/superclustr/internal/cli"
 )
 
@@ -23,7 +22,7 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 	cmd := &cobra.Command{
 		Use:   "super <service> <action> [flags]",
 		Short: "SUPERCLUSTR",
-		Long:  `Computing Cluster for Research Applications.`,
+		Long:  `A Computing Cluster for Experimental Internet Research.`,
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),
 		},
@@ -53,9 +52,7 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
 	cmd.AddCommand(masterCmd.NewCmdMaster(f))
-	cmd.AddCommand(computeCmd.NewCmdCompute(f))
-	cmd.AddCommand(monitorCmd.NewCmdMonitor(f))
-	cmd.AddCommand(storageCmd.NewCmdStorage(f))
+	cmd.AddCommand(workerCmd.NewCmdWorker(f))
 
 	// Add the completion command and hide it
 	completionCmd := &cobra.Command{

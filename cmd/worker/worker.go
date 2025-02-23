@@ -1,4 +1,4 @@
-package node
+package worker
 
 import (
 	"github.com/spf13/cobra"
@@ -6,10 +6,10 @@ import (
 	"github.com/superclustr/superclustr/internal/cli"
 )
 
-func NewCmdCompute(f *cli.Factory) *cobra.Command {
+func NewCmdWorker(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "worker <action>",
-		Short:   "Initialize, manage, and update a worker service.",
+		Short:   "Initialize, manage, and update a worker machine.",
 		Long:    "Initialize, manage, and update a worker service on this machine.",
 		GroupID: "all",
 	}

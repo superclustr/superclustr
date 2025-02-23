@@ -1,4 +1,4 @@
-package node
+package master
 
 import (
 	"github.com/spf13/cobra"
@@ -9,7 +9,7 @@ import (
 func NewCmdMaster(f *cli.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "master <action>",
-		Short:   "Initialize, manage, and update a master service.",
+		Short:   "Initialize, manage, and update a master machine.",
 		Long:    "Initialize, manage, and update a master service on this machine.",
 		GroupID: "all",
 	}

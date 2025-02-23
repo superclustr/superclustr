@@ -5,13 +5,12 @@
 
 ---
 
-[https://superclustr.net](https://superclustr.net/?ref=github) — A distributed computing cluster for early research
+[https://superclustr.net](https://superclustr.net) — A Computing Cluster for Experimental Internet Research.
 
-Superclustr is a distributed cluster independently created by a group of Internet Researchers and Engineers
-from the RIPE NCC with the purpose of providing a community operated platform for early research.
+Superclustr is a distributed cluster independently created by a group of Internet Researchers and Engineers during their work at the RIPE NCC with the purpose of providing a community run platform for experimental internet research.
 
 > [!NOTE]
-> This is an experimental service and not operated by or affiliated with the RIPE NCC. If you wish to join the operated cluster, please contact us via the [Request Access](https://www.superclustr.net/request-access) page. We are looking for a few good people to join the team.
+> This is a cluster for experimental internet research. If you wish to join the cluster, please contact us via the [Request Access](https://www.superclustr.net/request-access) page. We are looking for a few good people to join the team.
 
 
 ## Enrollment

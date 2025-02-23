@@ -1,0 +1,60 @@
+---
+# This playbook configures repositories
+
+#####################
+# EPEL Repositories #
+#####################
+
+- name: Configure EPEL Repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
+    file: "{{ item.file }}"
+    baseurl: "{{ item.baseurl | default(omit) }}"
+    metalink: "{{ item.metalink | default(omit) }}"
+    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
+    gpgcheck: "{{ item.gpgcheck | default(omit) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+  loop: "{{ epel_repos[ansible_distribution_major_version] | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: epel-repos
+
+###########################
+# Additional Repositories #
+###########################
+
+- name: Enable Required Additional Repository (PowerTools or CodeReady Builder)
+  replace:
+    path: "{{ repo_file }}"
+    regexp: '(\[{{ repo_section }}\][^\[]*?)enabled=0'
+    replace: '\1enabled=1'
+  vars:
+    repo_file: >-
+      {%- if ansible_distribution == 'Rocky' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/Rocky-PowerTools.repo
+      {%- elif ansible_distribution == 'AlmaLinux' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/AlmaLinux-PowerTools.repo
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '8' -%}
+        /etc/yum.repos.d/ol8_codeready_builder.repo
+      {%- elif ansible_distribution == 'Rocky' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/rocky.repo
+      {%- elif ansible_distribution == 'AlmaLinux' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/almalinux.repo
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '9' -%}
+        /etc/yum.repos.d/ol9_codeready_builder.repo
+      {%- endif -%}
+    repo_section: >-
+      {%- if ansible_distribution in ['Rocky', 'AlmaLinux'] and ansible_distribution_major_version == '8' -%}
+        powertools
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '8' -%}
+        ol8_codeready_builder
+      {%- elif ansible_distribution in ['Rocky', 'AlmaLinux'] and ansible_distribution_major_version == '9' -%}
+        crb
+      {%- elif ansible_distribution == 'OracleLinux' and ansible_distribution_major_version == '9' -%}
+        ol9_codeready_builder
+      {%- endif -%}
+  when: ansible_distribution in ['Rocky', 'AlmaLinux', 'OracleLinux'] and ansible_distribution_major_version in ['8', '9']
+  tags: additional-repos
+
+...

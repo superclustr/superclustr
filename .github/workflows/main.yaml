@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - '*'  # This triggers both builds and tag deployments
+      - '*'  # Triggers both builds and tag deployments
 
 jobs:
   build:
@@ -32,25 +32,27 @@ jobs:
       #  run: |
       #    make test
 
-      - name: Upload Binary Artifact
+      - name: Upload Tagged Binary Artifact
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: super
           path: bin/super
 
+      - name: Upload Nightly Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: super-nightly
+          path: bin/super
+
   deploy:
-    name: Deploy to GitHub Pages on Tag
+    name: Deploy to GitHub Pages
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')  # Only run when a tag is pushed
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Get the Tag Version
-        id: get_tag
-        run: echo "tag=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Set up Git user
         run: |
@@ -62,19 +64,32 @@ jobs:
           git fetch --no-tags --filter=blob:none origin gh-pages
           git checkout gh-pages || git checkout --orphan gh-pages
 
-      - name: Download Binary Artifact
+      - name: Download Tagged Binary
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/download-artifact@v4
         with:
           name: super
           path: /tmp/artifacts
 
-      - name: Copy to versioned and latest
+      - name: Download Nightly Binary
+        uses: actions/download-artifact@v4
+        with:
+          name: super-nightly
+          path: /tmp/artifacts
+
+      - name: Deploy Tagged Binary
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          cp /tmp/artifacts/super super-${{ env.tag }}
+          TAG_VERSION="${GITHUB_REF##*/}"
+          cp /tmp/artifacts/super super-${TAG_VERSION}
           cp /tmp/artifacts/super super
+
+      - name: Deploy Nightly Binary
+        run: |
+          cp /tmp/artifacts/super-nightly super-nightly
 
       - name: Commit and Push Changes
         run: |
-          git add super-${{ env.tag }} super
-          git commit -m "Deploy super-${{ env.tag }} to GitHub Pages"
-          git push origin gh-pages
+          git add super super-* super-nightly || true
+          git commit -m "Deploy latest binaries to GitHub Pages"
+          git push origin gh-pages || echo "No changes to push"

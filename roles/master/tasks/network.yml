@@ -43,8 +43,6 @@
       IPV6INIT=no
       {% endif %}
       #ANSIBLE-END
-  args:
-    creates: /etc/sysconfig/network-scripts/ifcfg-{{ master_network.device }}
   when: master_network.device is not none
   tags: interface-network
 

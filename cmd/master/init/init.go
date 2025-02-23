@@ -55,22 +55,16 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
-	if device == "" {
-		return fmt.Errorf("Network Device is required")
-	}
 	if hostname == "" {
 		return fmt.Errorf("Hostname is required")
 	}
-	if ipPool == "" && ipV6Pool == "" {
-		return fmt.Errorf("LoadBalancer pool range is required")
+	if device == "" && (ipAddr != "" || ipV6Addr != "") {
+		return fmt.Errorf("Network device definition is required")
 	}
-	if ipAddr == "" && ipV6Addr == "" {
-		return fmt.Errorf("Machine IPv4/IPv6 address or 'dhcp' is required")
-	}
-	if ipNetmask == "" && ipAddr != "dhcp" {
+	if ipNetmask == "" && ipAddr != "dhcp" && ipAddr != "" {
 		return fmt.Errorf("Netmask is required, since ip-address is static")
 	}
-	if (ipGateway == "" && ipV6Gateway == "") && (ipAddr != "dhcp" && ipV6Addr != "dhcp") {
+	if (ipGateway == "" && ipAddr != "dhcp" && ipAddr != "") || (ipV6Gateway == "" && ipV6Addr != "dhcp" && ipV6Addr != "") {
 		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
 	}
 

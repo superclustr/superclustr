@@ -47,6 +47,7 @@
       #ANSIBLE-END
   args:
     creates: /etc/sysconfig/network-scripts/ifcfg-{{ master_network.device }}
+  when: master_network.device is not none
   tags: interface-network
 
 - name: Apply network changes

@@ -31,7 +31,6 @@
       BOOTPROTO=none
       {% endif %}
 
-
       # IPv6 Configuration
       {% if master_network.ip_v6_address is not none and master_network.ip_v6_address != 'dhcp' %}
       IPV6ADDR={{ master_network.ip_v6_address }}
@@ -43,7 +42,6 @@
       {% else %}
       IPV6INIT=no
       {% endif %}
-
       #ANSIBLE-END
   args:
     creates: /etc/sysconfig/network-scripts/ifcfg-{{ master_network.device }}

@@ -47,6 +47,8 @@
           --flannel-backend none
           --disable-network-policy
           --write-kubeconfig-mode "0644"
+          --cluster-cidr "10.42.0.0/16,fd42::/48"
+          --service-cidr "10.43.0.0/16,fd43::/108"
       shell: /tmp/k3s-install.sh
       args:
         creates: /usr/local/bin/k3s
@@ -87,6 +89,7 @@
       shell: |
         helm install cilium cilium/cilium --namespace kube-system \
           --set ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16" \
+          --set ipam.operator.clusterPoolIPv6PodCIDRList="fd42::/48" \
           --set operator.replicas=1 \
           --set hubble.enabled=false \
           --set clustermesh.enabled=false

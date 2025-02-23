@@ -59,7 +59,7 @@ jobs:
 
       - name: Checkout gh-pages branch
         run: |
-          git --no-tags --filter=blob:none origin gh-pages
+          git fetch --no-tags --filter=blob:none origin gh-pages
           git checkout gh-pages || git checkout --orphan gh-pages
 
       - name: Download Binary Artifact

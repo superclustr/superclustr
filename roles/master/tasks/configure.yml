@@ -146,7 +146,7 @@
     - name: Create MetalLB config
       copy:
         content: |
-          {% if master_network.ip_pool is not none %}
+          {% if master_network.ip_pool %}
           apiVersion: metallb.io/v1beta1
           kind: IPAddressPool
           metadata:
@@ -154,10 +154,10 @@
             namespace: metallb-system
           spec:
             addresses:
-            - {{ master_network.ip_pool }}  # Your IPv4 range
+            - {{ master_network.ip_pool }}
           ---
           {% endif %}
-          {% if master_network.ip_v6_pool is not none %}
+          {% if master_network.ip_v6_pool %}
           apiVersion: metallb.io/v1beta1
           kind: IPAddressPool
           metadata:
@@ -175,12 +175,12 @@
             namespace: metallb-system
           spec:
             ipAddressPools:
-            {% if master_network.ip_pool is not none %}
+          {% if master_network.ip_pool %}
             - ipv4-pool
-            {% endif %}
-            {% if master_network.ip_v6_pool is not none %}
+          {% endif %}
+          {% if master_network.ip_v6_pool %}
             - ipv6-pool
-            {% endif %}
+          {% endif %}
         dest: /tmp/metallb-config.yaml
         mode: '0644'
 

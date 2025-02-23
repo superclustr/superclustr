@@ -20,7 +20,7 @@
       DNS2=8.8.4.4
 
       # IPv4 Configuration
-      {% if master_network.ip_address is not none and master_network.ip_address != 'dhcp' %}
+      {% if master_network.ip_address and master_network.ip_address != 'dhcp' %}
       IPADDR={{ master_network.ip_address }}
       NETMASK={{ master_network.ip_netmask }}
       GATEWAY={{ master_network.ip_gateway }}
@@ -32,7 +32,7 @@
       {% endif %}
 
       # IPv6 Configuration
-      {% if master_network.ip_v6_address is not none and master_network.ip_v6_address != 'dhcp' %}
+      {% if master_network.ip_v6_address and master_network.ip_v6_address != 'dhcp' %}
       IPV6ADDR={{ master_network.ip_v6_address }}
       IPV6_DEFAULTGW={{ master_network.ip_v6_gateway }}
       IPV6_AUTOCONF=no

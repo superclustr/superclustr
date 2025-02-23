@@ -16,8 +16,14 @@
       TYPE=Ethernet
 
       # DNS Configuration
+      {% if master_network.ip_address %}
       DNS1=8.8.8.8
       DNS2=8.8.4.4
+      {% endif %}
+      {% if master_network.ip_v6_address %}
+      DNS3=2001:4860:4860::8888
+      DNS4=2001:4860:4860::8844
+      {% endif %}
 
       # IPv4 Configuration
       {% if master_network.ip_address and master_network.ip_address != 'dhcp' %}
@@ -29,6 +35,7 @@
       BOOTPROTO=dhcp
       {% else %}
       BOOTPROTO=none
+      IPV4_FAILURE_FATAL=no
       {% endif %}
 
       # IPv6 Configuration

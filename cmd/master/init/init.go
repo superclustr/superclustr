@@ -41,7 +41,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	}
 
 	// Define flags for network configuration
-	cmd.Flags().StringVar(&device, "device", "", "Network Interface Device Name (e.g. 'eth0')")
+	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
 	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node01.ams.superclustr.net')")
 	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
@@ -56,7 +56,10 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 func runInit(f *cli.Factory, device string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string) error {
 	// Validate inputs
 	if device == "" && (ipAddr != "" || ipV6Addr != "") {
-		return fmt.Errorf("Network device definition is required")
+		return fmt.Errorf("Network interface device must be specified")
+	}
+	if device != "" && (ipAddr == "" && ipV6Addr == "") {
+		return fmt.Errorf("IP address is required, since device is defined")
 	}
 	if ipNetmask == "" && ipAddr != "dhcp" && ipAddr != "" {
 		return fmt.Errorf("Netmask is required, since ip-address is static")

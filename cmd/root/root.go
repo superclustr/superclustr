@@ -3,7 +3,6 @@ package root
 import (
 	"github.com/spf13/cobra"
 	masterCmd "github.com/superclustr/superclustr/cmd/master"
-	storageCmd "github.com/superclustr/superclustr/cmd/storage"
 	versionCmd "github.com/superclustr/superclustr/cmd/version"
 	workerCmd "github.com/superclustr/superclustr/cmd/worker"
 	"github.com/superclustr/superclustr/internal/cli"

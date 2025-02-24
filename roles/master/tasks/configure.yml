@@ -74,66 +74,6 @@
         creates: /var/lib/ansible/firewall_configured
   tags: firewalld-config
 
-########################
-# ArgoCD Configuration #
-########################
-
-- name: Configure ArgoCD
-  block:
-    - name: Create ArgoCD ApplicationSet
-      copy:
-        content: |
-          apiVersion: argoproj.io/v1alpha1
-          kind: ApplicationSet
-          metadata:
-            name: all-apps
-            namespace: argocd
-          spec:
-            generators:
-              - list:
-                  elements:
-                    - name: bgpdata
-                      repoURL: https://github.com/bgpdata/bgpdata.git
-                      chartPath: charts/bgpdata
-                    - name: ris-kafka
-                      repoURL: https://github.com/robin-rpr/ris-kafka.git
-                      chartPath: charts/ris-kafka
-                    - name: cernide
-                      repoURL: https://github.com/cernide/cernide.git
-                      chartPath: charts/polyaxon
-            template:
-              metadata:
-                name: '{% raw %}{{name}}{% endraw %}'
-              spec:
-                project: default
-                source:
-                  repoURL: '{% raw %}{{repoURL}}{% endraw %}'
-                  targetRevision: HEAD
-                  path: '{% raw %}{{chartPath}}{% endraw %}'
-                  helm:
-                    valueFiles:
-                      - values.yaml
-                destination:
-                  server: https://kubernetes.default.svc
-                  namespace: '{% raw %}{{name}}{% endraw %}'
-                syncPolicy:
-                  automated:
-                    prune: true
-                    selfHeal: true
-                  syncOptions:
-                    - CreateNamespace=true
-        dest: /tmp/argocd-applicationset.yaml
-        mode: '0644'
-    - name: Apply ArgoCD ApplicationSet
-      command: kubectl apply -f /tmp/argocd-applicationset.yaml
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-      register: argocd_result
-      changed_when: argocd_result.stdout is search("created|configured|updated")
-      tags: argocd-config
-  tags: argocd-config
-
 #########################
 # MetalLB Configuration #
 #########################

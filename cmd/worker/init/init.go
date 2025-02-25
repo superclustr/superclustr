@@ -21,11 +21,9 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	var device string
 	var server string
 	var hostname string
-	var ipPool string
 	var ipAddr string
 	var ipNetmask string
 	var ipGateway string
-	var ipV6Pool string
 	var ipV6Addr string
 	var ipV6Gateway string
 	var tailscaleToken string
@@ -36,7 +34,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 		Short: "Initialize a worker service.",
 		Long:  "Initialize a worker service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f, device, server, hostname, ipPool, ipAddr, ipNetmask, ipGateway, ipV6Pool, ipV6Addr, ipV6Gateway, tailscaleToken, kubernetesToken)
+			err := runInit(f, device, server, hostname, ipAddr, ipNetmask, ipGateway, ipV6Addr, ipV6Gateway, tailscaleToken, kubernetesToken)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
@@ -47,11 +45,9 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
 	cmd.Flags().StringVar(&server, "server", "", "Master server (e.g. '100.104.213.66')")
 	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node02.superclustr.net')")
-	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
 	cmd.Flags().StringVar(&ipGateway, "ip-gateway", "", "Gateway IP address (required if ip-address is static)")
-	cmd.Flags().StringVar(&ipV6Pool, "ip-v6-pool", "", "LoadBalancer IPv6 pool range (e.g., '2001:678:7ec:70::1/64')")
 	cmd.Flags().StringVar(&ipV6Addr, "ip-v6-address", "", "Static IPv6 address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipV6Gateway, "ip-v6-gateway", "", "IPv6 Gateway IP address (required if ip-v6-address is static)")
 	cmd.Flags().StringVar(&tailscaleToken, "tailscale-token", "", "Tailscale authentication token (required for vpn network access)")
@@ -59,7 +55,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	return cmd
 }
 
-func runInit(f *cli.Factory, device string, server string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string, tailscaleToken string, kubernetesToken string) error {
+func runInit(f *cli.Factory, device string, server string, hostname string, ipAddr string, ipNetmask string, ipGateway string, ipV6Addr string, ipV6Gateway string, tailscaleToken string, kubernetesToken string) error {
 	// Validate inputs
 	if server == "" {
 		return fmt.Errorf("Server is required")
@@ -93,11 +89,9 @@ func runInit(f *cli.Factory, device string, server string, hostname string, ipPo
 			"worker_network": map[string]interface{}{
 				"device": 		   device,
 				"hostname": 	   hostname,
-				"ip_pool":         ipPool,
 				"ip_address":      ipAddr,
 				"ip_gateway":      ipGateway,
 				"ip_netmask":      ipNetmask,
-				"ip_v6_pool":      ipV6Pool,
 				"ip_v6_address":   ipV6Addr,
 				"ip_v6_gateway":   ipV6Gateway,
 				"tailscale_token": tailscaleToken,

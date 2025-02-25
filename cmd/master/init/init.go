@@ -46,7 +46,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 	// Define flags for network configuration
 	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
-	cmd.Flags().StringVar(&email, "email", "", "Email address (e.g. 'hostmaster@superclustr.net')")
+	cmd.Flags().StringVar(&email, "email", "hostmaster@superclustr.net", "Email address (e.g. 'hostmaster@acme.net')")
 	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node01.superclustr.net')")
 	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
@@ -98,12 +98,7 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 			},
 			"master_kubernetes": map[string]interface{}{
 				"taint": "node-role.kubernetes.io/control-plane:NoSchedule",
-				"email": func() string {
-					if email == "" {
-						return "hostmaster@superclustr.net"
-					}
-					return email
-				}(),
+				"email": email,
 			},
 		}},
 	}})

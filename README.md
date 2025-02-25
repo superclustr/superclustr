@@ -19,20 +19,24 @@ To enroll your machine into the cluster, please see the examples below.
 This will use the latest version of Superclustr to provision your node.
 
 ```bash
-# Via DHCP
+# Master
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
-    --ip-v6-address dhcp \
-    --ip-v6-pool 2001:678:7ec:301:8000::/65 \
     --hostname node01.superclustr.net \
-    --device ens2f0
-
-# Or, using a Static IP
-curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-v6-gateway 2001:678:7ec:301::1 \
     --ip-v6-address 2001:678:7ec:301::2 \
     --ip-v6-pool 2001:678:7ec:301:8000::/65 \
-    --hostname node01.superclustr.net \
-    --device ens2f0
+    --tailscale-token <YOUR_TAILSCALE_TOKEN> \
+    --device eth0
+
+# Or, Worker
+curl -sSL https://archive.superclustr.net/super.sh | bash -s worker init \
+    --server 100.XXX.XXX.XXX \
+    --hostname node02.superclustr.net \
+    --ip-v6-gateway 2001:678:7ec:301::1 \
+    --ip-v6-address 2001:678:7ec:301::3 \
+    --tailscale-token <YOUR_TAILSCALE_TOKEN> \
+    --kubernetes-token <YOUR_KUBERNETES_TOKEN> \
+    --device eth0
 ```
 
 > [!NOTE]  

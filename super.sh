@@ -18,7 +18,7 @@ BINARY_URL="https://archive.superclustr.net/${BINARY_NAME}"
 
 # Download the selected binary to a temporary location
 TMP_BINARY=$(mktemp /tmp/${BINARY_NAME}.XXXXXX)
-curl -sSL "$BINARY_URL" -o "$TMP_BINARY"
+curl -sSL --no-cache "$BINARY_URL" -o "$TMP_BINARY"
 
 # Make the binary executable
 chmod +x "$TMP_BINARY"

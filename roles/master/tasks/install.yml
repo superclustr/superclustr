@@ -17,7 +17,7 @@
     tailscale up \
       --ssh \
       --auth-key "{{ master_network.tailscale_token }}" \
-      --advertise-tags "tag:supercluster"
+      --advertise-tags "tag:superclustr"
   register: tailscale_result
   changed_when: "'Success' in tailscale_result.stdout"
   tags: tailscale-install

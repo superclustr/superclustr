@@ -17,12 +17,12 @@
 
       # DNS Configuration
       {% if worker_network.ip_address %}
-      DNS1=8.8.8.8
-      DNS2=8.8.4.4
+      DNS1=8.8.8.8 # Google DNS
+      DNS2=8.8.4.4 # Google DNS
       {% endif %}
       {% if worker_network.ip_v6_address %}
-      DNS3=2001:4860:4860::8888
-      DNS4=2001:4860:4860::8844
+      DNS3=2001:4860:4860::64 # Google DNS64
+      DNS4=2606:4700:4700::64 # Cloudflare DNS64
       {% endif %}
 
       # IPv4 Configuration

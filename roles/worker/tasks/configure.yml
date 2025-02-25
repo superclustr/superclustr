@@ -1,20 +1,6 @@
 ---
 # This playbook configures the services
 
-###########################
-# Tailscale Configuration #
-###########################
-
-- name: Configure Tailscale
-  block:
-    - name: Provision Tailscale
-      command: |
-        tailscale up --ssh --auth-key "{{ master_network.tailscale_token }}" --advertise-tags "tag:superclustr"
-        touch /var/lib/ansible/tailscale_configured
-      args:
-        creates: /var/lib/ansible/tailscale_configured
-  tags: tailscale-config
-
 ##########################
 # Firewall Configuration #
 ##########################

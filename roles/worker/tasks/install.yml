@@ -12,6 +12,22 @@
     creates: /usr/bin/tailscale
   tags: tailscale-install
 
+- name: Provision Tailscale
+  command: |
+    tailscale up \
+      --ssh \
+      --auth-key "{{ worker_network.tailscale_token }}" \
+      --advertise-tags "tag:supercluster"
+  register: tailscale_result
+  changed_when: "'Success' in tailscale_result.stdout"
+  tags: tailscale-install
+
+- name: Get Tailscale IP address
+  shell: tailscale ip -4
+  register: tailscale_ip
+  changed_when: false
+  tags: tailscale-install
+
 #########################
 # Firewall Installation #
 #########################
@@ -45,8 +61,8 @@
         INSTALL_K3S_EXEC: >-
           agent
           --token="{{ worker_kubernetes.kubernetes_token }}"
-          --server="https://{{ worker_kubernetes.server | replace('.', '-') }}:6443"
-          --node-external-ip="{{ worker_network.hostname | replace('.', '-') }}"
+          --server="https://{{ worker_kubernetes.server }}:6443"
+          --node-external-ip="{{ tailscale_ip.stdout }}"
           --vpn-auth="name=tailscale,joinKey={{ worker_network.tailscale_token }}"
       shell: /tmp/k3s-install.sh
       args:

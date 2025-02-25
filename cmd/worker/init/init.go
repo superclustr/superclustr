@@ -45,8 +45,8 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 	// Define flags for network configuration
 	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
-	cmd.Flags().StringVar(&server, "server", "", "Master server (e.g. 'node01.ams.superclustr.net')")
-	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node02.ams.superclustr.net')")
+	cmd.Flags().StringVar(&server, "server", "", "Master server (e.g. '100.104.213.66')")
+	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node02.superclustr.net')")
 	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
@@ -63,9 +63,6 @@ func runInit(f *cli.Factory, device string, server string, hostname string, ipPo
 	// Validate inputs
 	if server == "" {
 		return fmt.Errorf("Server is required")
-	}
-	if hostname == "" {
-		return fmt.Errorf("Hostname is required")
 	}
 	if kubernetesToken == "" {
 		return fmt.Errorf("Kubernetes node token is required")

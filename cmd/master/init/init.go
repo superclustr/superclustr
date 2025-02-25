@@ -45,7 +45,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	// Define flags for network configuration
 	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
 	cmd.Flags().StringVar(&email, "email", "", "Email address (e.g. 'hostmaster@superclustr.net')")
-	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node01.ams.superclustr.net')")
+	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node01.superclustr.net')")
 	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
 	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
 	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
@@ -59,9 +59,6 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 func runInit(f *cli.Factory, device string, email string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string, tailscaleToken string) error {
 	// Validate inputs
-	if hostname == "" {
-		return fmt.Errorf("Hostname is required")
-	}
 	if tailscaleToken == "" {
 		return fmt.Errorf("Tailscale authentication token is required")
 	}
@@ -178,11 +175,19 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 	if err != nil {
 		return fmt.Errorf("failed to read node token file: %v", err)
 	}
+
+	// Get the Tailscale IP address
+	tailscaleIPCmd := exec.Command("tailscale", "ip", "-4")
+	tailscaleIPOutput, err := tailscaleIPCmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to get Tailscale IP: %v", err)
+	}
+	tailscaleIP := strings.TrimSpace(string(tailscaleIPOutput))
+
 	fmt.Println("\nTo join a worker node, execute the following command:\n")
 
 	fmt.Printf("curl -sSL https://archive.superclustr.net/super.sh | bash -s worker init \\\n")
-	fmt.Printf("    --server %s \\\n", hostname)
-	fmt.Printf("    --hostname <YOUR_WORKER_HOSTNAME> \\\n")
+	fmt.Printf("    --server %s \\\n", tailscaleIP)
 	fmt.Printf("    --tailscale-token %s \\\n", tailscaleToken)
 	fmt.Printf("    --kubernetes-token %s\n\n", string(token))
 

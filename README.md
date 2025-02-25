@@ -23,7 +23,7 @@ This will use the latest version of Superclustr to provision your node.
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-v6-address dhcp \
     --ip-v6-pool 2001:678:7ec:301:8000::/65 \
-    --hostname node01.ams.superclustr.net \
+    --hostname node01.superclustr.net \
     --device ens2f0
 
 # Or, using a Static IP
@@ -31,7 +31,7 @@ curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-v6-gateway 2001:678:7ec:301::1 \
     --ip-v6-address 2001:678:7ec:301::2 \
     --ip-v6-pool 2001:678:7ec:301:8000::/65 \
-    --hostname node01.ams.superclustr.net \
+    --hostname node01.superclustr.net \
     --device ens2f0
 ```
 

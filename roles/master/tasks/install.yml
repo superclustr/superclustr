@@ -65,7 +65,6 @@
         --write-kubeconfig-mode "0644"
         --cluster-cidr "10.42.0.0/16,fd42::/48"
         --service-cidr "10.43.0.0/16,fd43::/108"
-        --node-taint "{{ master_kubernetes.taint }}"
         --node-external-ip "{{ tailscale_ip.stdout }}"
         --vpn-auth "name=tailscale,joinKey={{ master_network.tailscale_token }}"
       args:

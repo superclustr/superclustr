@@ -97,7 +97,6 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 				"tailscale_token": tailscaleToken,
 			},
 			"master_kubernetes": map[string]interface{}{
-				"taint": "node-role.kubernetes.io/control-plane:NoSchedule",
 				"email": email,
 			},
 		}},

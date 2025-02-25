@@ -16,5 +16,4 @@ master_network:
 # https://kubernetes.io/docs/home/
 master_kubernetes:
     email: null # Email address e.g. hostmaster@superclustr.net
-    taint: null # Taint e.g. node-role.kubernetes.io/control-plane:NoSchedule
 

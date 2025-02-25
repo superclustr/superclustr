@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"path/filepath"
 
@@ -150,7 +151,7 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 		),
 	)
 
-	exec := configuration.NewAnsibleWithConfigurationSettingsExecute(
+	ansibleCmd := configuration.NewAnsibleWithConfigurationSettingsExecute(
 		execute.NewDefaultExecute(
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
@@ -165,7 +166,7 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 	)
 
 	// Execute the playbook
-	err = exec.Execute(context.Background())
+	err = ansibleCmd.Execute(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to execute ansible playbook: %v", err)
 	}
@@ -178,7 +179,7 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 	}
 
 	// Get the Tailscale IP address
-	tailscaleIPCmd := os.exec.Command("tailscale", "ip", "-4")
+	tailscaleIPCmd := exec.Command("tailscale", "ip", "-4")
 	tailscaleIPOutput, err := tailscaleIPCmd.Output()
 	if err != nil {
 		return fmt.Errorf("failed to get Tailscale IP: %v", err)

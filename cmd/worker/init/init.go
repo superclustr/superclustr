@@ -152,7 +152,7 @@ func runInit(f *cli.Factory, device string, server string, hostname string, ipPo
 		),
 	)
 
-	exec := configuration.NewAnsibleWithConfigurationSettingsExecute(
+	ansibleCmd := configuration.NewAnsibleWithConfigurationSettingsExecute(
 		execute.NewDefaultExecute(
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
@@ -167,7 +167,7 @@ func runInit(f *cli.Factory, device string, server string, hostname string, ipPo
 	)
 
 	// Execute the playbook
-	err = exec.Execute(context.Background())
+	err = ansibleCmd.Execute(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to execute ansible playbook: %v", err)
 	}

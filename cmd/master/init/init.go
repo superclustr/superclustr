@@ -178,7 +178,7 @@ func runInit(f *cli.Factory, device string, email string, hostname string, ipPoo
 	}
 
 	// Get the Tailscale IP address
-	tailscaleIPCmd := exec.Command("tailscale", "ip", "-4")
+	tailscaleIPCmd := os.exec.Command("tailscale", "ip", "-4")
 	tailscaleIPOutput, err := tailscaleIPCmd.Output()
 	if err != nil {
 		return fmt.Errorf("failed to get Tailscale IP: %v", err)

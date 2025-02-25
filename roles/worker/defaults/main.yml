@@ -10,11 +10,10 @@ worker_network:
     ip_gateway: null # Gateway IP address e.g. 192.168.1.1
     ip_v6_pool: null # LoadBalancer IPv6 pool range e.g. 2001:678:7ec:70::1/64
     ip_v6_address: null # Static IPv6 address or 'dhcp' for dynamic assignment
+    tailscale_key: null # Tailscale authentication key https://tailscale.com/kb/1085/auth-keys
 
 # Kubernetes
 # https://kubernetes.io/docs/home/
 worker_kubernetes:
-    url: null
-    token: null
-    label: null
-    taint: null
+    server: null # Master server e.g. node01.ams.superclustr.net
+    kubernetes_token: null # Kubernetes node token

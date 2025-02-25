@@ -42,9 +42,12 @@
 
     - name: Install k3s agent
       environment:
-        INSTALL_K3S_EXEC: agent
-        K3S_URL: "{{ worker_kubernetes.url }}"
-        K3S_TOKEN: "{{ worker_kubernetes.token }}"
+        INSTALL_K3S_EXEC: >-
+          agent
+          --token="{{ worker_kubernetes.kubernetes_token }}"
+          --server="https://{{ worker_kubernetes.server | replace('.', '-') }}:6443"
+          --node-external-ip="{{ worker_network.hostname | replace('.', '-') }}"
+          --vpn-auth="name=tailscale,joinKey={{ worker_network.tailscale_token }}"
       shell: /tmp/k3s-install.sh
       args:
         creates: /usr/local/bin/k3s

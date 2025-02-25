@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/apenella/go-ansible/v2/pkg/execute"
 	"github.com/apenella/go-ansible/v2/pkg/execute/configuration"
 	"github.com/apenella/go-ansible/v2/pkg/execute/result/transformer"
@@ -16,59 +18,108 @@ import (
 )
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
+	var device string
+	var server string
+	var hostname string
+	var ipPool string
+	var ipAddr string
+	var ipNetmask string
+	var ipGateway string
+	var ipV6Pool string
+	var ipV6Addr string
+	var ipV6Gateway string
+	var tailscaleToken string
+	var kubernetesToken string
+
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize a worker service.",
 		Long:  "Initialize a worker service on this machine.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f)
+			err := runInit(f, device, server, hostname, ipPool, ipAddr, ipNetmask, ipGateway, ipV6Pool, ipV6Addr, ipV6Gateway, tailscaleToken, kubernetesToken)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
 		},
 	}
 
+	// Define flags for network configuration
+	cmd.Flags().StringVar(&device, "device", "", "Network interface device name (e.g. 'eth0')")
+	cmd.Flags().StringVar(&server, "server", "", "Master server (e.g. 'node01.ams.superclustr.net')")
+	cmd.Flags().StringVar(&hostname, "hostname", "", "Hostname (e.g. 'node02.ams.superclustr.net')")
+	cmd.Flags().StringVar(&ipPool, "ip-pool", "", "LoadBalancer IP pool range (e.g., '192.168.1.240/25')")
+	cmd.Flags().StringVar(&ipAddr, "ip-address", "", "Static IP address or 'dhcp' for dynamic assignment")
+	cmd.Flags().StringVar(&ipNetmask, "ip-netmask", "", "IP netmask (required if ip-address is static)")
+	cmd.Flags().StringVar(&ipGateway, "ip-gateway", "", "Gateway IP address (required if ip-address is static)")
+	cmd.Flags().StringVar(&ipV6Pool, "ip-v6-pool", "", "LoadBalancer IPv6 pool range (e.g., '2001:678:7ec:70::1/64')")
+	cmd.Flags().StringVar(&ipV6Addr, "ip-v6-address", "", "Static IPv6 address or 'dhcp' for dynamic assignment")
+	cmd.Flags().StringVar(&ipV6Gateway, "ip-v6-gateway", "", "IPv6 Gateway IP address (required if ip-v6-address is static)")
+	cmd.Flags().StringVar(&tailscaleToken, "tailscale-token", "", "Tailscale authentication token (required for vpn network access)")
+	cmd.Flags().StringVar(&kubernetesToken, "kubernetes-token", "", "Kubernetes node token (required for joining the cluster)")
 	return cmd
 }
 
-func runInit(f *cli.Factory) error {
+func runInit(f *cli.Factory, device string, server string, hostname string, ipPool string, ipAddr string, ipNetmask string, ipGateway string, ipV6Pool string, ipV6Addr string, ipV6Gateway string, tailscaleToken string, kubernetesToken string) error {
+	// Validate inputs
+	if server == "" {
+		return fmt.Errorf("Server is required")
+	}
+	if hostname == "" {
+		return fmt.Errorf("Hostname is required")
+	}
+	if kubernetesToken == "" {
+		return fmt.Errorf("Kubernetes node token is required")
+	}
+	if tailscaleToken == "" {
+		return fmt.Errorf("Tailscale authentication token is required")
+	}
+	if device == "" && (ipAddr != "" || ipV6Addr != "") {
+		return fmt.Errorf("Network interface device must be specified")
+	}
+	if device != "" && (ipAddr == "" && ipV6Addr == "") {
+		return fmt.Errorf("IP address is required, since device is defined")
+	}
+	if ipNetmask == "" && ipAddr != "dhcp" && ipAddr != "" {
+		return fmt.Errorf("Netmask is required, since ip-address is static")
+	}
+	if (ipGateway == "" && ipAddr != "dhcp" && ipAddr != "") || (ipV6Gateway == "" && ipV6Addr != "dhcp" && ipV6Addr != "") {
+		return fmt.Errorf("Gateway IP address is required, since ip-address is static")
+	}
+
+	// Build playbook structure
+	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
+		"hosts":        "localhost",
+		"become":       true,
+		"gather_facts": true,
+		"roles": []map[string]interface{}{{
+			"role": "worker",
+			"worker_network": map[string]interface{}{
+				"device": 		   device,
+				"hostname": 	   hostname,
+				"ip_pool":         ipPool,
+				"ip_address":      ipAddr,
+				"ip_gateway":      ipGateway,
+				"ip_netmask":      ipNetmask,
+				"ip_v6_pool":      ipV6Pool,
+				"ip_v6_address":   ipV6Addr,
+				"ip_v6_gateway":   ipV6Gateway,
+				"tailscale_token": tailscaleToken,
+			},
+			"worker_kubernetes": map[string]interface{}{
+				"server":           server,
+				"kubernetes_token": kubernetesToken,
+			},
+		}},
+	}})
+	if err != nil {
+		return fmt.Errorf("failed to generate playbook YAML: %v", err)
+	}
+
 	// Define inventory on the fly
-	inventoryIni := `
-[openhpc_login]
-openhpc-login-0 ansible_host=88.99.165.60 ansible_user=root
-
-[openhpc_compute]
-openhpc-worker-0 ansible_host=88.99.165.60 ansible_user=root
-
-[cluster_login:children]
-openhpc_login
-
-[cluster_control:children]
-openhpc_login
-
-[cluster_batch:children]
-openhpc_compute
-`
+	inventoryIni := ``
 
 	// Define playbook on the fly
-	playbookYaml := `
----
-- hosts:
-  - cluster_login
-  - cluster_control
-  - cluster_batch
-  become: yes
-  roles:
-    - role: openhpc
-      openhpc_enable:
-        control: "{{ inventory_hostname in groups['cluster_control'] }}"
-        batch: "{{ inventory_hostname in groups['cluster_batch'] }}"
-        runtime: true
-      openhpc_slurm_control_host: "{{ groups['cluster_control'] | first }}"
-      openhpc_slurm_partitions:
-        - name: "worker"
-      openhpc_cluster_name: openhpc
-`
+	playbookYaml := string(yamlData)
 
 	// Create a temporary directory to store the inventory and playbook
 	tempDir, err := os.MkdirTemp("", "ansible")
@@ -109,8 +160,9 @@ openhpc_compute
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
 			execute.WithTransformers(
-				transformer.Prepend("Go-ansible example with become"),
+				transformer.Prepend("worker"),
 			),
+			execute.WithEnvVars(map[string]string{"PYTHONPATH": f.Python.GetPythonLibFsPath()}),
 			execute.WithExecutable(f.Python),
 		),
 		configuration.WithAnsibleForceColor(),
@@ -122,6 +174,9 @@ openhpc_compute
 	if err != nil {
 		return fmt.Errorf("failed to execute ansible playbook: %v", err)
 	}
+
+	// Print success message
+	fmt.Println("\nCompleted successfully!")
 
 	return nil
 }

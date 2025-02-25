@@ -7,21 +7,12 @@
 
 - name: Configure Tailscale
   block:
-    - name: Update profile for sudoers
-      lineinfile:
-        path: /etc/profile
-        state: present
-        line: |
-          if [ "$(id -u)" -eq 0 ] || sudo -v &>/dev/null; then
-            if ! tailscale status &>/dev/null; then
-              echo "######################################################################"
-              echo "#  Tailscale SSH enables secure external access to the system via    #"
-              echo "#  the Tailscale network. All other SSH connections are disabled.    #"
-              echo "#  For more info: https://tailscale.com/kb/1193/tailscale-ssh        #"
-              echo "######################################################################"
-              sudo tailscale up --ssh
-            fi
-          fi
+    - name: Provision Tailscale
+      command: |
+        tailscale up --ssh --auth-key "{{ master_network.tailscale_token }}" --advertise-tags "tag:superclustr"
+        touch /var/lib/ansible/tailscale_configured
+      args:
+        creates: /var/lib/ansible/tailscale_configured
   tags: tailscale-config
 
 ##########################

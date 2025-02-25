@@ -22,15 +22,15 @@ This will use the latest version of Superclustr to provision your node.
 # Via DHCP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
     --ip-v6-address dhcp \
-    --ip-v6-pool 2001:678:7ec:70::1080/113 \
+    --ip-v6-pool 2001:678:7ec:301:8000::/65 \
     --hostname node01.ams.superclustr.net \
     --device ens2f0
 
 # Or, using a Static IP
 curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
-    --ip-v6-gateway 2001:678:7ec:70::1 \
-    --ip-v6-address 2001:678:7ec:70::1001 \
-    --ip-v6-pool 2001:678:7ec:70::1080/113 \
+    --ip-v6-gateway 2001:678:7ec:301::1 \
+    --ip-v6-address 2001:678:7ec:301::2 \
+    --ip-v6-pool 2001:678:7ec:301:8000::/65 \
     --hostname node01.ams.superclustr.net \
     --device ens2f0
 ```
@@ -45,14 +45,14 @@ You can also find a full example in the [Vagrantfile](Vagrantfile).
 Here’s the information laid out for our current network configuration.
 This is relevant to you if you want to join the cluster or if you want to connect to the cluster from outside.
 
-| **Type**       | **Allocation**                   | **Purpose**               | **Range**                         | **CIDR**                    |
-|----------------|----------------------------------|---------------------------|-----------------------------------|-----------------------------|
-| **IPv4**       | `89.37.98.1`                     | Gateway                   | `89.37.98.1`                      | -                           |
-|                | -                                | Static IPs for machines   | -                                 | -                           |
-|                | -                                | MetalLB Address Pool      | -                                 | -                           |
-| **IPv6**       | `2001:678:7ec:70::1`             | Gateway                   | `2001:678:7ec:70::1`              | -                           |
-|                | `2001:678:7ec:70::1001 - ::107F` | Static IPs for machines   | `2001:678:7ec:70::1001 - ::107F`  | `2001:678:7ec:70::1001/113` |
-|                | `2001:678:7ec:70::1080 - ::10FF` | MetalLB Address Pool      | `2001:678:7ec:70::1080 - ::1fff`  | `2001:678:7ec:70::1080/113` |
+| **Type**       | **Allocation**                   | **Purpose**                              | **Prefix**                    |
+|----------------|----------------------------------|------------------------------------------|-------------------------------|
+| **IPv4**       | `89.37.98.1`                     | Gateway                                  | -                             |
+|                | -                                | Static IPs for machines                  | -                             |
+|                | -                                | MetalLB Address Pool                     | -                             |
+| **IPv6**       | `2001:678:7ec:301::1`            | Gateway                                  | -                             |
+|                | `2001:678:7ec:301::2 - 2001:678:7ec:301:7fff::` | Static IPs for machines   |  `2001:678:7ec:301::/65`      |
+|                | `2001:678:7ec:301:8000:: - 2001:678:7ec:301:ffff::` | MetalLB Address Pool  |  `2001:678:7ec:301:8000::/65` |
 
 ## Getting Started
 

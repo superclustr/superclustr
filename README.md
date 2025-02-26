@@ -42,7 +42,7 @@ This is relevant to you if you want to join the cluster or if you want to connec
 | **Type**       | **Allocation**                   | **Purpose**                              | **Prefix**                    |
 |----------------|----------------------------------|------------------------------------------|-------------------------------|
 | **IPv4**       | `89.37.98.1`                     | Gateway                                  | -                             |
-|                | `89.37.98.170 - 89.37.98.174`    | Static IPs for machines                  | `/25`                         |
+|                | `89.37.98.65 - 89.37.98.68`      | Static IPs for machines                  | `/25`                         |
 | **IPv6**       | `2001:678:7ec:301::1`            | Gateway                                  | -                             |
 |                | `2001:678:7ec:301::2 - ::ffff`   | Static IPs for machines                  |  `2001:678:7ec:301::/64`      |
 

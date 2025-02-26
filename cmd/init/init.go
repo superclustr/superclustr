@@ -136,7 +136,6 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 			ipAddress = "<master-ip>"
 		}
 	} else {
-	} else {
 		ipAddress = advertiseAddr
 	}
 

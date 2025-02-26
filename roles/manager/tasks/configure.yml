@@ -66,7 +66,7 @@
         creates: /var/lib/ansible/firewall_configured
 
     - name: Reload firewalld configuration
-      command: |
+      shell: |
         firewall-cmd --reload
         touch /var/lib/ansible/firewall_configured
       args:
@@ -85,4 +85,26 @@
         touch /var/lib/ansible/docker_swarm_configured
       args:
         creates: /var/lib/ansible/docker_swarm_configured
-  tags: docker-deploy
+  tags: docker-config
+
+###########################
+# Portainer Configuration #
+###########################
+
+- name: Configure Portainer
+  block:
+    - name: Download Portainer
+      get_url:
+        url: https://downloads.portainer.io/ce-lts/portainer-agent-stack.yml
+        dest: /tmp/portainer-agent-stack.yml
+        mode: 0644
+        owner: root
+        group: root
+
+    - name: Deploy Portainer
+      command: |
+        docker stack deploy -c /tmp/portainer-agent-stack.yml portainer
+        touch /var/lib/ansible/portainer_configured
+      args:
+        creates: /var/lib/ansible/portainer_configured
+  tags: portainer-config

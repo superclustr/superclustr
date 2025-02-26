@@ -81,7 +81,7 @@
   block:
     - name: Deploy Docker Swarm Manager
       shell: |
-        docker swarm init --advertise-addr {{ manager_docker.advertise_addr }}
+        docker swarm init docker swarm init {% if manager_docker.advertise_addr != '' %}--advertise-addr {{ manager_docker.advertise_addr }}{% endif %}
         touch /var/lib/ansible/docker_swarm_configured
       args:
         creates: /var/lib/ansible/docker_swarm_configured

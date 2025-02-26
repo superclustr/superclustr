@@ -20,24 +20,25 @@ import (
 )
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
-	var hostname string
+	var advertiseAddr string
 
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "init --advertise-addr <advertise-addr>",
 		Long:  "Initialize a manager node.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f, hostname)
+			err := runInit(f, advertiseAddr)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
 		},
 	}
 
+	cmd.Flags().StringVarP(&advertiseAddr, "advertise-addr", "a", "", "The advertise address")
 	return cmd
 }
 
-func runInit(f *cli.Factory, hostname string) error {
+func runInit(f *cli.Factory, advertiseAddr string) error {
 	// Build playbook structure
 	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
 		"hosts":        "localhost",

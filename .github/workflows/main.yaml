@@ -66,8 +66,6 @@ jobs:
       - name: Deploy Tagged Binary
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          TAG_VERSION="${GITHUB_REF##*/}"
-          cp /tmp/artifacts/super super-${TAG_VERSION}
           cp /tmp/artifacts/super super
 
       - name: Deploy Nightly Binary

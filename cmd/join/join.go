@@ -30,7 +30,7 @@ func NewCmdJoin(f *cli.Factory) *cobra.Command {
 			address := args[0]
 
 			// Check if the address is empty
-			if address == "" || address == nil {
+			if address == "" {
 				log.Fatalf("Manager IP address is required")
 				return
 			}

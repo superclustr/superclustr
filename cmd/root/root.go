@@ -2,9 +2,9 @@ package root
 
 import (
 	"github.com/spf13/cobra"
-	masterCmd "github.com/superclustr/superclustr/cmd/master"
+	initCmd "github.com/superclustr/superclustr/cmd/init"
 	versionCmd "github.com/superclustr/superclustr/cmd/version"
-	workerCmd "github.com/superclustr/superclustr/cmd/worker"
+	joinCmd "github.com/superclustr/superclustr/cmd/join"
 	"github.com/superclustr/superclustr/internal/cli"
 )
 
@@ -19,9 +19,9 @@ func (ae *AuthError) Error() string {
 func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, error) {
 	cobra.EnableCommandSorting = false
 	cmd := &cobra.Command{
-		Use:   "super <service> <action> [flags]",
+		Use:   "super <action> [flags]",
 		Short: "SUPERCLUSTR",
-		Long:  `A Computing Cluster for Experimental Internet Research.`,
+		Long:  `A Simple Computing Cluster for Experimental Internet Research.`,
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),
 		},
@@ -50,8 +50,8 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
-	cmd.AddCommand(masterCmd.NewCmdMaster(f))
-	cmd.AddCommand(workerCmd.NewCmdWorker(f))
+	cmd.AddCommand(initCmd.NewCmdInit(f))
+	cmd.AddCommand(joinCmd.NewCmdJoin(f))
 
 	// Add the completion command and hide it
 	completionCmd := &cobra.Command{

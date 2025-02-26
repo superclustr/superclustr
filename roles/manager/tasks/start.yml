@@ -6,12 +6,6 @@
   # As the subsequent "ensure" tasks are all no-op to check if any services have bounced
   meta: flush_handlers
 
-- name: Ensure Tailscale state
-  systemd:
-    name: tailscaled
-    enabled: true
-  tags: tailscale-service
-
 - name: Ensure firewalld state
   systemd:
     name: firewalld
@@ -19,9 +13,9 @@
     state: started
   tags: firewalld-service
 
-- name: Ensure k3s state
+- name: Ensure docker state
   systemd:
-    name: k3s
-    enabled: true
+    name: docker
+    enabled: yes
     state: started
-  tags: kubernetes-service
+  tags: docker-service

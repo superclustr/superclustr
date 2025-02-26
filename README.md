@@ -5,7 +5,7 @@
 
 ---
 
-[https://superclustr.net](https://superclustr.net) — A Computing Cluster for Experimental Internet Research.
+[https://superclustr.net](https://superclustr.net) — A Simple Computing Cluster for Experimental Internet Research.
 
 Superclustr is a distributed cluster independently created by a group of Internet Researchers and Engineers during their work at the RIPE NCC with the purpose of providing a community run platform for experimental internet research.
 
@@ -19,24 +19,14 @@ To enroll your machine into the cluster, please see the examples below.
 This will use the latest version of Superclustr to provision your node.
 
 ```bash
-# Master
-curl -sSL https://archive.superclustr.net/super.sh | bash -s master init \
-    --hostname node01.superclustr.net \
-    --ip-v6-gateway 2001:678:7ec:301::1 \
-    --ip-v6-address 2001:678:7ec:301::2 \
-    --ip-v6-pool 2001:678:7ec:301:8000::/65 \
-    --tailscale-token <YOUR_TAILSCALE_TOKEN> \
-    --device eth0
+# Manager
+curl -sSL https://archive.superclustr.net/super.sh | bash -s init \
+    --advertise-addr 100.XXX.XXX.XXX
 
 # Or, Worker
-curl -sSL https://archive.superclustr.net/super.sh | bash -s worker init \
-    --server 100.XXX.XXX.XXX \
-    --hostname node02.superclustr.net \
-    --ip-v6-gateway 2001:678:7ec:301::1 \
-    --ip-v6-address 2001:678:7ec:301::3 \
-    --tailscale-token <YOUR_TAILSCALE_TOKEN> \
-    --kubernetes-token <YOUR_KUBERNETES_TOKEN> \
-    --device eth0
+curl -sSL https://archive.superclustr.net/super.sh | bash -s join \
+    --token <YOUR_DOCKER_SWARM_TOKEN>
+    100.XXX.XXX.XXX
 ```
 
 > [!NOTE]  
@@ -52,11 +42,9 @@ This is relevant to you if you want to join the cluster or if you want to connec
 | **Type**       | **Allocation**                   | **Purpose**                              | **Prefix**                    |
 |----------------|----------------------------------|------------------------------------------|-------------------------------|
 | **IPv4**       | `89.37.98.1`                     | Gateway                                  | -                             |
-|                | -                                | Static IPs for machines                  | -                             |
-|                | -                                | MetalLB Address Pool                     | -                             |
+|                | `89.37.98.170 - 89.37.98.174`    | Static IPs for machines                  | -                             |
 | **IPv6**       | `2001:678:7ec:301::1`            | Gateway                                  | -                             |
-|                | `2001:678:7ec:301::2 - 2001:678:7ec:301:7fff::` | Static IPs for machines   |  `2001:678:7ec:301::/65`      |
-|                | `2001:678:7ec:301:8000:: - 2001:678:7ec:301:ffff::` | MetalLB Address Pool  |  `2001:678:7ec:301:8000::/65` |
+|                | `2001:678:7ec:301::2 - ::ffff`   | Static IPs for machines                  |  `2001:678:7ec:301::/64`      |
 
 ## Getting Started
 
@@ -75,8 +63,8 @@ Before you begin, ensure you have the following installed on your system:
 First, clone the repository to your local machine:
 
 ```sh
-git clone git@github.com:robin-rpr/bgpdata.git
-cd bgpdata
+git clone git@github.com:superclustr/superclustr.git
+cd superclustr
 ```
 
 ### Building

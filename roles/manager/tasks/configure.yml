@@ -79,9 +79,9 @@
 
 - name: Configure Docker
   block:
-    - name: Deploy Docker Swarm Worker
+    - name: Deploy Docker Swarm Manager
       shell: |
-        docker swarm join --token {{ worker_docker.token }} {{ worker_docker.address }}
+        docker swarm init --advertise-addr {{ manager_docker.advertise_addr }}
         touch /var/lib/ansible/docker_swarm_configured
       args:
         creates: /var/lib/ansible/docker_swarm_configured

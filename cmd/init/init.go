@@ -128,13 +128,14 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 	var ipAddress string
 	if advertiseAddr == "" {
 		conn, err := net.Dial("udp", "8.8.8.8:80")
-		if err != nil {
-			return fmt.Errorf("failed to determine local IP address: %v", err)
+		if err == nil {
+			defer conn.Close()
+			localAddr := conn.LocalAddr().(*net.UDPAddr)
+			ipAddress = localAddr.IP.String()
+		} else {
+			ipAddress = "<master-ip>"
 		}
-		defer conn.Close()
-		
-		localAddr := conn.LocalAddr().(*net.UDPAddr)
-		ipAddress = localAddr.IP.String()
+	} else {
 	} else {
 		ipAddress = advertiseAddr
 	}

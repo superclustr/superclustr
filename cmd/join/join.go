@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
@@ -21,7 +19,6 @@ import (
 
 func NewCmdJoin(f *cli.Factory) *cobra.Command {
 	var token string
-	var address string
 
 	cmd := &cobra.Command{
 		Use:   "join",

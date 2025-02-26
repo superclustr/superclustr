@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -123,19 +124,26 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 	}
 	dockerSwarmJoinToken := strings.TrimSpace(string(dockerSwarmJoinTokenOutput))
 
-	// Get the Tailscale IP address
-	tailscaleIPCmd := exec.Command("tailscale", "ip", "-4")
-	tailscaleIPOutput, err := tailscaleIPCmd.Output()
-	if err != nil {
-		return fmt.Errorf("failed to get Tailscale IP: %v", err)
+	// Get the local IP address
+	var ipAddress string
+	if advertiseAddr == "" {
+		conn, err := net.Dial("udp", "8.8.8.8:80")
+		if err != nil {
+			return fmt.Errorf("failed to determine local IP address: %v", err)
+		}
+		defer conn.Close()
+		
+		localAddr := conn.LocalAddr().(*net.UDPAddr)
+		ipAddress = localAddr.IP.String()
+	} else {
+		ipAddress = advertiseAddr
 	}
-	tailscaleIP := strings.TrimSpace(string(tailscaleIPOutput))
 
 	fmt.Println("\nTo join a worker node, execute the following command:\n")
 
 	fmt.Printf("curl -sSL https://archive.superclustr.net/super.sh | bash -s join \\\n")
 	fmt.Printf("    --token %s \\\n", dockerSwarmJoinToken)
-	fmt.Printf("    %s\n", tailscaleIP)
+	fmt.Printf("    %s\n", ipAddress)
 
 	fmt.Println("Completed successfully!")
 

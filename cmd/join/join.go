@@ -50,7 +50,7 @@ func NewCmdJoin(f *cli.Factory) *cobra.Command {
 	return cmd
 }
 
-func runJoin(f *cli.Factory, hostname string) error {
+func runJoin(f *cli.Factory, token string, address string) error {
 	// Build playbook structure
 	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
 		"hosts":        "localhost",

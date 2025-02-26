@@ -22,7 +22,7 @@ func NewCmdJoin(f *cli.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "join",
-		Short: "join --token <token> <manager-ip>",
+		Short: "join --advertise-addr <ip|interface>[:port] --token <token> HOST:PORT",
 		Long:  "Join a worker node to the cluster.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -35,7 +35,7 @@ func NewCmdJoin(f *cli.Factory) *cobra.Command {
 				return
 			}
 
-			err := runJoin(f, token, address)
+			err := runJoin(f, token, address, advertiseAddr)
 			if err != nil {
 				log.Fatalf("join command failed: %v", err)
 			}
@@ -43,12 +43,13 @@ func NewCmdJoin(f *cli.Factory) *cobra.Command {
 	}
 
 	// Define flags for network configuration
-	cmd.Flags().StringVar(&token, "token", "", "Docker Swarm join token")
+	cmd.Flags().StringVar(&token, "token", "", "Token for entry into the cluster")
+	cmd.Flags().StringVarP(&advertiseAddr, "advertise-addr", "a", "", "Advertised address")
 	cmd.MarkFlagRequired("token")
 	return cmd
 }
 
-func runJoin(f *cli.Factory, token string, address string) error {
+func runJoin(f *cli.Factory, token string, address string, advertiseAddr string) error {
 	// Build playbook structure
 	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
 		"hosts":        "localhost",
@@ -57,8 +58,9 @@ func runJoin(f *cli.Factory, token string, address string) error {
 		"roles": []map[string]interface{}{{
 			"role": "worker",
 			"worker_docker": map[string]interface{}{
-				"address": 	   address,
-				"token": 	   token,
+				"advertise_addr": advertiseAddr,
+				"address": 	      address,
+				"token": 	      token,
 			},
 		}},
 	}})

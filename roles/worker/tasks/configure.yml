@@ -81,7 +81,7 @@
   block:
     - name: Deploy Docker Swarm Worker
       shell: |
-        docker swarm join --token {{ worker_docker.token }} {{ worker_docker.address }};
+        docker swarm join {% if worker_docker.advertise_addr != '' %}--advertise-addr {{ worker_docker.advertise_addr }}{% endif %} --token {{ worker_docker.token }} {{ worker_docker.address }};
         touch /var/lib/ansible/docker_swarm_configured
       args:
         creates: /var/lib/ansible/docker_swarm_configured

@@ -2,4 +2,4 @@
 # Docker Swarm
 # https://docs.docker.com/engine/swarm/
 manager_docker:
-    advertise_addr: '' # Advertise address
+    advertise_addr: '' # Advertised address

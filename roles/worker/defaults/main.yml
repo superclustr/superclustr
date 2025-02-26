@@ -2,5 +2,6 @@
 # Docker Swarm
 # https://docs.docker.com/engine/swarm/
 worker_docker:
+    advertise_addr: '' # Advertised address
     address: null # Manager server address
     token: null # Docker Swarm join token

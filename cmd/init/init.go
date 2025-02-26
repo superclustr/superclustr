@@ -25,7 +25,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "init --advertise-addr <advertise-addr>",
+		Short: "init --advertise-addr <ip|interface>[:port]",
 		Long:  "Initialize a manager node.",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runInit(f, advertiseAddr)
@@ -35,7 +35,7 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&advertiseAddr, "advertise-addr", "a", "", "The advertise address")
+	cmd.Flags().StringVarP(&advertiseAddr, "advertise-addr", "a", "", "Advertised address")
 	return cmd
 }
 

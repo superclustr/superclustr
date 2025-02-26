@@ -44,7 +44,7 @@
         creates: /var/lib/ansible/firewall_configured
 
     - name: Allow Docker Swarm node communication ports (7946/tcp+udp) on trusted zone
-      command: |
+      shell: |
         firewall-cmd --zone=trusted --add-port=7946/tcp --permanent
         firewall-cmd --zone=trusted --add-port=7946/udp --permanent
       args:

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"regexp"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
@@ -122,30 +123,31 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get Docker Swarm join token: %v", err)
 	}
-	dockerSwarmJoinToken := strings.TrimSpace(string(dockerSwarmJoinTokenOutput))
-
-	// Get the local IP address
-	var ipAddress string
-	if advertiseAddr == "" {
-		conn, err := net.Dial("udp", "8.8.8.8:80")
-		if err == nil {
-			defer conn.Close()
-			localAddr := conn.LocalAddr().(*net.UDPAddr)
-			ipAddress = localAddr.IP.String()
-		} else {
-			ipAddress = "<master-ip>"
-		}
-	} else {
-		ipAddress = advertiseAddr
+	
+	// Extract the token using regex
+	outputStr := string(dockerSwarmJoinTokenOutput)
+	tokenRegex := regexp.MustCompile(`SWMTKN-\S+`)
+	tokenMatches := tokenRegex.FindString(outputStr)
+	if tokenMatches == "" {
+		return fmt.Errorf("could not find token in docker swarm join-token output")
 	}
+	dockerSwarmJoinToken := tokenMatches
+	
+	// Extract the IP:port using regex
+	ipRegex := regexp.MustCompile(`(\d+\.\d+\.\d+\.\d+:\d+)`)
+	ipMatches := ipRegex.FindStringSubmatch(outputStr)
+	if len(ipMatches) < 2 {
+		return fmt.Errorf("could not find IP:port in docker swarm join-token output")
+	}
+	ipAddress := ipMatches[1]
 
 	fmt.Println("\nTo add a worker to this cluster, run the following command:\n")
 
 	fmt.Printf("curl -sSL https://archive.superclustr.net/super.sh | bash -s join \\\n")
 	fmt.Printf("    --token %s \\\n", dockerSwarmJoinToken)
-	fmt.Printf("    %s\n", ipAddress + ":2377")
+	fmt.Printf("    %s\n", ipAddress)
 
-	fmt.Println("Completed successfully!")
+	fmt.Println("Completed successfully!\n")
 
 	return nil
 }

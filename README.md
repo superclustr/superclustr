@@ -29,9 +29,6 @@ curl -sSL https://downloads.superclustr.net/super.sh | bash -s join \
     100.XXX.XXX.XXX
 ```
 
-> [!NOTE]  
-> We are currently only operating within IPv6 space, therefore all documentation uses this specific protocol version.
-
 You can also find a full example in the [Vagrantfile](Vagrantfile).
 
 ## Network Configuration

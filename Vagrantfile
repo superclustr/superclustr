@@ -27,40 +27,41 @@ Vagrant.configure("2") do |config|
       vmware.gui = "true"
   end
 
-  # Master VM
-  config.vm.define "master" do |master|
-    master.vm.hostname = "master"
-    master.vm.network "private_network", type: "dhcp"
+  # Manager VM
+  config.vm.define "manager" do |manager|
+    manager.vm.hostname = "manager"
+    manager.vm.network "private_network", type: "dhcp"
 
     # Forward port 80 on the guest to port 80 on the host
-    master.vm.network "forwarded_port", guest: 80, host: 80
+    manager.vm.network "forwarded_port", guest: 80, host: 80
 
-    # Forward port 6443 on the guest to port 6443 on the host
-    master.vm.network "forwarded_port", guest: 6443, host: 6443, auto_correct: true
+    # Forward port 9443 on the guest to port 9443 on the host
+    manager.vm.network "forwarded_port", guest: 9443, host: 9443, auto_correct: true
 
     # Sync kubeconfig from the VM to the host project directory
-    master.vm.synced_folder ".", "/vagrant"
+    manager.vm.synced_folder ".", "/vagrant"
 
-    master.vm.provision "shell", run: "always", inline: <<-SHELL
-      # Initialize the master
-      /vagrant/bin/super master init --ip-pool 192.168.1.240/25 --ip-address dhcp --ip-v6-pool 2001:678:7ec:70::1/64 --ip-v6-address dhcp
+    manager.vm.provision "shell", run: "always", inline: <<-SHELL
+      # Initialize
+      /vagrant/bin/super init
 
-      # Copy the kubeconfig to the host project directory
-      cp /etc/rancher/k3s/k3s.yaml /vagrant/k3s.yaml
+      # Copy Token
+      docker swarm join-token worker | grep -oE 'SWMTKN-[A-Za-z0-9-]+' > /vagrant/token.txt
 
-      # Replace localhost with 127.0.0.1 in the kubeconfig
-      sed -i 's/127.0.0.1/localhost/g' /vagrant/k3s.yaml
+      # Copy IP Address
+      docker swarm join-token worker | grep -oE '([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+)' > /vagrant/ip.txt
     SHELL
   end
 
   # Worker VM
-  #config.vm.define "worker" do |worker|
-  #  worker.vm.hostname = "worker"
-  #  worker.vm.network "private_network", type: "dhcp"
-  #
-  #  worker.vm.provision "shell", run: "always", inline: <<-SHELL
-  #    /vagrant/bin/super worker init
-  #  SHELL
-  #end
+  config.vm.define "worker" do |worker|
+    worker.vm.hostname = "worker"
+    worker.vm.network "private_network", type: "dhcp"
+  
+    worker.vm.provision "shell", run: "always", inline: <<-SHELL
+      # Join
+      /vagrant/bin/super join --token $(cat /vagrant/token.txt) $(cat /vagrant/ip.txt):2377
+    SHELL
+  end
 
 end

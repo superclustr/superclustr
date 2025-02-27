@@ -79,6 +79,10 @@
 
 - name: Configure Docker
   block:
+    - name: Start Docker Engine
+      systemd:
+        name: docker
+        state: started
     - name: Deploy Docker Swarm Worker
       shell: |
         docker swarm join {% if worker_docker.advertise_addr != '' %}--advertise-addr {{ worker_docker.advertise_addr }}{% endif %} --token {{ worker_docker.token }} {{ worker_docker.address }};
@@ -86,3 +90,4 @@
       args:
         creates: /var/lib/ansible/docker_swarm_configured
   tags: docker-config
+

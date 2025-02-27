@@ -16,6 +16,6 @@
 - name: Ensure docker state
   systemd:
     name: docker
-    enabled: yes
+    enabled: true
     state: started
   tags: docker-service

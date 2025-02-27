@@ -19,6 +19,7 @@ import (
 
 func NewCmdJoin(f *cli.Factory) *cobra.Command {
 	var token string
+	var advertiseAddr string
 
 	cmd := &cobra.Command{
 		Use:   "join",

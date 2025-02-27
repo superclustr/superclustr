@@ -79,6 +79,10 @@
 
 - name: Configure Docker
   block:
+    - name: Start Docker Engine
+      systemd:
+        name: docker
+        state: started
     - name: Deploy Docker Swarm Manager
       shell: |
         docker swarm init {% if manager_docker.advertise_addr != '' %}--advertise-addr {{ manager_docker.advertise_addr }}{% endif %};
@@ -102,7 +106,7 @@
         group: root
 
     - name: Deploy Portainer
-      command: |
+      shell: |
         docker stack deploy -c /tmp/portainer-agent-stack.yml portainer
         touch /var/lib/ansible/portainer_configured
       args:

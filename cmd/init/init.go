@@ -139,11 +139,11 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 		ipAddress = advertiseAddr
 	}
 
-	fmt.Println("\nTo join a worker node, execute the following command:\n")
+	fmt.Println("\nTo add a worker to this cluster, run the following command:\n")
 
 	fmt.Printf("curl -sSL https://archive.superclustr.net/super.sh | bash -s join \\\n")
 	fmt.Printf("    --token %s \\\n", dockerSwarmJoinToken)
-	fmt.Printf("    %s\n", ipAddress)
+	fmt.Printf("    %s\n", ipAddress + ":2377")
 
 	fmt.Println("Completed successfully!")
 

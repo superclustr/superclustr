@@ -14,7 +14,7 @@ for arg in "$@"; do
 done
 
 # Define the URL to the selected binary
-BINARY_URL="https://archive.superclustr.net/${BINARY_NAME}"
+BINARY_URL="https://downloads.superclustr.net/${BINARY_NAME}"
 
 # Download the selected binary to a temporary location
 TMP_BINARY=$(mktemp /tmp/${BINARY_NAME}.XXXXXX)

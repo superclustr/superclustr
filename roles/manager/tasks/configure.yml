@@ -96,7 +96,7 @@
 ###########################
 
 - name: Check Portainer Deployment
-  shell: docker stack ls --format "{{.Name}}" | grep -w portainer
+  shell: docker stack ls --format {% raw %}"{{.Name}}"{% endraw %} | grep -w portainer
   register: portainer_deployed
   ignore_errors: yes
   changed_when: false

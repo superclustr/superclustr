@@ -5,22 +5,19 @@
 # Hostname Configuration #
 ###########################
 
-- name: Set hostname based on Docker Swarm Node Number
+- name: Set hostname based on Docker Swarm Node ID
   block:
-    - name: Get Docker Swarm Node Number
-      shell: >
-        docker node ls --format {% raw %}'{{.ID}}'{% endraw %} | nl | 
-        grep "$(docker info --format {% raw %}'{{.Swarm.NodeID}}'{% endraw %})" | 
-        awk '{print $1}'
-      register: docker_node_number
+    - name: Get Docker Swarm Node ID
+      command: docker info --format {% raw %}'{{.Swarm.NodeID}}'{% endraw %}
+      register: docker_node_id
       changed_when: false
 
     - name: Set hostname
       hostname:
-        name: "node{{ docker_node_number.stdout }}.superclustr.net"
+        name: "{{ docker_node_id.stdout }}.superclustr.net"
 
     - name: Update /etc/hosts
       lineinfile:
         path: /etc/hosts
-        line: "127.0.1.1 node{{ docker_node_number.stdout }}.superclustr.net"
+        line: "127.0.1.1 {{ docker_node_id.stdout }}.superclustr.net"
         state: present

@@ -21,7 +21,7 @@ func NewCmdRoot(f *cli.Factory, version, buildDate string) (*cobra.Command, erro
 	cmd := &cobra.Command{
 		Use:   "super <action> [flags]",
 		Short: "SUPERCLUSTR",
-		Long:  `A Simple Computing Cluster for Experimental Internet Research.`,
+		Long:  `A Distributed Computing Cluster for Experimental Internet Research.`,
 		Annotations: map[string]string{
 			"versionInfo": versionCmd.Format(version, buildDate),
 		},

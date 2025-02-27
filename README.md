@@ -5,7 +5,7 @@
 
 ---
 
-[https://superclustr.net](https://superclustr.net) — A Simple Computing Cluster for Experimental Internet Research.
+[https://superclustr.net](https://superclustr.net) — A Distributed Computing Cluster for Experimental Internet Research.
 
 Superclustr is a distributed cluster independently created by a group of Internet Researchers and Engineers during their work at the RIPE NCC with the purpose of providing a community run platform for experimental internet research.
 

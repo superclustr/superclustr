@@ -20,11 +20,11 @@ This will use the latest version of Superclustr to provision your node.
 
 ```bash
 # Manager
-curl -sSL https://archive.superclustr.net/super.sh | bash -s init \
+curl -sSL https://downloads.superclustr.net/super.sh | bash -s init \
     --advertise-addr 100.XXX.XXX.XXX
 
 # Or, Worker
-curl -sSL https://archive.superclustr.net/super.sh | bash -s join \
+curl -sSL https://downloads.superclustr.net/super.sh | bash -s join \
     --token <YOUR_DOCKER_SWARM_TOKEN>
     100.XXX.XXX.XXX
 ```

@@ -129,7 +129,7 @@ func runJoin(f *cli.Factory, token string, address string, advertiseAddr string)
 		return fmt.Errorf("failed to execute ansible playbook: %v", err)
 	}
 
-	fmt.Println("Completed successfully!")
+	fmt.Println("\nSuccess!\n")
 
 	return nil
 }

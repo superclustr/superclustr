@@ -145,7 +145,7 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 	fmt.Printf("    --token %s \\\n", dockerSwarmJoinToken)
 	fmt.Printf("    %s\n\n", ipAddress)
 
-	fmt.Println("Completed successfully!\n")
+	fmt.Println("Success!\n")
 
 	return nil
 }

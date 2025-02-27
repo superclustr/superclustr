@@ -143,7 +143,7 @@ func runInit(f *cli.Factory, advertiseAddr string) error {
 
 	fmt.Printf("curl -sSL https://archive.superclustr.net/super.sh | bash -s join \\\n")
 	fmt.Printf("    --token %s \\\n", dockerSwarmJoinToken)
-	fmt.Printf("    %s\n", ipAddress)
+	fmt.Printf("    %s\n\n", ipAddress)
 
 	fmt.Println("Completed successfully!\n")
 

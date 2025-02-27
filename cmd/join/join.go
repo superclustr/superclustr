@@ -114,7 +114,7 @@ func runJoin(f *cli.Factory, token string, address string, advertiseAddr string)
 			execute.WithCmd(playbookCmd),
 			execute.WithErrorEnrich(playbook.NewAnsiblePlaybookErrorEnrich()),
 			execute.WithTransformers(
-				transformer.Prepend("master"),
+				transformer.Prepend("worker"),
 			),
 			execute.WithEnvVars(map[string]string{"PYTHONPATH": f.Python.GetPythonLibFsPath()}),
 			execute.WithExecutable(f.Python),

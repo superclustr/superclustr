@@ -79,6 +79,22 @@
 
 - name: Configure Docker
   block:
+    - name: Create Docker Directory
+      file:
+        path: /home/docker
+        state: directory
+      args:
+        creates: /home/docker
+    - name: Set Docker Config
+      copy:
+        content: |
+          {
+            "data-root": "/home/docker"
+          }
+        dest: /etc/docker/daemon.json
+        mode: 0600
+      args:
+        creates: /etc/docker/daemon.json
     - name: Start Docker Engine
       systemd:
         name: docker

@@ -25,7 +25,7 @@ curl -sSL https://downloads.superclustr.net/super.sh | bash -s init \
 
 # Or, Worker
 curl -sSL https://downloads.superclustr.net/super.sh | bash -s join \
-    --token <YOUR_DOCKER_SWARM_TOKEN>
+    --token <YOUR_JOIN_TOKEN>
     100.XXX.XXX.XXX
 ```
 

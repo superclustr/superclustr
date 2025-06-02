@@ -23,21 +23,6 @@
       args:
         creates: /var/lib/ansible/firewall_configured
 
-    - name: Allow HTTP service on public zone
-      command: firewall-cmd --zone=public --add-service=http --permanent
-      args:
-        creates: /var/lib/ansible/firewall_configured
-
-    - name: Allow HTTPS service on public zone
-      command: firewall-cmd --zone=public --add-service=https --permanent
-      args:
-        creates: /var/lib/ansible/firewall_configured
-
-    - name: Allow Kafka port (9092/tcp) on public zone
-      command: firewall-cmd --zone=public --add-port=9092/tcp --permanent
-      args:
-        creates: /var/lib/ansible/firewall_configured
-
     - name: Allow Docker Swarm management port (2377/tcp) on trusted zone
       command: firewall-cmd --zone=trusted --add-port=2377/tcp --permanent
       args:

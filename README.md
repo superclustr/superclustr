@@ -18,6 +18,16 @@ Superclustr is a distributed cluster independently created by a group of Interne
 To enroll your machine into the cluster, please see the examples below.
 This will use the latest version of Superclustr to provision your node.
 
+1. Tailscale (optional):
+If using Tailscale, run the following commands on each machine.
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale --ssh
+tailscale serve --bg https+insecure://127.0.0.1:9443
+```
+
+2. Deployment:
+Whenever you are ready, deploy using the following commands.
 ```bash
 # Manager
 curl -sSL https://downloads.superclustr.net/super.sh | bash -s init \
@@ -29,19 +39,8 @@ curl -sSL https://downloads.superclustr.net/super.sh | bash -s join \
     100.XXX.XXX.XXX
 ```
 
+
 You can also find a full example in the [Vagrantfile](Vagrantfile).
-
-## Network Configuration
-
-Here’s the information laid out for our current network configuration.
-This is relevant to you if you want to join the cluster or if you want to connect to the cluster from outside.
-
-| **Type**       | **Allocation**                   | **Purpose**                              | **Prefix**                    |
-|----------------|----------------------------------|------------------------------------------|-------------------------------|
-| **IPv4**       | `89.37.98.1`                     | Gateway                                  | -                             |
-|                | `89.37.98.65 - 89.37.98.68`      | Static IPs for machines                  | `/25`                         |
-| **IPv6**       | `2001:678:7ec:301::1`            | Gateway                                  | -                             |
-|                | `2001:678:7ec:301::2 - ::ffff`   | Static IPs for machines                  |  `2001:678:7ec:301::/64`      |
 
 ## Getting Started
 

@@ -18,16 +18,6 @@ Superclustr is a distributed cluster independently created by a group of Interne
 To enroll your machine into the cluster, please see the examples below.
 This will use the latest version of Superclustr to provision your node.
 
-1. Tailscale (optional):
-If using Tailscale, run the following commands on each machine.
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-tailscale --ssh
-tailscale serve --bg https+insecure://127.0.0.1:9443
-```
-
-2. Deployment:
-Whenever you are ready, deploy using the following commands.
 ```bash
 # Manager
 curl -sSL https://downloads.superclustr.net/super.sh | bash -s init \

@@ -3,3 +3,4 @@
 # https://docs.docker.com/engine/swarm/
 manager_docker:
     advertise_addr: '' # Advertised address
+    cloudflare_tunnel_token: '' # Cloudflare Tunnel Token

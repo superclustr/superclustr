@@ -21,13 +21,14 @@ import (
 
 func NewCmdInit(f *cli.Factory) *cobra.Command {
 	var advertiseAddr string
+	var cloudflareTunnelToken string
 
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "init --advertise-addr <ip|interface>[:port]",
+		Short: "init --advertise-addr <ip|interface>[:port] [--cloudflare-tunnel-token <token>]",
 		Long:  "Initialize a manager node.",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runInit(f, advertiseAddr)
+			err := runInit(f, advertiseAddr, cloudflareTunnelToken)
 			if err != nil {
 				log.Fatalf("init command failed: %v", err)
 			}
@@ -35,20 +36,26 @@ func NewCmdInit(f *cli.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&advertiseAddr, "advertise-addr", "a", "", "Advertised address")
+	cmd.Flags().StringVarP(&cloudflareTunnelToken, "cloudflare-tunnel-token", "c", "", "Cloudflare Tunnel Token (optional)")
 	return cmd
 }
 
-func runInit(f *cli.Factory, advertiseAddr string) error {
+func runInit(f *cli.Factory, advertiseAddr string, cloudflareTunnelToken string) error {
 	// Build playbook structure
+	managerDocker := map[string]interface{}{
+		"advertise_addr": advertiseAddr,
+	}
+	if cloudflareTunnelToken != "" {
+		managerDocker["cloudflare_tunnel_token"] = cloudflareTunnelToken
+	}
+
 	yamlData, err := yaml.Marshal([]interface{}{map[string]interface{}{
 		"hosts":        "localhost",
 		"become":       true,
 		"gather_facts": true,
 		"roles": []map[string]interface{}{{
 			"role": "manager",
-			"manager_docker": map[string]interface{}{
-				"advertise_addr": advertiseAddr,
-			},
+			"manager_docker": managerDocker,
 		}},
 	}})
 	if err != nil {

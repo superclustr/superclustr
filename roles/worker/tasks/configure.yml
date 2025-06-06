@@ -64,28 +64,15 @@
 
 - name: Configure Docker
   block:
-    - name: Set Docker Daemon Config
-      copy:
-        content: |
-          {
-            "default-address-pools": [
-              {
-                "base": "10.100.0.0/8",
-                "size": 16
-              }
-            ]
-          }
-        dest: /etc/docker/daemon.json
-        mode: 0644
-      args:
-        creates: /etc/docker/daemon.json
     - name: Start Docker Engine
       systemd:
         name: docker
         state: started
-    - name: Deploy Docker Swarm Worker
+    - name: Join as a Docker Swarm Worker
       shell: |
-        docker swarm join {% if worker_docker.advertise_addr != '' %}--advertise-addr {{ worker_docker.advertise_addr }}{% endif %} --token {{ worker_docker.token }} {{ worker_docker.address }};
+        docker swarm join \
+          {% if worker_docker.advertise_addr != '' %}--advertise-addr {{ worker_docker.advertise_addr }}{% endif %} \
+          --token {{ worker_docker.token }} {{ worker_docker.address }};
         touch /var/lib/ansible/docker_swarm_configured
       args:
         creates: /var/lib/ansible/docker_swarm_configured

@@ -154,8 +154,6 @@
         mode: 0644
         owner: root
         group: root
-      args:
-        creates: /tmp/portainer-agent-stack.yml
 
     - name: Deploy Portainer
       shell: |
